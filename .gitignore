@@ -1,0 +1,45 @@
+# 构建目录
+build/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# RoboClaw运行时数据
+.roboclaw/
+
+# 日志
+*.log
+
+# 依赖（如果使用本地缓存）
+external/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# 测试覆盖率
+coverage/
+*.gcda
+*.gcno
