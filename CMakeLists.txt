@@ -41,9 +41,36 @@ FetchContent_Declare(cpptoml
 )
 FetchContent_MakeAvailable(cpptoml)
 
-# 源文件（初始版本只有main.cpp）
+# 源文件
 set(SOURCES
+    # 主程序
     src/main.cpp
+
+    # 工具模块
+    src/tools/tool_base.cpp
+    src/tools/read_tool.cpp
+    src/tools/write_tool.cpp
+    src/tools/edit_tool.cpp
+    src/tools/bash_tool.cpp
+
+    # Agent模块
+    src/agent/tool_executor.cpp
+
+    # LLM模块
+    src/llm/http_client.cpp
+    src/llm/anthropic_provider.cpp
+    src/llm/openai_provider.cpp
+
+    # 工具类
+    src/utils/logger.cpp
+
+    # 存储模块
+    src/storage/config_manager.cpp
+
+    # CLI模块
+    src/cli/config_wizard.cpp
+
+    # 平台相关
     ${PLATFORM_SOURCES}
 )
 
