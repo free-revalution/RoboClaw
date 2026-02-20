@@ -55,11 +55,18 @@ set(SOURCES
 
     # Agent模块
     src/agent/tool_executor.cpp
+    src/agent/prompt_builder.cpp
+    src/agent/agent.cpp
 
     # LLM模块
     src/llm/http_client.cpp
     src/llm/anthropic_provider.cpp
     src/llm/openai_provider.cpp
+
+    # Session模块
+    src/session/conversation_node.cpp
+    src/session/conversation_tree.cpp
+    src/session/session_manager.cpp
 
     # 工具类
     src/utils/logger.cpp
