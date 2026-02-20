@@ -68,6 +68,11 @@ set(SOURCES
     src/session/conversation_tree.cpp
     src/session/session_manager.cpp
 
+    # Token优化模块
+    src/optimization/token_optimizer.cpp
+    src/optimization/conversation_compressor.cpp
+    src/optimization/token_budget.cpp
+
     # 工具类
     src/utils/logger.cpp
 
