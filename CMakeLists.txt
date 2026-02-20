@@ -76,6 +76,7 @@ set(SOURCES
 
     # CLI模块
     src/cli/config_wizard.cpp
+    src/cli/interactive_mode.cpp
 
     # 平台相关
     ${PLATFORM_SOURCES}
