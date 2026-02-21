@@ -1,8 +1,8 @@
-# Contributing to RoboClaw / 为 RoboClaw 做贡献
+# Contributing to RoboPartner / 为 RoboPartner 做贡献
 
-Thank you for considering contributing to RoboClaw! This document provides guidelines for contributing to the project.
+Thank you for considering contributing to RoboPartner! This document provides guidelines for contributing to the project.
 
-感谢您考虑为 RoboClaw 做贡献！本文档提供了参与本项目的指南。
+感谢您考虑为 RoboPartner 做贡献！本文档提供了参与本项目的指南。
 
 ---
 
@@ -93,11 +93,11 @@ Enhancement suggestions are welcome! Please include:
 ```bash
 # 1. Fork the repository on GitHub
 # 2. Clone your fork
-git clone https://github.com/YOUR_USERNAME/RoboClaw.git
-cd RoboClaw
+git clone https://github.com/YOUR_USERNAME/RoboPartner.git
+cd RoboPartner
 
 # 3. Add upstream remote
-git remote add upstream https://github.com/ORIGINAL_OWNER/RoboClaw.git
+git remote add upstream https://github.com/ORIGINAL_OWNER/RoboPartner.git
 ```
 
 ### Build Setup / 构建设置
@@ -140,19 +140,19 @@ cmake --build .
 - Use 4 spaces for indentation (no tabs)
 - Maximum line length: 120 characters
 - Opening braces on the same line for functions/methods
-- Namespace comments: `// namespace roboclaw {`
+- Namespace comments: `// namespace robopartner {`
 
 **[中文]**
 - 使用 4 个空格缩进（不使用制表符）
 - 最大行长度：120 个字符
 - 函数/方法的左大括号在同一行
-- 命名空间注释：`// namespace roboclaw {`
+- 命名空间注释：`// namespace robopartner {`
 
 ### Example / 示例
 
 ```cpp
 // Good / 好的示例
-namespace roboclaw {
+namespace robopartner {
 
 class Example {
 public:
@@ -169,7 +169,7 @@ private:
     std::mutex mutex_;
 };
 
-} // namespace roboclaw
+} // namespace robopartner
 ```
 
 ### Thread Safety / 线程安全
@@ -280,6 +280,6 @@ Before submitting a PR:
 
 ## License / 许可证
 
-By contributing to RoboClaw, you agree that your contributions will be licensed under the MIT License.
+By contributing to RoboPartner, you agree that your contributions will be licensed under the MIT License.
 
-通过为 RoboClaw 做贡献，您同意您的贡献将在 MIT 许可证下许可。
+通过为 RoboPartner 做贡献，您同意您的贡献将在 MIT 许可证下许可。

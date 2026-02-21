@@ -5,6 +5,9 @@
 #include "../tools/write_tool.h"
 #include "../tools/edit_tool.h"
 #include "../tools/bash_tool.h"
+#include "../tools/serial_tool.h"
+#include "../tools/browser_tool.h"
+#include "../tools/agent_tool.h"
 
 namespace roboclaw {
 
@@ -15,11 +18,14 @@ ToolExecutor::ToolExecutor()
 void ToolExecutor::initialize() {
     LOG_INFO("初始化工具执行器");
 
-    // 注册四个基础工具
+    // 注册基础工具
     registerTool("read", std::make_shared<ReadTool>());
     registerTool("write", std::make_shared<WriteTool>());
     registerTool("edit", std::make_shared<EditTool>());
     registerTool("bash", std::make_shared<BashTool>());
+    registerTool("serial", std::make_shared<SerialTool>());
+    registerTool("browser", std::make_shared<BrowserTool>());
+    registerTool("agent", std::make_shared<AgentTool>());
 
     LOG_INFO("工具注册完成，共 " + std::to_string(registry_.getAllToolNames().size()) + " 个工具");
 }

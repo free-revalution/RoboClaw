@@ -1,15 +1,15 @@
 <div align="center">
 
-# RoboClaw
+# RoboPartner
 
-### Minimalist AI Agent Framework in C++ / 极简 C++ AI Agent 框架
+### AI Agent Framework with Browser Automation / 带浏览器自动化的 AI Agent 框架
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![C++20](https://img.shields.io/badge/C++-20-00599C.svg)](https://en.cppreference.com/w/cpp/20)
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](README.md#installation)
 
-**"Less is More" AI Agent Framework / "少即是多" AI Agent 框架**
+**"Your AI Development Partner" / "您的 AI 开发伙伴"**
 
 </div>
 
@@ -19,25 +19,31 @@
 
 **[English]**
 
-RoboClaw is a minimalist AI Agent framework written in modern C++, inspired by the OpenClaw project's Pi engine. Unlike mainstream Agent frameworks (like LangChain, AutoGPT), RoboClaw embraces the philosophy of "Less is More":
+RoboPartner is an advanced AI Agent framework written in modern C++ that combines powerful code understanding with browser automation capabilities. Inspired by OpenClaw's visual interaction model and extending it with agent discovery and management, RoboPartner becomes your ultimate AI development companion:
 
-- **Only 4 Tools**: Read, Write, Edit, Bash — nothing more
+- **7 Core Tools**: Read, Write, Edit, Bash, Serial, **Browser (NEW)**, **Agent Manager (NEW)**
+- **Browser Automation**: Visual browser control similar to OpenClaw - navigate, click, type, screenshot
+- **Agent Discovery**: Automatically detect and manage local AI coding assistants (Claude Code, Cursor, Copilot, etc.)
 - **Minimal System Prompt**: The shortest possible Agent system prompt
 - **Self-Coding**: Agent writes its own code for new features instead of installing plugins
 - **Tree-Structured Conversations**: Support branching with bug fixes that don't pollute mainline
 - **High Performance**: Multithreaded with thread pool, read-write locks, and atomic operations
 - **Production Ready**: Token optimization, session persistence, cross-platform support
+- **Multilingual**: English and Simplified Chinese language support
 
 **[中文]**
 
-RoboClaw 是一个用现代 C++ 编写的极简 AI Agent 框架，灵感来源于 OpenClaw 项目的 Pi 引擎。与主流 Agent 框架（如 LangChain、AutoGPT）不同，RoboClaw 采用"少即是多"的设计哲学：
+RoboPartner 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了强大的代码理解和浏览器自动化能力。灵感来源于 OpenClaw 的可视化交互模型，并扩展了 Agent 发现和管理功能，使其成为您的终极 AI 开发伙伴：
 
-- **只有 4 个工具**：Read（读文件）、Write（写文件）、Edit（编辑文件）、Bash（执行命令）
+- **7 个核心工具**：Read、Write、Edit、Bash、Serial、**Browser（浏览器自动化，新增）**、**Agent Manager（Agent 管理，新增）**
+- **浏览器自动化**：类似 OpenClaw 的可视化操作 - 导航、点击、输入、截图
+- **Agent 发现**：自动检测和管理本地 AI 编程助手（Claude Code、Cursor、Copilot 等）
 - **极简系统提示词**：最短的 Agent 系统提示词
 - **自编码能力**：需要新功能时让 Agent 自己写代码，而不是安装插件
 - **树状对话结构**：支持分支，修复 bug 不影响主线
 - **高性能**：多线程线程池、读写锁、原子操作
 - **生产就绪**：Token 优化、会话持久化、跨平台支持
+- **多语言支持**：支持简体中文和英文界面
 
 ---
 
@@ -51,110 +57,77 @@ RoboClaw 是一个用现代 C++ 编写的极简 AI Agent 框架，灵感来源�
 | **Write** | Create new files or overwrite existing files | 创建新文件或覆盖现有文件 |
 | **Edit** | Precise string replacement in files | 精确替换文件中的字符串 |
 | **Bash** | Execute shell commands with cross-platform support | 执行 shell 命令，跨平台支持 |
+| **Serial** | Serial port communication for embedded development | 串口通信工具，用于嵌入式开发 |
+| **Browser** | Browser automation (OpenClaw-style visual control) | **浏览器自动化（OpenClaw 风格可视化控制，新增）** |
+| **Agent** | Discover and manage local AI assistants | **Agent 发现和管理（新增）** |
 
-### Tree-Structured Conversations / 树状对话结构
+### New in v0.2.0 / v0.2.0 新功能
 
-```
-Mainline:  A → B → C → D
-                    ↓
-Branch:        → E → F (bug fix)
-```
+#### Browser Automation / 浏览器自动化
 
-**[English]** Create branches from any node. Each branch has independent history. Bug fixes don't pollute the mainline conversation.
+**OpenClaw-Style Visual Control / OpenClaw 风格可视化控制**
 
-**[中文]** 从任意节点创建新分支。每个分支拥有独立历史。修复 bug 不会污染主线对话。
-
-### Concurrent Tool Execution / 并发工具执行
+RoboPartner now includes powerful browser automation capabilities similar to OpenClaw:
 
 ```
-Sequential:          Concurrent:
-[Tool1] → [Tool2]     [Tool1] ─┐
-  300ms  + 200ms       [Tool2] ─┼→ ThreadPool
-  = 500ms              [Tool3] ─┘   = max(300, 200, 100)
-                       [Tool4] ─┐   = 400ms
-                                = 300ms
+# Open browser and navigate to URL / 打开浏览器并导航
+{"action": "open", "browser": "chrome"}
+{"action": "navigate", "url": "https://github.com"}
+
+# Take screenshot / 截图
+{"action": "screenshot"}
+
+# Click element / 点击元素
+{"action": "click", "selector_type": "css", "selector_value": "#submit-button"}
+
+# Type text / 输入文本
+{"action": "type", "selector_type": "css", "selector_value": "#search-input", "text": "search query"}
+
+# Execute JavaScript / 执行 JavaScript
+{"action": "execute", "script": "document.title='Hello from RoboPartner'"}
+
+# Scroll page / 滚动页面
+{"action": "scroll", "x": 0, "y": 500}
 ```
 
-**[English]** Execute multiple tools concurrently using the thread pool. Significantly faster for I/O-bound operations.
+**Supported Browsers / 支持的浏览器**:
+- macOS: Safari, Chrome, Firefox
+- Linux: Chrome, Firefox
+- Windows: Edge, Chrome, Firefox
 
-**[中文]** 使用线程池并发执行多个工具。对于 I/O 密集型操作速度显著提升。
+#### Agent Discovery & Management / Agent 发现和管理
 
-### Token Optimization / Token 优化
-
-**[English]**
-- LRU cache for token estimation
-- Conversation compression
-- Prompt caching support
-- Token budget management
-
-**[中文]**
-- Token 估算 LRU 缓存
-- 对话压缩
-- 提示词缓存支持
-- Token 预算管理
-
-### LLM Provider Support / LLM 提供商支持
-
-| Provider | Status |
-|----------|--------|
-| Anthropic (Claude) | ✅ Supported / 已支持 |
-| OpenAI (GPT) | ✅ Supported / 已支持 |
-| Google Gemini | 🔄 Planned / 计划中 |
-| DeepSeek | 🔄 Planned / 计划中 |
-| ByteDance | 🔄 Planned / 计划中 |
-| Alibaba Qwen | 🔄 Planned / 计划中 |
-
----
-
-## Architecture / 架构设计
+Automatically discover and manage AI coding assistants installed on your system:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         RoboClaw Framework                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────┐    ┌──────────────┐    ┌────────────────┐   │
-│  │   CLI       │    │   Agent      │    │  LLM Provider  │   │
-│  │   Module    │◄──►│   Engine     │◄──►│   Interface    │   │
-│  └─────────────┘    └──────┬───────┘    └────────────────┘   │
-│                            │                                  │
-│                     ┌──────▼───────┐                          │
-│                     │  Tool        │                          │
-│                     │  Executor    │                          │
-│                     └──────┬───────┘                          │
-│                            │                                  │
-│              ┌─────────────┼─────────────┐                   │
-│              ▼             ▼             ▼                   │
-│     ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│     │   Read   │  │  Write   │  │   Edit   │              │
-│     │   Tool   │  │   Tool   │  │   Tool   │              │
-│     └──────────┘  └──────────┘  └──────────┘              │
-│                                                 ┌──────────┐   │
-│                                                 │   Bash   │   │
-│                                                 │   Tool   │   │
-│                                                 └──────────┘   │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              Thread Pool (Multithreading)              │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐       │
-│  │   Session   │  │  Token       │  │    Skill       │       │
-│  │  Manager    │  │  Optimizer   │  │    System       │       │
-│  └─────────────┘  └──────────────┘  └────────────────┘       │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+# List all installed agents / 列出所有已安装的 Agents
+robopartner agent --list
+
+Output / 输出:
+ID: claude_code_vscode
+  Name: Claude Code VSCode Extension
+  Type: claude_code
+  Status: Enabled
+  Capabilities: code_completion, chat, code_explanation
+
+ID: cursor_app
+  Name: cursor
+  Type: cursor
+  Status: Enabled
+  Capabilities: ide, code_completion, chat, codebase_chat
 ```
 
-### Thread Safety / 线程安全
-
-| Component | Synchronization / 同步机制 |
-|-----------|---------------------------|
-| Task Queue | `std::mutex` + `std::condition_variable` |
-| Conversation History | `std::shared_mutex` (read-write lock) |
-| Tool Results | `std::mutex` |
-| Statistics | `std::atomic` |
-| Token Cache | `std::shared_mutex` |
+**Supported Agents / 支持的 Agents**:
+- Claude Code (VSCode extension)
+- Cursor AI IDE
+- GitHub Copilot
+- OpenAI Codex
+- Tabnine
+- Blackbox AI
+- Sourcegraph Cody
+- Replit Ghostwriter
+- OpenClaw
+- And more...
 
 ---
 
@@ -179,8 +152,8 @@ xcode-select --install
 brew install cmake ninja nlohmann-json
 
 # Clone repository
-git clone https://github.com/yourusername/RoboClaw.git
-cd RoboClaw
+git clone https://github.com/yourusername/RoboClaw.git RoboPartner
+cd RoboPartner
 
 # Configure with preset
 cmake --preset=release
@@ -189,7 +162,7 @@ cmake --preset=release
 cmake --build build --config Release
 
 # Run
-./build/roboclaw --help
+./build/robopartner --help
 ```
 
 ### Linux Installation / Linux 安装
@@ -200,369 +173,224 @@ sudo apt update
 sudo apt install -y cmake ninja-build nlohmann-json3-dev \
     build-essential g++ git
 
-# Clone repository
-git clone https://github.com/yourusername/RoboClaw.git
-cd RoboClaw
-
-# Configure with preset
+# Clone and build
+git clone https://github.com/yourusername/RoboClaw.git RoboPartner
+cd RoboPartner
 cmake --preset=release
-
-# Build
 cmake --build build --config Release
-
-# Run
-./build/roboclaw --help
+./build/robopartner --help
 ```
 
 ### Windows Installation / Windows 安装
 
 ```powershell
-# Install vcpkg package manager
+# Install vcpkg
 git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
 .\vcpkg\bootstrap-vcpkg.bat
 
 # Install dependencies
 .\vcpkg\vcpkg install nlohmann-json:x64-windows cmake ninja
 
-# Clone repository
-git clone https://github.com/yourusername/RoboClaw.git
-cd RoboClaw
-
-# Configure with Visual Studio Developer Command Prompt
+# Clone and build
+git clone https://github.com/yourusername/RoboClaw.git RoboPartner
+cd RoboPartner
 cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -B build
-
-# Build
 cmake --build build --config Release
-
-# Run
-.\build\roboclaw.exe --help
-```
-
-### Docker Installation / Docker 安装
-
-```bash
-# Build image
-docker build -t roboclaw:latest .
-
-# Run container
-docker run -it --rm roboclaw:latest --help
-
-# Interactive mode
-docker run -it --rm -v $(pwd)/data:/app/data roboclaw:latest
+.\build\robopartner.exe --help
 ```
 
 ---
 
 ## Quick Start / 快速开始
 
-### Configuration / 配置
-
-**[English]** First run will launch configuration wizard to set up your API keys:
-
-**[中文]** 首次运行会启动配置向导来设置 API 密钥：
-
-```bash
-./build/roboclaw
-```
-
-Configuration file location / 配置文件位置:
-- **macOS/Linux**: `~/.config/roboclaw/config.json`
-- **Windows**: `%APPDATA%\roboclaw\config.json`
-
 ### Basic Usage / 基本用法
 
 ```bash
 # Start interactive mode / 启动交互模式
-./build/roboclaw
+./build/robopartner
 
 # Show help / 显示帮助
-./build/roboclaw --help
+./build/robopartner --help
 
-# Show version / 显示版本
-./build/roboclaw --version
+# List discovered agents / 列出发现的 Agents
+./build/robopartner agent --list
 
-# Show configuration / 显示配置
-./build/roboclaw config --show
-
-# List conversations / 列出对话
-./build/roboclaw conversation --list
-
-# List skills / 列出技能
-./build/roboclaw skill --list
+# Open browser / 打开浏览器
+./build/robopartner browser --open
 ```
 
-### Example Session / 示例对话
-
-```
-==================================================
-  RoboClaw v0.1.0
-  C++ AI Agent Framework - 极简AI Agent框架
-==================================================
-
-[Config loaded: Anthropic Claude 3.5 Sonnet]
-
-You: What files are in the current directory?
-
-Assistant: I'll use the Bash tool to list the files.
-
-[Bash] ls -la
-
-[Result]
-total 24
-drwxr-xr-x   8 user  staff   256 Feb 21 10:30 .
-drwxr-xr-x   3 user  staff    96 Feb 21 10:30 ..
--rw-r--r--   1 user  staff   234 Feb 21 10:30 README.md
-drwxr-xr-x   3 user  staff    96 Feb 21 10:30 src
-...
-
-You: Can you read the README.md file?
-
-Assistant: [Reading README.md...]
-
-[Result]
-# RoboClaw
-...
-```
-
----
-
-## Development / 开发指南
-
-### Project Structure / 项目结构
-
-```
-RoboClaw/
-├── CMakeLists.txt              # CMake configuration / CMake 配置
-├── CMakePresets.json           # CMake presets / CMake 预设
-├── README.md                   # This file / 本文件
-├── LICENSE                     # MIT License / MIT 许可证
-├── src/                        # Source code / 源代码
-│   ├── main.cpp               # Entry point / 入口文件
-│   ├── cli/                   # CLI module / CLI 模块
-│   │   ├── config_wizard.cpp   # Configuration wizard / 配置向导
-│   │   ├── interactive_mode.cpp # Interactive mode / 交互模式
-│   │   └── skill_commands.cpp   # Skill commands / 技能命令
-│   ├── agent/                 # Agent engine / Agent 引擎
-│   │   ├── agent.h/.cpp       # Core Agent class / 核心 Agent 类
-│   │   ├── tool_executor.h/.cpp # Tool executor / 工具执行器
-│   │   └── prompt_builder.h/.cpp # Prompt builder / 提示词构建器
-│   ├── tools/                 # Tools implementation / 工具实现
-│   │   ├── tool_base.h/.cpp   # Base tool class / 工具基类
-│   │   ├── read_tool.h/.cpp   # Read tool / 读工具
-│   │   ├── write_tool.h/.cpp  # Write tool / 写工具
-│   │   ├── edit_tool.h/.cpp   # Edit tool / 编辑工具
-│   │   └── bash_tool.h/.cpp   # Bash tool / Bash工具
-│   ├── llm/                   # LLM interfaces / LLM 接口
-│   │   ├── llm_provider.h     # Base provider / 提供商基类
-│   │   ├── anthropic_provider.h/.cpp # Anthropic / Claude
-│   │   ├── openai_provider.h/.cpp     # OpenAI / GPT
-│   │   └── http_client.h/.cpp # HTTP client / HTTP 客户端
-│   ├── session/               # Session management / 会话管理
-│   │   ├── session_manager.h/.cpp  # Session manager / 会话管理器
-│   │   ├── conversation_tree.h/.cpp # Conversation tree / 对话树
-│   │   └── conversation_node.h/.cpp  # Conversation node / 对话节点
-│   ├── optimization/          # Token optimization / Token 优化
-│   │   ├── token_optimizer.h/.cpp    # Token optimizer / Token 优化器
-│   │   ├── token_budget.h/.cpp       # Token budget / Token 预算
-│   │   ├── conversation_compressor.h/.cpp
-│   │   └── token_constants.h          # Constants / 常量
-│   ├── skills/                # Skill system / 技能系统
-│   │   ├── skill_parser.h/.cpp       # Skill parser / 技能解析器
-│   │   ├── skill_registry.h/.cpp     # Skill registry / 技能注册表
-│   │   ├── skill_executor.h/.cpp      # Skill executor / 技能执行器
-│   │   └── skill_downloader.h/.cpp    # Skill downloader / 技能下载器
-│   ├── storage/               # Storage layer / 存储层
-│   │   └── config_manager.h/.cpp      # Config manager / 配置管理器
-│   └── utils/                 # Utilities / 工具类
-│       ├── logger.h/.cpp      # Logger / 日志
-│       └── thread_pool.h/.cpp # Thread pool / 线程池
-├── skills/                     # Built-in skills / 内置技能
-│   └── builtin/               # Built-in skill definitions / 内置技能定义
-└── docs/                       # Documentation / 文档
-    └── plans/                 # Design documents / 设计文档
-```
-
-### Building from Source / 从源码构建
+### Browser Automation Examples / 浏览器自动化示例
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/RoboClaw.git
-cd RoboClaw
+# Navigate to a website / 导航到网站
+./build/robopartner browser --navigate https://github.com
 
-# Create build directory
-mkdir -p build && cd build
+# Take a screenshot / 截图
+./build/robopartner browser --screenshot
 
-# Configure (Debug)
-cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-
-# Or use preset
-cmake --preset=debug
-
-# Build
-cmake --build . -j$(nproc)
-
-# Run tests (when available)
-ctest --output-on-failure
+# Interactively control browser / 交互式控制浏览器
+./build/robopartner browser
 ```
 
-### VSCode Development / VSCode 开发
-
-**[English]** The project includes VSCode configuration files. Simply open the project folder in VSCode, and the CMake Tools extension will handle the rest.
-
-**[中文]** 项目包含 VSCode 配置文件。只需在 VSCode 中打开项目文件夹，CMake Tools 扩展会自动处理其余工作。
+### Agent Management Examples / Agent 管理示例
 
 ```bash
-code .
+# List all installed AI agents / 列出所有已安装的 AI agents
+./build/robopartner agent --list
+
+# Show specific agent details / 显示特定 Agent 详情
+./build/robopartner agent --show claude_code_vscode
+
+# Launch an agent / 启动 Agent
+./build/robopartner agent --launch cursor_app
 ```
 
 ---
 
-## Skill System / 技能系统
+## Project Structure / 项目结构
 
-### Built-in Skills / 内置技能
-
-```bash
-# List available skills
-./build/roboclaw skill --list
-
-# Show skill details
-./build/roboclaw skill --show code-review
-
-# Install custom skill
-./build/roboclaw skill --install /path/to/skill.json
-
-# Uninstall skill
-./build/roboclaw skill --uninstall skill-name
 ```
-
-### Creating Custom Skills / 创建自定义技能
-
-**[English]** Skills are defined in JSON format. Here's a template:
-
-**[中文]** 技能以 JSON 格式定义。以下是模板：
-
-```json
-{
-  "name": "my-skill",
-  "version": "1.0.0",
-  "description": "My custom skill",
-  "author": "Your Name",
-  "actions": [
-    {
-      "type": "tool",
-      "name": "read",
-      "parameters": {
-        "file": "${filename}"
-      }
-    },
-    {
-      "type": "llm",
-      "prompt": "Analyze this file: ${file_content}"
-    }
-  ]
-}
+RoboPartner/
+├── CMakeLists.txt              # CMake configuration
+├── README.md                   # This file
+├── LICENSE                     # MIT License
+├── src/
+│   ├── main.cpp               # Entry point
+│   ├── cli/                   # CLI module
+│   │   ├── config_wizard.cpp   # Configuration wizard with language selection
+│   │   ├── interactive_mode.cpp # Interactive mode
+│   │   └── agent_commands.cpp  # Agent management commands (NEW)
+│   ├── tools/                 # Tools implementation
+│   │   ├── tool_base.{h,cpp}   # Base tool class
+│   │   ├── read_tool.{h,cpp}   # Read tool
+│   │   ├── write_tool.{h,cpp}  # Write tool
+│   │   ├── edit_tool.{h,cpp}   # Edit tool
+│   │   ├── bash_tool.{h,cpp}   # Bash tool
+│   │   ├── serial_tool.{h,cpp}  # Serial port tool
+│   │   ├── browser_tool.{h,cpp} # Browser automation (NEW)
+│   │   └── agent_tool.{h,cpp}   # Agent discovery (NEW)
+│   ├── agent/
+│   │   ├── agent.h/.cpp       # Core Agent class
+│   │   ├── tool_executor.h/.cpp # Tool executor (now with 7 tools)
+│   │   └── prompt_builder.h/.cpp # Prompt builder
+│   ├── llm/                   # LLM provider interface
+│   ├── session/                # Session management
+│   ├── optimization/           # Token optimization
+│   └── utils/                 # Utility classes
+└── tests/
+    ├── unit/                  # Unit tests
+    ├── integration/           # Integration tests
+    └── e2e/                   # End-to-end tests
 ```
 
 ---
 
-## Performance / 性能
+## Architecture / 架构设计
 
-### Benchmarks / 基准测试
-
-| Operation | Single Thread | Multithreaded | Improvement |
-|-----------|--------------|---------------|-------------|
-| 4 Tools Sequential | ~500ms | ~150ms | **3.3x** |
-| Token Estimation (cached) | ~50ms | ~5ms | **10x** |
-| Conversation Read | N/A | Concurrent | **N x** |
-
-### Optimization Techniques / 优化技术
-
-1. **Thread Pool**: Reuses threads, avoids creation overhead / 线程池复用线程，避免创建开销
-2. **Read-Write Locks**: Allows concurrent reads / 读写锁允许并发读取
-3. **Atomic Operations**: Lock-free counters / 原子操作无锁计数
-4. **LRU Cache**: Caches token estimates / LRU 缓存 token 估算
-5. **Lazy Loading**: Components loaded on demand / 懒加载按需加载组件
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     RoboPartner Framework                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────┐    ┌───────────┐    ┌────────────────┐   │
+│  │   CLI       │    │   Agent   │    │  Browser       │   │
+│  │   Module    │◄──►│   Engine   │◄──►│  Automation   │   │
+│  └─────────────┘    └─────┬─────┘    └────────────────┘   │
+│                          │                                  │
+│                   ┌──────▼───────┐                          │
+│                   │  Tool        │                          │
+│                   │  Executor    │                          │
+│                   └──────┬───────┘                          │
+│                          │                                  │
+│         ┌─────────────┼─────────────┐                       │
+│         ▼             ▼             ▼                       │
+│   ┌─────────┐ ┌──────────┐ ┌──────────┐                    │
+│   │   Read   │ │  Write   │ │   Edit   │                │
+│   │   Tool   │ │   Tool   │ │   Tool   │                │
+│   └─────────┘ └──────────┘ └──────────┘                    │
+│                                                        ┌──────────┐  │
+│                                                        │  Bash    │  │
+│                                                        │  Tool    │  │
+│                                                        └──────────┘  │
+│                                                 ┌────────────┐   │
+│                                                 │    Serial  │   │
+│                                                 │    Tool    │   │
+│                                                 └────────────┘   │
+│                                                 ┌─────────────┐  │
+│                                                 │   Browser   │  │
+││                                                 │   Tool     │  │
+│                                                 └─────────────┘  │
+│                                                 ┌─────────────┐  │
+│                                                 │    Agent    │  │
+│                                                 │    Tool     │  │
+│                                                 └─────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │              Thread Pool (Multithreading)              │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐       │
+│  │   Session   │  │ Token        │  │    Agent       │       │
+│  │  Manager    │  │  Optimizer   │  │  Discovery     │       │
+│  └─────────────┘  └──────────────┘  └────────────────┘       │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Contributing / 贡献指南
+## Usage Examples / 使用示例
 
-### How to Contribute / 如何贡献
-
-**[English]**
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Write tests if applicable
-5. Ensure the build passes (`cmake --build build`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
-
-**[中文]**
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 进行更改
-4. 如适用，编写测试
-5. 确保构建通过 (`cmake --build build`)
-6. 提交更改 (`git commit -m 'Add amazing feature'`)
-7. 推送到分支 (`git push origin feature/amazing-feature`)
-8. 打开 Pull Request
-
-### Code Style / 代码风格
-
-- Follow C++ Core Guidelines / 遵循 C++ 核心指南
-- Use 4 spaces for indentation / 使用 4 空格缩进
-- Maximum line length: 120 characters / 最大行长度：120 字符
-- Use meaningful variable names / 使用有意义的变量名
-
-### Development Guidelines / 开发指南
+### Example 1: Browser Automation / 浏览器自动化
 
 ```cpp
-// Good / 好的示例
-class Example {
-public:
-    explicit Example(std::string name) : name_(std::move(name)) {}
+// Open browser and navigate / 打开浏览器并导航
+ToolResult result = toolExecutor->execute("browser", {
+    {"action", "open"},
+    {"browser", "chrome"}
+});
 
-    void process() {
-        std::lock_guard<std::mutex> lock(mutex_);
-        // Thread-safe operation
-    }
+result = toolExecutor->execute("browser", {
+    {"action", "navigate"},
+    {"url", "https://github.com"}
+});
 
-private:
-    std::string name_;
-    std::mutex mutex_;
-};
-
-// Avoid / 避免
-class Example {
-    void Process() { m_sName = ""; }  // Non-const reference
-private:
-    std::string m_sName;  // Hungarian notation
-};
+// Take screenshot / 截图
+result = toolExecutor->execute("browser", {
+    {"action", "screenshot"}
+});
 ```
 
----
+### Example 2: Agent Discovery / Agent 发现
 
-## Roadmap / 路线图
+```cpp
+// List all agents / 列出所有 Agents
+ToolResult result = toolExecutor->execute("agent", {
+    {"action", "list"}
+});
 
-### v0.1.0 (Current / 当前)
-- [x] Basic framework / 基础框架
-- [x] 4 core tools / 4 个核心工具
-- [x] LLM provider interface / LLM 提供商接口
-- [x] Session management / 会话管理
-- [x] Thread pool implementation / 线程池实现
+// Get agent capabilities / 获取 Agent 能力
+result = toolExecutor->execute("agent", {
+    {"action", "capabilities"},
+    {"agent_id", "claude_code_vscode"}
+});
+```
 
-### v0.2.0 (Planned / 计划中)
-- [ ] Enhanced skill system / 增强技能系统
-- [ ] Web API mode / Web API 模式
-- [ ] Plugin system / 插件系统
-- [ ] Docker images / Docker 镜像
+### Example 3: Combined Workflow / 组合工作流
 
-### v0.3.0 (Future / 未来)
-- [ ] Streaming response / 流式响应
-- [ ] Multi-modal support / 多模态支持
-- [ ] Distributed execution / 分布式执行
+```cpp
+// 1. Discover agents / 发现 Agents
+auto agents = toolExecutor->execute("agent", {{"action", "list"}});
+
+// 2. Open browser / 打开浏览器
+toolExecutor->execute("browser", {{"action", "open"}});
+
+// 3. Navigate to repository / 导航到仓库
+toolExecutor->execute("browser", {{"action", "navigate"}, {"url", "https://github.com/user/repo"}});
+
+// 4. Read README / 读取 README
+toolExecutor->execute("read", {{"file", "README.md"}});
+```
 
 ---
 
@@ -570,6 +398,7 @@ private:
 
 - [Design Document](docs/plans/2025-02-20-roboclaw-design.md) - 设计文档
 - [Extension Design](docs/plans/2025-02-20-extensions-design.md) - 扩展设计
+- [Test Documentation](tests/README.md) - 测试文档
 
 ---
 
@@ -578,7 +407,7 @@ private:
 ```
 MIT License
 
-Copyright (c) 2025 RoboClaw Contributors
+Copyright (c) 2025 RoboPartner Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -601,16 +430,22 @@ SOFTWARE.
 
 ---
 
+## Contributing / 贡献指南
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+---
+
 ## Acknowledgments / 致谢
 
 **[English]**
-- [OpenClaw](https://github.com/OpenClaw) - Original inspiration / 原始灵感
+- [OpenClaw](https://github.com/OpenClaw) - Original inspiration for visual browser control / 可视化浏览器控制的原始灵感
 - [CPR](https://github.com/libcpr/cpr) - HTTP library / HTTP 库
 - [nlohmann/json](https://github.com/nlohmann/json) - JSON library / JSON 库
 - All contributors / 所有贡献者
 
 **[中文]**
-- [OpenClaw](https://github.com/OpenClaw) - 原始灵感来源
+- [OpenClaw](https://github.com/OpenClaw) - 浏览器可视化控制的灵感来源
 - [CPR](https://github.com/libcpr/cpr) - HTTP 库
 - [nlohmann/json](https://github.com/nlohmann/json) - JSON 库
 - 所有开源贡献者
@@ -619,12 +454,12 @@ SOFTWARE.
 
 <div align="center">
 
-**Made with ❤️ by the RoboClaw Community**
+**Made with ❤️ by the RoboPartner Community**
 
-**用 ❤️ 构建 | RoboClaw 社区**
+**用 ❤️ 构建 | RoboPartner 社区**
 
-[⭐ Star](https://github.com/yourusername/RoboClaw) &nbsp;&nbsp;
-[🍴 Fork](https://github.com/yourusername/RoboClaw/fork) &nbsp;&nbsp;
-[📖 Documentation](https://github.com/yourusername/RoboClaw/wiki)
+[⭐ Star](https://github.com/yourusername/RoboPartner) &nbsp;&nbsp;
+[🍴 Fork](https://github.com/yourusername/RoboPartner/fork) &nbsp;&nbsp;
+[📖 Documentation](https://github.com/yourusername/RoboPartner/wiki)
 
 </div>

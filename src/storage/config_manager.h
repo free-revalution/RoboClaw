@@ -21,6 +21,12 @@ enum class ProviderType {
     QWEN
 };
 
+// 语言设置
+enum class Language {
+    CHINESE,   // 简体中文
+    ENGLISH    // English
+};
+
 // 提供商信息
 struct ProviderInfo {
     ProviderType type;
@@ -90,6 +96,9 @@ class Config {
 public:
     Config() = default;
 
+    // 语言设置
+    Language language = Language::CHINESE;
+
     DefaultConfig default_config;
     std::map<ProviderType, ProviderInfo> providers;
     BehaviorConfig behavior;
@@ -154,6 +163,12 @@ public:
     static std::string providerToString(ProviderType type);
     static ProviderType stringToProvider(const std::string& str);
     static ProviderType typeFromString(const std::string& str);
+
+    // 语言类型转换
+    static std::string languageToString(Language lang);
+    static Language stringToLanguage(const std::string& str);
+    Language getLanguage() const { return config_.language; }
+    void setLanguage(Language lang) { config_.language = lang; }
 
     // 初始化默认配置
     void initializeDefaults();

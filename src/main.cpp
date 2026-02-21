@@ -24,9 +24,9 @@ using namespace std;
 using namespace roboclaw;
 
 // 版本信息
-const string ROBOCLAW_VERSION = "0.1.0";
-const string ROBOCLAW_NAME = "RoboClaw";
-const string ROBOCLAW_DESCRIPTION = "C++ AI Agent Framework - 极简AI Agent框架";
+const string ROBOPARTNER_VERSION = "0.2.0";
+const string ROBOPARTNER_NAME = "RoboPartner";
+const string ROBOPARTNER_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
 
 // CLI命令枚举
 enum class Command {
@@ -55,15 +55,15 @@ struct CLIOptions {
 // 显示横幅
 void showBanner() {
     cout << "==================================================" << endl;
-    cout << "  " << ROBOCLAW_NAME << " v" << ROBOCLAW_VERSION << endl;
-    cout << "  " << ROBOCLAW_DESCRIPTION << endl;
+    cout << "  " << ROBOPARTNER_NAME << " v" << ROBOPARTNER_VERSION << endl;
+    cout << "  " << ROBOPARTNER_DESCRIPTION << endl;
     cout << "==================================================" << endl;
 }
 
 // 显示帮助信息
 void showHelp() {
     showBanner();
-    cout << "\n用法: roboclaw [命令] [选项]\n";
+    cout << "\n用法: robopartner [命令] [选项]\n";
     cout << "\n命令:\n";
     cout << "  (无)              启动交互式对话\n";
     cout << "  chat             启动交互式对话（显式）\n";
@@ -72,44 +72,59 @@ void showHelp() {
     cout << "  conversation     对话管理\n";
     cout << "  config           配置管理\n";
     cout << "  skill            技能管理\n";
+    cout << "  agent            Agent管理 (新增)\n";
+    cout << "  browser          浏览器自动化 (新增)\n";
     cout << "\n选项:\n";
     cout << "  --help, -h       显示此帮助信息\n";
     cout << "  --version, -v    显示版本信息\n";
     cout << "  --verbose        显示详细日志\n\n";
 
     cout << "分支命令:\n";
-    cout << "  roboclaw branch --list              列出所有分支\n";
-    cout << "  roboclaw branch --new <name>        创建新分支\n";
-    cout << "  roboclaw branch --switch <name>     切换分支\n\n";
+    cout << "  robopartner branch --list              列出所有分支\n";
+    cout << "  robopartner branch --new <name>        创建新分支\n";
+    cout << "  robopartner branch --switch <name>     切换分支\n\n";
 
     cout << "配置命令:\n";
-    cout << "  roboclaw config --show              显示当前配置\n";
-    cout << "  roboclaw config --edit              编辑配置文件\n";
-    cout << "  roboclaw config --reset             重置配置\n\n";
+    cout << "  robopartner config --show              显示当前配置\n";
+    cout << "  robopartner config --edit              编辑配置文件\n";
+    cout << "  robopartner config --reset             重置配置\n\n";
 
     cout << "对话命令:\n";
-    cout << "  roboclaw conversation --list        列出所有对话\n";
-    cout << "  roboclaw conversation --show <id>   显示对话详情\n";
-    cout << "  roboclaw conversation --delete <id> 删除对话\n\n";
+    cout << "  robopartner conversation --list        列出所有对话\n";
+    cout << "  robopartner conversation --show <id>   显示对话详情\n";
+    cout << "  robopartner conversation --delete <id> 删除对话\n\n";
 
     cout << "技能命令:\n";
-    cout << "  roboclaw skill --list              列出所有技能\n";
-    cout << "  roboclaw skill --show <name>       显示技能详情\n";
-    cout << "  roboclaw skill --install <file>    安装技能\n";
-    cout << "  roboclaw skill --uninstall <name>  卸载技能\n";
-    cout << "  roboclaw skill --create <name>     创建新技能\n\n";
+    cout << "  robopartner skill --list              列出所有技能\n";
+    cout << "  robopartner skill --show <name>       显示技能详情\n";
+    cout << "  robopartner skill --install <file>    安装技能\n";
+    cout << "  robopartner skill --uninstall <name>  卸载技能\n";
+    cout << "  robopartner skill --create <name>     创建新技能\n\n";
+
+    cout << "Agent命令 (新增):\n";
+    cout << "  robopartner agent --list             列出本地已安装的Agents\n";
+    cout << "  robopartner agent --show <name>      显示Agent详情\n";
+    cout << "  robopartner agent --launch <name>     启动指定Agent\n\n";
+
+    cout << "浏览器命令 (新增):\n";
+    cout << "  robopartner browser --open           打开浏览器\n";
+    cout << "  robopartner browser --screenshot     截图\n";
+    cout << "  robopartner browser --navigate <url> 导航到URL\n";
+    cout << "  robopartner browser --click <selector> 点击元素\n";
+    cout << "  robopartner browser --type <text>     输入文本\n\n";
 
     cout << "示例:\n";
-    cout << "  roboclaw              # 启动对话\n";
-    cout << "  roboclaw chat         # 启动对话\n";
-    cout << "  roboclaw --new        # 创建新对话\n";
-    cout << "  roboclaw config --show # 显示配置\n\n";
+    cout << "  robopartner              # 启动对话\n";
+    cout << "  robopartner chat         # 启动对话\n";
+    cout << "  robopartner --new        # 创建新对话\n";
+    cout << "  robopartner config --show # 显示配置\n";
+    cout << "  robopartner agent --list # 列出Agents\n\n";
 }
 
 // 显示版本信息
 void showVersion() {
-    cout << ROBOCLAW_NAME << " version " << ROBOCLAW_VERSION << endl;
-    cout << "Copyright (c) 2025 RoboClaw Contributors\n\n";
+    cout << ROBOPARTNER_NAME << " version " << ROBOPARTNER_VERSION << endl;
+    cout << "Copyright (c) 2025 RoboPartner Contributors\n\n";
 
     cout << "构建信息:\n";
     cout << "  C++标准: C++" << __cplusplus << "\n";
@@ -208,7 +223,7 @@ void showConfig(ConfigManager& config_mgr) {
     const auto& config = config_mgr.getConfig();
 
     cout << "\n==================================================\n";
-    cout << "  RoboClaw 配置\n";
+    cout << "  RoboPartner 配置\n";
     cout << "==================================================\n\n";
 
     cout << "默认设置:\n";
@@ -267,7 +282,7 @@ void editConfig() {
 
 // 列出对话
 void listConversations(SessionManager& session_mgr) {
-    session_mgr.setSessionsDir(".roboclaw/conversations");
+    session_mgr.setSessionsDir(".robopartner/conversations");
     auto sessions = session_mgr.listSessions();
 
     if (sessions.empty()) {
@@ -384,10 +399,10 @@ int main(int argc, char* argv[]) {
         }
 
         // 设置日志文件
-        Logger::getInstance().setLogFile(ConfigManager::getConfigDir() + "/roboclaw.log");
+        Logger::getInstance().setLogFile(ConfigManager::getConfigDir() + "/robopartner.log");
         Logger::getInstance().setFileOutput(true);
 
-        LOG_INFO("RoboClaw 启动");
+        LOG_INFO("RoboPartner 启动");
     }
 
     // 处理命令

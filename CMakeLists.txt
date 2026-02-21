@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(RoboClaw VERSION 0.1.0 LANGUAGES CXX)
+project(RoboPartner VERSION 0.2.0 LANGUAGES CXX)
 
 # C++标准
 set(CMAKE_CXX_STANDARD 20)
@@ -41,6 +41,9 @@ set(SOURCES
     src/tools/write_tool.cpp
     src/tools/edit_tool.cpp
     src/tools/bash_tool.cpp
+    src/tools/serial_tool.cpp
+    src/tools/browser_tool.cpp
+    src/tools/agent_tool.cpp
 
     # Agent模块
     src/agent/tool_executor.cpp
@@ -90,20 +93,25 @@ include_directories(
 )
 
 # 可执行文件
-add_executable(roboclaw ${SOURCES})
+add_executable(robopartner ${SOURCES})
 
 # 链接库
-target_link_libraries(roboclaw
+target_link_libraries(robopartner
     cpr::cpr
     nlohmann_json::nlohmann_json
 )
 
+# Windows 串口支持库
+if(WIN32)
+    target_link_libraries(robopartner setupapi)
+endif()
+
 # 编译选项
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(roboclaw PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(robopartner PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
-    target_compile_options(roboclaw PRIVATE /W4)
+    target_compile_options(robopartner PRIVATE /W4)
 endif()
 
 # 安装规则
-install(TARGETS roboclaw DESTINATION bin)
+install(TARGETS robopartner DESTINATION bin)

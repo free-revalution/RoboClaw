@@ -121,6 +121,9 @@ bool ConfigManager::configExists() {
 }
 
 void ConfigManager::initializeDefaults() {
+    // 语言设置
+    config_.language = Language::CHINESE;
+
     // 默认配置
     config_.default_config.provider = ProviderType::ANTHROPIC;
     config_.default_config.model = "claude-sonnet-4-20250514";
@@ -245,6 +248,8 @@ bool ConfigManager::parseToml(const std::string& content) {
                     config_.default_config.provider = stringToProvider(value);
                 } else if (key == "model") {
                     config_.default_config.model = value;
+                } else if (key == "language") {
+                    config_.language = stringToLanguage(value);
                 }
             } else if (currentSection == "behavior") {
                 if (key == "max_retries") {
@@ -350,7 +355,8 @@ std::string ConfigManager::generateToml() const {
     // 默认配置
     ss << "[default]\n";
     ss << "provider = \"" << providerToString(config_.default_config.provider) << "\"\n";
-    ss << "model = \"" << config_.default_config.model << "\"\n\n";
+    ss << "model = \"" << config_.default_config.model << "\"\n";
+    ss << "language = \"" << languageToString(config_.language) << "\"\n\n";
 
     // 提供商配置
     ss << "# ============================================\n";
@@ -536,6 +542,24 @@ bool ConfigManager::getBool(const std::string& key, bool defaultVal) const {
         return lower == "true" || lower == "yes" || lower == "1";
     }
     return defaultVal;
+}
+
+std::string ConfigManager::languageToString(Language lang) {
+    switch (lang) {
+        case Language::CHINESE: return "chinese";
+        case Language::ENGLISH: return "english";
+        default:                return "chinese";
+    }
+}
+
+Language ConfigManager::stringToLanguage(const std::string& str) {
+    std::string lower = str;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+    if (lower == "chinese" || lower == "zh" || lower == "zh-cn") return Language::CHINESE;
+    if (lower == "english" || lower == "en") return Language::ENGLISH;
+
+    return Language::CHINESE;  // 默认
 }
 
 } // namespace roboclaw

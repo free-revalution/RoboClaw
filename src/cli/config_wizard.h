@@ -23,6 +23,9 @@ public:
     static bool needsSetup();
 
 private:
+    // 选择语言
+    Language selectLanguage();
+
     // 显示欢迎信息
     void showWelcome();
 
@@ -50,7 +53,11 @@ private:
     void clearScreen();
     void printSeparator();
 
+    // 获取本地化文本
+    std::string getText(const std::string& key) const;
+
     ConfigManager config_manager_;
+    Language language_ = Language::CHINESE;
 };
 
 } // namespace roboclaw
