@@ -4,6 +4,8 @@
 #include "../utils/logger.h"
 #include <fstream>
 #include <algorithm>
+#include <shared_mutex>
+#include <mutex>
 
 namespace roboclaw {
 
@@ -13,6 +15,8 @@ SessionManager::SessionManager() {
 }
 
 void SessionManager::setSessionsDir(const std::string& dir) {
+    std::unique_lock<std::shared_mutex> lock(session_mutex_);
+    std::unique_lock<std::mutex> current_lock(current_session_mutex_, std::defer_lock);
     sessions_dir_ = dir;
 
     // 创建目录
@@ -40,13 +44,20 @@ std::shared_ptr<ConversationTree> SessionManager::createSession(const std::strin
 
     // 保存元数据
     saveMetadata(metadata);
-    sessions_cache_[metadata.id] = metadata;
+
+    {
+        std::unique_lock<std::shared_mutex> lock(session_mutex_);
+        sessions_cache_[metadata.id] = metadata;
+    }
 
     // 保存会话
     saveSession(session);
 
     // 设置为当前会话
-    current_session_ = session;
+    {
+        std::lock_guard<std::mutex> lock(current_session_mutex_);
+        current_session_ = session;
+    }
 
     LOG_INFO("创建新会话: " + metadata.id + " (" + metadata.title + ")");
 
@@ -55,11 +66,19 @@ std::shared_ptr<ConversationTree> SessionManager::createSession(const std::strin
 
 std::shared_ptr<ConversationTree> SessionManager::loadSession(const std::string& sessionId) {
     // 检查缓存
-    auto cachedIt = sessions_cache_.find(sessionId);
-    if (cachedIt != sessions_cache_.end()) {
-        // 检查是否当前已加载
-        if (current_session_ && current_session_->getConversationId() == sessionId) {
-            return current_session_;
+    {
+        std::shared_lock<std::shared_mutex> lock(session_mutex_);
+        auto cachedIt = sessions_cache_.find(sessionId);
+        if (cachedIt != sessions_cache_.end()) {
+            // 检查是否当前已加载
+            std::shared_ptr<ConversationTree> current;
+            {
+                std::lock_guard<std::mutex> current_lock(current_session_mutex_);
+                current = current_session_;
+                if (current && current->getConversationId() == sessionId) {
+                    return current;
+                }
+            }
         }
     }
 
@@ -81,7 +100,10 @@ std::shared_ptr<ConversationTree> SessionManager::loadSession(const std::string&
         auto session = std::make_shared<ConversationTree>();
 
         if (session->fromJson(sessionJson)) {
-            current_session_ = session;
+            {
+                std::lock_guard<std::mutex> lock(current_session_mutex_);
+                current_session_ = session;
+            }
             LOG_INFO("加载会话: " + sessionId);
             return session;
         }
@@ -142,10 +164,16 @@ bool SessionManager::deleteSession(const std::string& sessionId) {
             std::filesystem::remove_all(sessionDir);
         }
 
-        sessions_cache_.erase(sessionId);
+        {
+            std::unique_lock<std::shared_mutex> lock(session_mutex_);
+            sessions_cache_.erase(sessionId);
+        }
 
-        if (current_session_ && current_session_->getConversationId() == sessionId) {
-            current_session_ = nullptr;
+        {
+            std::unique_lock<std::mutex> current_lock(current_session_mutex_);
+            if (current_session_ && current_session_->getConversationId() == sessionId) {
+                current_session_ = nullptr;
+            }
         }
 
         LOG_INFO("删除会话: " + sessionId);
@@ -158,6 +186,7 @@ bool SessionManager::deleteSession(const std::string& sessionId) {
 }
 
 std::vector<SessionMetadata> SessionManager::listSessions() const {
+    std::shared_lock<std::shared_mutex> lock(session_mutex_);
     std::vector<SessionMetadata> sessions;
 
     for (const auto& pair : sessions_cache_) {
@@ -174,14 +203,20 @@ std::vector<SessionMetadata> SessionManager::listSessions() const {
 }
 
 SessionMetadata SessionManager::getSessionMetadata(const std::string& sessionId) const {
-    auto it = sessions_cache_.find(sessionId);
-    if (it != sessions_cache_.end()) {
-        return it->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(session_mutex_);
+        auto it = sessions_cache_.find(sessionId);
+        if (it != sessions_cache_.end()) {
+            return it->second;
+        }
     }
 
     // 尝试从文件加载
     SessionMetadata metadata;
     if (const_cast<SessionManager*>(this)->loadMetadata(sessionId, metadata)) {
+        // 更新缓存
+        std::unique_lock<std::shared_mutex> lock(session_mutex_);
+        sessions_cache_[sessionId] = metadata;
         return metadata;
     }
 

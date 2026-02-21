@@ -4,7 +4,7 @@
 #ifndef ROBOCLAW_AGENT_TOOL_EXECUTOR_H
 #define ROBOCLAW_AGENT_TOOL_EXECUTOR_H
 
-#include "tool_base.h"
+#include "../tools/tool_base.h"
 #include "../storage/config_manager.h"
 #include <memory>
 #include <map>

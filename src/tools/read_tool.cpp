@@ -10,7 +10,7 @@ ReadTool::ReadTool()
     : ToolBase("read", "读取文件内容") {
 }
 
-ToolDescription ReadTool::getDescription() const {
+ToolDescription ReadTool::getToolDescription() const {
     ToolDescription desc;
     desc.name = name_;
     desc.description = description_;
@@ -87,12 +87,13 @@ ToolResult ReadTool::execute(const json& params) {
     json metadata;
     metadata["path"] = path;
     metadata["total_lines"] = totalLines;
-    metadata["lines_read"] = limit > 0 ? std::min(limit, totalLines - offset) : totalLines - offset;
+    int lines_read = limit > 0 ? std::min(limit, totalLines - offset) : totalLines - offset;
+    metadata["lines_read"] = lines_read;
     metadata["offset"] = offset;
     metadata["encoding"] = detectEncoding(path);
     metadata["file_size"] = std::filesystem::file_size(path);
 
-    LOG_DEBUG("文件读取成功: " + std::to_string(metadata["lines_read"]) + " 行");
+    LOG_DEBUG("文件读取成功: " + std::to_string(lines_read) + " 行");
 
     return ToolResult::ok(content, metadata);
 }

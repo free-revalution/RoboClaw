@@ -220,7 +220,7 @@ void InteractiveMode::showBanner() {
 
     if (width > 80) width = 80;
 
-    std::string separator(width - 1, '━');
+    std::string separator(width - 1, '-');
 
     std::cout << "\033[90m" << separator << "\033[0m" << std::endl;
     std::cout << "\033[90m  \033[0m";

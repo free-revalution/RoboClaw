@@ -7,6 +7,8 @@
 #include "token_optimizer.h"
 #include <string>
 #include <functional>
+#include <memory>
+#include <mutex>
 
 namespace roboclaw {
 
@@ -21,7 +23,7 @@ public:
     int getBudget() const { return max_tokens_; }
 
     // 设置优化器
-    void setOptimizer(TokenOptimizer* optimizer) {
+    void setOptimizer(std::shared_ptr<TokenOptimizer> optimizer) {
         optimizer_ = optimizer;
     }
 
@@ -29,26 +31,33 @@ public:
     bool checkBudget(const std::vector<ChatMessage>& messages);
 
     // 获取当前使用量
-    int getCurrentUsage() const { return current_usage_; }
+    int getCurrentUsage() const {
+        std::lock_guard<std::mutex> lock(usage_mutex_);
+        return current_usage_;
+    }
 
     // 获取剩余预算
     int getRemainingBudget() const {
+        std::lock_guard<std::mutex> lock(usage_mutex_);
         return std::max(0, max_tokens_ - current_usage_);
     }
 
     // 获取使用百分比
     double getUsagePercentage() const {
+        std::lock_guard<std::mutex> lock(usage_mutex_);
         if (max_tokens_ == 0) return 0.0;
         return (static_cast<double>(current_usage_) / max_tokens_) * 100.0;
     }
 
     // 更新使用量
     void updateUsage(int tokens) {
+        std::lock_guard<std::mutex> lock(usage_mutex_);
         current_usage_ += tokens;
     }
 
     // 重置使用量
     void resetUsage() {
+        std::lock_guard<std::mutex> lock(usage_mutex_);
         current_usage_ = 0;
     }
 
@@ -74,9 +83,12 @@ public:
 private:
     int max_tokens_;
     int current_usage_;
-    TokenOptimizer* optimizer_;
+    std::shared_ptr<TokenOptimizer> optimizer_;
 
     std::function<void(const std::string&)> warning_callback_;
+
+    // 互斥锁保证线程安全
+    mutable std::mutex usage_mutex_;
 
     // 触发警告
     void triggerWarning(const std::string& message);

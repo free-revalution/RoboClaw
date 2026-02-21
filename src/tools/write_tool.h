@@ -15,7 +15,7 @@ public:
     ~WriteTool() override = default;
 
     // 获取工具描述
-    ToolDescription getDescription() const override;
+    ToolDescription getToolDescription() const override;
 
     // 验证参数
     bool validateParams(const json& params) const override;
@@ -31,7 +31,7 @@ private:
     bool ensureDirectoryExists(const std::string& path);
 
     // 检查路径是否有效
-    bool isValidPath(const std::string& path);
+    bool isValidPath(const std::string& path) const;
 };
 
 } // namespace roboclaw

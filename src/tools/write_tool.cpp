@@ -10,7 +10,7 @@ WriteTool::WriteTool()
     : ToolBase("write", "创建新文件或覆盖现有文件") {
 }
 
-ToolDescription WriteTool::getDescription() const {
+ToolDescription WriteTool::getToolDescription() const {
     ToolDescription desc;
     desc.name = name_;
     desc.description = description_;
@@ -136,7 +136,7 @@ bool WriteTool::ensureDirectoryExists(const std::string& path) {
     }
 }
 
-bool WriteTool::isValidPath(const std::string& path) {
+bool WriteTool::isValidPath(const std::string& path) const {
     try {
         std::filesystem::path filePath(path);
 

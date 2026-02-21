@@ -27,19 +27,8 @@ FetchContent_Declare(cpr
 )
 FetchContent_MakeAvailable(cpr)
 
-# 2. nlohmann/json - JSON库
-FetchContent_Declare(nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
-)
-FetchContent_MakeAvailable(nlohmann_json)
-
-# 3. cpp-toml - TOML库
-FetchContent_Declare(cpptoml
-    GIT_REPOSITORY https://github.com/skystrife/cpptoml.git
-    GIT_TAG master
-)
-FetchContent_MakeAvailable(cpptoml)
+# 2. nlohmann/json - JSON库 (使用系统包管理器安装)
+find_package(nlohmann_json 3.11.3 REQUIRED)
 
 # 源文件
 set(SOURCES
@@ -73,8 +62,15 @@ set(SOURCES
     src/optimization/conversation_compressor.cpp
     src/optimization/token_budget.cpp
 
+    # 技能模块
+    src/skills/skill_parser.cpp
+    src/skills/skill_registry.cpp
+    src/skills/skill_executor.cpp
+    src/skills/skill_downloader.cpp
+
     # 工具类
     src/utils/logger.cpp
+    src/utils/thread_pool.cpp
 
     # 存储模块
     src/storage/config_manager.cpp
@@ -82,6 +78,7 @@ set(SOURCES
     # CLI模块
     src/cli/config_wizard.cpp
     src/cli/interactive_mode.cpp
+    src/cli/skill_commands.cpp
 
     # 平台相关
     ${PLATFORM_SOURCES}
@@ -99,7 +96,6 @@ add_executable(roboclaw ${SOURCES})
 target_link_libraries(roboclaw
     cpr::cpr
     nlohmann_json::nlohmann_json
-    cpptoml::cpptoml
 )
 
 # 编译选项

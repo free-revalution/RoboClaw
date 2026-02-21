@@ -10,7 +10,7 @@ EditTool::EditTool()
     : ToolBase("edit", "精确替换文件内容") {
 }
 
-ToolDescription EditTool::getDescription() const {
+ToolDescription EditTool::getToolDescription() const {
     ToolDescription desc;
     desc.name = name_;
     desc.description = description_ + "（包括缩进和空格）";

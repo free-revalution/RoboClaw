@@ -17,7 +17,7 @@ AnthropicProvider::AnthropicProvider(const std::string& apiKey,
     }
 
     // 设置默认头部
-    http_client_.setDefaultHeader("x-api-key", api_key);
+    http_client_.setDefaultHeader("x-api-key", api_key_);
     http_client_.setDefaultHeader("anthropic-version", "2023-06-01");
     http_client_.setDefaultHeader("Content-Type", "application/json");
 }
@@ -64,7 +64,7 @@ bool AnthropicProvider::chatStream(const std::vector<ChatMessage>& messages,
         // 发送流式请求
         std::string url = base_url_ + "/v1/messages";
         std::map<std::string, std::string> headers;
-        headers["x-api-key"] = api_key;
+        headers["x-api-key"] = api_key_;
 
         return http_client_.postStream(url, requestBody, headers, callback);
 

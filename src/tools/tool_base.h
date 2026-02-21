@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <memory>
+#include <shared_mutex>
 #include "../utils/logger.h"
 
 // 使用nlohmann/json处理参数
@@ -20,7 +22,7 @@ namespace roboclaw {
 struct ToolResult {
     bool success;
     std::string content;
-    std::string error;
+    std::string error_message;
     json metadata;  // 额外元数据
 
     ToolResult() : success(false) {}
@@ -33,10 +35,10 @@ struct ToolResult {
         return result;
     }
 
-    static ToolResult error(const std::string& error) {
+    static ToolResult error(const std::string& error_msg) {
         ToolResult result;
         result.success = false;
-        result.error = error;
+        result.error_message = error_msg;
         return result;
     }
 
@@ -49,7 +51,7 @@ struct ToolResult {
                 j["metadata"] = metadata;
             }
         } else {
-            j["error"] = error;
+            j["error"] = error_message;
         }
         return j;
     }
@@ -112,7 +114,7 @@ public:
     std::string getDescription() const { return description_; }
 
     // 获取工具描述（JSON格式）
-    virtual ToolDescription getDescription() const = 0;
+    virtual ToolDescription getToolDescription() const = 0;
 
     // 验证参数
     virtual bool validateParams(const json& params) const;
@@ -164,6 +166,13 @@ private:
     ToolRegistry() = default;
 
     std::map<std::string, std::shared_ptr<ToolBase>> tools_;
+
+    // 读写锁保证线程安全
+    mutable std::shared_mutex tools_mutex_;
+
+    // 禁止拷贝
+    ToolRegistry(const ToolRegistry&) = delete;
+    ToolRegistry& operator=(const ToolRegistry&) = delete;
 };
 
 } // namespace roboclaw

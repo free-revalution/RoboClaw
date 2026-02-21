@@ -44,7 +44,7 @@ BashTool::BashTool()
     };
 }
 
-ToolDescription BashTool::getDescription() const {
+ToolDescription BashTool::getToolDescription() const {
     ToolDescription desc;
     desc.name = name_;
     desc.description = description_;

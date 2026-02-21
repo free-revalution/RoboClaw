@@ -16,7 +16,7 @@ public:
     ~ReadTool() override = default;
 
     // 获取工具描述
-    ToolDescription getDescription() const override;
+    ToolDescription getToolDescription() const override;
 
     // 验证参数
     bool validateParams(const json& params) const override;

@@ -1,6 +1,7 @@
 // TokenOptimizer实现
 
 #include "token_optimizer.h"
+#include "token_constants.h"
 #include "../utils/logger.h"
 #include <algorithm>
 #include <sstream>
@@ -8,7 +9,9 @@
 
 namespace roboclaw {
 
-TokenOptimizer::TokenOptimizer() {
+TokenOptimizer::TokenOptimizer()
+    : cache_hits_(0)
+    , cache_misses_(0) {
     // 默认配置
 }
 
@@ -17,15 +20,64 @@ void TokenOptimizer::setConfig(const TokenOptimizationConfig& config) {
 }
 
 int TokenOptimizer::estimateTokens(const std::vector<ChatMessage>& messages) {
+    if (!config_.enable_token_cache) {
+        return estimateTokensImpl(messages);
+    }
+
+    // 生成缓存键
+    CacheKey key = generateCacheKey(messages);
+
+    // 检查缓存
+    {
+        std::lock_guard<std::mutex> lock(cache_mutex_);
+        auto it = cache_index_.find(key);
+        if (it != cache_index_.end()) {
+            // 缓存命中，移动到LRU头部
+            cache_hits_++;
+            auto entry = it->second;
+            cache_list_.splice(cache_list_.begin(), cache_list_, entry);
+            return entry->token_count;
+        }
+    }
+
+    // 缓存未命中
+    cache_misses_++;
+    int result = estimateTokensImpl(messages);
+
+    // 添加到缓存
+    {
+        std::lock_guard<std::mutex> lock(cache_mutex_);
+        cache_list_.push_front(CacheEntry(result));
+        cache_index_[key] = cache_list_.begin();
+
+        // 如果超过最大缓存大小，移除最旧的条目
+        while (cache_list_.size() > config_.max_cache_size) {
+            auto last = cache_list_.end();
+            --last;
+            // 需要反向查找键（这是低效的，但简化了实现）
+            for (auto it = cache_index_.begin(); it != cache_index_.end(); ++it) {
+                if (it->second == last) {
+                    cache_index_.erase(it);
+                    break;
+                }
+            }
+            cache_list_.pop_back();
+        }
+    }
+
+    return result;
+}
+
+int TokenOptimizer::estimateTokensImpl(const std::vector<ChatMessage>& messages) const {
     int total = 0;
 
     for (const auto& msg : messages) {
         // 估算每条消息的token数
-        total += estimateTokens(msg.content);
+        total += estimateTokensOptimized(msg.content);
 
         // 工具调用也需要token
         if (!msg.tool_calls.empty()) {
-            total += static_cast<int>(msg.tool_calls.size()) * 50;  // 每个工具调用约50 tokens
+            total += static_cast<int>(msg.tool_calls.size()) * TokenConstants::TOKENS_PER_TOOL_CALL;
         }
     }
 
@@ -37,10 +89,52 @@ int TokenOptimizer::estimateTokens(const std::string& text) {
         return 0;
     }
 
-    return estimateTokensOptimized(text);
+    if (!config_.enable_token_cache) {
+        return estimateTokensOptimized(text);
+    }
+
+    // 生成缓存键
+    CacheKey key = generateCacheKey(text);
+
+    // 检查缓存
+    {
+        std::lock_guard<std::mutex> lock(cache_mutex_);
+        auto it = cache_index_.find(key);
+        if (it != cache_index_.end()) {
+            cache_hits_++;
+            auto entry = it->second;
+            cache_list_.splice(cache_list_.begin(), cache_list_, entry);
+            return entry->token_count;
+        }
+    }
+
+    // 缓存未命中
+    cache_misses_++;
+    int result = estimateTokensOptimized(text);
+
+    // 添加到缓存
+    {
+        std::lock_guard<std::mutex> lock(cache_mutex_);
+        cache_list_.push_front(CacheEntry(result));
+        cache_index_[key] = cache_list_.begin();
+
+        while (cache_list_.size() > config_.max_cache_size) {
+            auto last = cache_list_.end();
+            --last;
+            for (auto it = cache_index_.begin(); it != cache_index_.end(); ++it) {
+                if (it->second == last) {
+                    cache_index_.erase(it);
+                    break;
+                }
+            }
+            cache_list_.pop_back();
+        }
+    }
+
+    return result;
 }
 
-int TokenOptimizer::estimateTokensOptimized(const std::string& text) {
+int TokenOptimizer::estimateTokensOptimized(const std::string& text) const {
     // 使用混合估算策略
     int chinese_chars = 0;
     int english_chars = 0;
@@ -63,15 +157,15 @@ int TokenOptimizer::estimateTokensOptimized(const std::string& text) {
 
     // 估算规则：
     // 中文：约1.5字符/token
-    // 英文：约4字符/token
+    // 英文：约4字符/token (CHARS_PER_TOKEN_ENGLISH)
     // 空格：约10字符/token
     // 代码：约4字符/token（但包含较多符号，保守估计）
 
     int tokens = 0;
     tokens += static_cast<int>(std::ceil(chinese_chars / 1.5));
-    tokens += static_cast<int>(std::ceil(english_chars / 4.0));
+    tokens += static_cast<int>(std::ceil(english_chars / static_cast<double>(TokenConstants::CHARS_PER_TOKEN_ENGLISH)));
     tokens += static_cast<int>(std::ceil(whitespace / 10.0));
-    tokens += static_cast<int>(std::ceil(code_chars / 4.0));
+    tokens += static_cast<int>(std::ceil(code_chars / static_cast<double>(TokenConstants::CHARS_PER_TOKEN_ENGLISH)));
 
     return std::max(tokens, 1);  // 至少1个token
 }
@@ -84,7 +178,7 @@ std::vector<ChatMessage> TokenOptimizer::compressHistory(
         return history;
     }
 
-    int current_tokens = estimateTokens(history);
+    int current_tokens = estimateTokensImpl(history);
     int threshold = (target_tokens > 0) ? target_tokens : config_.compression_threshold;
 
     if (current_tokens <= threshold) {
@@ -221,7 +315,8 @@ bool TokenOptimizer::needsCompression(const std::vector<ChatMessage>& messages) 
         return false;
     }
 
-    int current_tokens = estimateTokens(messages);
+    // 使用非缓存版本进行估算（const方法）
+    int current_tokens = estimateTokensImpl(messages);
     return current_tokens > config_.compression_threshold;
 }
 
@@ -235,13 +330,15 @@ int TokenOptimizer::estimateNextRequest(
         const std::vector<ChatMessage>& messages,
         const std::vector<ToolDefinition>& tools) const {
 
-    int tokens = estimateTokens(messages);
+    int tokens = estimateTokensImpl(messages);
 
     // 添加工具定义的token估算
     for (const auto& tool : tools) {
-        tokens += estimateTokens(tool.description);
+        // 估算描述的token数（不使用缓存）
+        tokens += estimateTokensOptimized(tool.description);
         if (tool.input_schema.contains("properties")) {
-            tokens += estimateTokens(tool.input_schema.dump());
+            std::string schema_str = tool.input_schema.dump();
+            tokens += estimateTokensOptimized(schema_str);
         }
     }
 
@@ -276,6 +373,69 @@ std::string TokenOptimizer::getCachedPromptKey() {
     size_t hash_value = hash_fn(system_prompt);
 
     // 转换为十六进制字符串
+    std::stringstream ss;
+    ss << std::hex << hash_value;
+    return ss.str();
+}
+
+// ==================== 缓存相关方法 ====================
+
+void TokenOptimizer::clearCache() {
+    std::lock_guard<std::mutex> lock(cache_mutex_);
+    cache_list_.clear();
+    cache_index_.clear();
+    cache_hits_ = 0;
+    cache_misses_ = 0;
+    LOG_INFO("Token估算缓存已清空");
+}
+
+size_t TokenOptimizer::getCacheSize() const {
+    std::lock_guard<std::mutex> lock(cache_mutex_);
+    return cache_list_.size();
+}
+
+size_t TokenOptimizer::getCacheHits() const {
+    return cache_hits_.load();
+}
+
+size_t TokenOptimizer::getCacheMisses() const {
+    return cache_misses_.load();
+}
+
+TokenOptimizer::CacheKey TokenOptimizer::generateCacheKey(const std::vector<ChatMessage>& messages) const {
+    std::stringstream ss;
+
+    // 生成消息序列的哈希键
+    for (const auto& msg : messages) {
+        ss << static_cast<int>(msg.role) << "|";
+
+        // 使用内容的前100个字符作为键的一部分
+        size_t len = std::min(size_t(100), msg.content.length());
+        ss << msg.content.substr(0, len) << "|";
+
+        // 包含工具调用信息
+        ss << msg.tool_calls.size() << ";";
+    }
+
+    // 对长键进行哈希
+    std::string key_str = ss.str();
+    std::hash<std::string> hash_fn;
+    size_t hash_value = hash_fn(key_str);
+
+    std::stringstream result;
+    result << std::hex << hash_value;
+    return result.str();
+}
+
+TokenOptimizer::CacheKey TokenOptimizer::generateCacheKey(const std::string& text) const {
+    // 对短文本直接使用前100字符，长文本使用哈希
+    if (text.length() <= 100) {
+        return text;
+    }
+
+    std::hash<std::string> hash_fn;
+    size_t hash_value = hash_fn(text);
+
     std::stringstream ss;
     ss << std::hex << hash_value;
     return ss.str();

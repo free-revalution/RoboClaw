@@ -9,6 +9,9 @@
 #include <map>
 #include <memory>
 #include <filesystem>
+#include <shared_mutex>
+#include <mutex>
+#include <atomic>
 
 namespace roboclaw {
 
@@ -63,7 +66,10 @@ public:
 
     // 设置会话存储目录
     void setSessionsDir(const std::string& dir);
-    std::string getSessionsDir() const { return sessions_dir_; }
+    std::string getSessionsDir() const {
+        std::shared_lock<std::shared_mutex> lock(session_mutex_);
+        return sessions_dir_;
+    }
 
     // 创建新会话
     std::shared_ptr<ConversationTree> createSession(const std::string& title = "");
@@ -78,10 +84,14 @@ public:
     bool deleteSession(const std::string& sessionId);
 
     // 获取当前会话
-    std::shared_ptr<ConversationTree> getCurrentSession() const { return current_session_; }
+    std::shared_ptr<ConversationTree> getCurrentSession() const {
+        std::lock_guard<std::mutex> lock(current_session_mutex_);
+        return current_session_;
+    }
 
     // 设置当前会话
     void setCurrentSession(std::shared_ptr<ConversationTree> session) {
+        std::lock_guard<std::mutex> lock(current_session_mutex_);
         current_session_ = session;
     }
 
@@ -100,7 +110,15 @@ public:
 private:
     std::string sessions_dir_;
     std::shared_ptr<ConversationTree> current_session_;
-    std::map<std::string, SessionMetadata> sessions_cache_;
+    mutable std::map<std::string, SessionMetadata> sessions_cache_;
+
+    // 读写锁保证线程安全
+    mutable std::shared_mutex session_mutex_;
+    mutable std::mutex current_session_mutex_;  // 当前会话专用锁
+
+    // 禁止拷贝
+    SessionManager(const SessionManager&) = delete;
+    SessionManager& operator=(const SessionManager&) = delete;
 
     // 获取会话文件路径
     std::string getSessionFilePath(const std::string& sessionId) const;

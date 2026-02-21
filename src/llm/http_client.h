@@ -7,6 +7,8 @@
 #include <string>
 #include <functional>
 #include <memory>
+#include <future>
+#include <atomic>
 
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
@@ -19,7 +21,7 @@ namespace roboclaw {
 struct HttpResponse {
     int status_code;
     std::string body;
-    std::string error;
+    std::string error_message;
     bool success;
 
     // 头部
@@ -37,9 +39,9 @@ struct HttpResponse {
         return resp;
     }
 
-    static HttpResponse error(const std::string& error) {
+    static HttpResponse error(const std::string& error_msg) {
         HttpResponse resp;
-        resp.error = error;
+        resp.error_message = error_msg;
         resp.success = false;
         return resp;
     }
@@ -49,8 +51,8 @@ struct HttpResponse {
         j["status_code"] = status_code;
         j["body"] = body;
         j["success"] = success;
-        if (!error.empty()) {
-            j["error"] = error;
+        if (!error_message.empty()) {
+            j["error"] = error_message;
         }
         return j;
     }
@@ -102,9 +104,55 @@ public:
                                int maxRetries = 3,
                                int timeout = 0);
 
+    // ==================== 异步请求方法 ====================
+
+    // 异步GET请求（返回future）
+    std::future<HttpResponse> getAsync(const std::string& url,
+                                       const std::map<std::string, std::string>& headers = {},
+                                       int timeout = 0);
+
+    // 异步POST请求（返回future）
+    std::future<HttpResponse> postAsync(const std::string& url,
+                                        const std::string& body,
+                                        const std::map<std::string, std::string>& headers = {},
+                                        int timeout = 0);
+
+    // 异步POST请求（JSON，返回future）
+    std::future<HttpResponse> postJsonAsync(const std::string& url,
+                                            const json& data,
+                                            const std::map<std::string, std::string>& headers = {},
+                                            int timeout = 0);
+
+    // 异步POST请求（回调版本）
+    void postAsyncCallback(const std::string& url,
+                           const std::string& body,
+                           const std::map<std::string, std::string>& headers,
+                           std::function<void(const HttpResponse&)> callback,
+                           int timeout = 0);
+
+    // 异步POST请求（JSON，回调版本）
+    void postJsonAsyncCallback(const std::string& url,
+                               const json& data,
+                               const std::map<std::string, std::string>& headers,
+                               std::function<void(const HttpResponse&)> callback,
+                               int timeout = 0);
+
+    // 批量异步POST请求（返回多个future）
+    std::vector<std::future<HttpResponse>> postBatchAsync(
+        const std::vector<std::tuple<std::string, json, std::map<std::string, std::string>>>& requests);
+
+    // 取消所有正在进行的异步请求
+    void cancelAllAsync();
+
+    // 获取活跃异步请求数
+    int getActiveAsyncRequests() const { return active_async_requests_.load(); }
+
 private:
     int default_timeout_;
     std::map<std::string, std::string> default_headers_;
+
+    // 异步请求计数
+    std::atomic<int> active_async_requests_;
 
     // 执行请求（带超时）
     HttpResponse execute(cpr::Session& session, int timeout);

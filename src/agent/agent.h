@@ -4,13 +4,18 @@
 #ifndef ROBOCLAW_AGENT_AGENT_H
 #define ROBOCLAW_AGENT_AGENT_H
 
-#include "llm_provider.h"
+#include "../llm/llm_provider.h"
 #include "tool_executor.h"
 #include "prompt_builder.h"
+#include "../optimization/token_optimizer.h"
+#include "../optimization/token_budget.h"
+#include "../utils/thread_pool.h"
 #include <string>
 #include <vector>
 #include <memory>
 #include <functional>
+#include <shared_mutex>
+#include <mutex>
 
 namespace roboclaw {
 
@@ -20,12 +25,14 @@ struct AgentConfig {
     int max_tokens;               // 最大输出token数
     double temperature;           // 温度参数
     bool stream_response;         // 是否流式响应
+    bool concurrent_tool_execution; // 是否并发执行工具
 
     AgentConfig()
         : max_iterations(10)
         , max_tokens(4096)
         , temperature(0.0)
-        , stream_response(false) {}
+        , stream_response(false)
+        , concurrent_tool_execution(false) {}  // 默认关闭以保证兼容性
 };
 
 // Agent响应
@@ -77,10 +84,10 @@ public:
                       std::function<void(const AgentResponse&)> onComplete);
 
     // 获取对话历史
-    const std::vector<ChatMessage>& getHistory() const { return history_; }
+    const std::vector<ChatMessage>& getHistory() const;
 
     // 清空历史
-    void clearHistory() { history_.clear(); }
+    void clearHistory();
 
     // 设置系统提示词
     void setSystemPrompt(const std::string& prompt) {
@@ -88,8 +95,31 @@ public:
     }
 
     // 添加消息到历史
-    void addToHistory(const ChatMessage& msg) {
-        history_.push_back(msg);
+    void addToHistory(const ChatMessage& msg);
+
+    // 设置Token优化器
+    void setTokenOptimizer(std::shared_ptr<TokenOptimizer> optimizer) {
+        token_optimizer_ = optimizer;
+    }
+
+    // 设置Token预算管理
+    void setTokenBudget(std::shared_ptr<TokenBudget> budget) {
+        token_budget_ = budget;
+    }
+
+    // 启用Token优化
+    void enableTokenOptimization(bool enable) {
+        token_optimization_enabled_ = enable;
+    }
+
+    // 启用并发工具执行
+    void enableConcurrentToolExecution(bool enable) {
+        config_.concurrent_tool_execution = enable;
+    }
+
+    // 设置线程池
+    void setThreadPool(std::shared_ptr<ThreadPool> pool) {
+        thread_pool_ = pool;
     }
 
 private:
@@ -98,6 +128,12 @@ private:
 
     // 执行工具调用
     bool executeToolCalls(const std::vector<ChatMessage::ToolCall>& toolCalls);
+
+    // 顺序执行工具调用
+    bool executeToolCallsSequential(const std::vector<ChatMessage::ToolCall>& toolCalls);
+
+    // 并发执行工具调用
+    bool executeToolCallsConcurrent(const std::vector<ChatMessage::ToolCall>& toolCalls);
 
     // 构建消息列表
     std::vector<ChatMessage> buildMessages(const std::string& userMessage);
@@ -111,11 +147,23 @@ private:
     PromptBuilder prompt_builder_;
     AgentConfig config_;
 
+    // Token优化
+    std::shared_ptr<TokenOptimizer> token_optimizer_;
+    std::shared_ptr<TokenBudget> token_budget_;
+    bool token_optimization_enabled_;
+
+    // 线程池
+    std::shared_ptr<ThreadPool> thread_pool_;
+
     // 对话历史
     std::vector<ChatMessage> history_;
 
     // 工具执行结果
     std::map<std::string, ToolResult> tool_results_;
+
+    // 线程安全保护
+    mutable std::shared_mutex history_mutex_;
+    std::mutex tool_results_mutex_;
 };
 
 } // namespace roboclaw

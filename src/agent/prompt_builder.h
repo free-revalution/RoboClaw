@@ -4,7 +4,7 @@
 #ifndef ROBOCLAW_AGENT_PROMPT_BUILDER_H
 #define ROBOCLAW_AGENT_PROMPT_BUILDER_H
 
-#include "llm_provider.h"
+#include "../llm/llm_provider.h"
 #include "tool_executor.h"
 #include <string>
 #include <vector>

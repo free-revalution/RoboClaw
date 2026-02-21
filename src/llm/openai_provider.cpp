@@ -17,7 +17,7 @@ OpenAIProvider::OpenAIProvider(const std::string& apiKey,
     }
 
     // 设置默认头部
-    http_client_.setDefaultHeader("Authorization", "Bearer " + api_key);
+    http_client_.setDefaultHeader("Authorization", "Bearer " + api_key_);
     http_client_.setDefaultHeader("Content-Type", "application/json");
 }
 

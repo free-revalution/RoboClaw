@@ -136,6 +136,26 @@ void ConfigManager::initializeDefaults() {
     config_.tools.forbidden_commands = {"rm -rf /", "rm -rf /*", "mkfs", "dd if=/dev/zero"};
     config_.tools.max_read_size = 10;
 
+    // 技能设置
+    config_.skills.local_skills_dir = "~/.roboclaw/skills";
+    config_.skills.auto_update = true;
+    config_.skills.update_interval_hours = 24;
+
+    // Token优化设置
+    config_.optimization.enable_compression = true;
+    config_.optimization.compression_threshold = 8000;
+    config_.optimization.target_budget = 12000;
+    config_.optimization.enable_prompt_caching = true;
+    config_.optimization.compress_tool_results = true;
+    config_.optimization.max_tool_result_length = 5000;
+    config_.optimization.show_token_stats = true;
+    config_.optimization.stats_update_interval = 1;
+
+    // 缓存设置
+    config_.cache.skills_cache_dir = ".roboclaw/skills/cache";
+    config_.cache.skill_cache_ttl = 168;
+    config_.cache.prompt_cache_size = 100;
+
     // 初始化所有提供商
     for (int i = 0; i <= 5; ++i) {
         initializeProviderInfo(static_cast<ProviderType>(i));
@@ -242,6 +262,40 @@ bool ConfigManager::parseToml(const std::string& content) {
                 } else if (key == "max_read_size") {
                     config_.tools.max_read_size = parseInt(value);
                 }
+            } else if (currentSection == "skills") {
+                if (key == "local_skills_dir") {
+                    config_.skills.local_skills_dir = value;
+                } else if (key == "auto_update") {
+                    config_.skills.auto_update = parseBool(value);
+                } else if (key == "update_interval_hours") {
+                    config_.skills.update_interval_hours = parseInt(value);
+                }
+            } else if (currentSection == "optimization") {
+                if (key == "enable_compression") {
+                    config_.optimization.enable_compression = parseBool(value);
+                } else if (key == "compression_threshold") {
+                    config_.optimization.compression_threshold = parseInt(value);
+                } else if (key == "target_budget") {
+                    config_.optimization.target_budget = parseInt(value);
+                } else if (key == "enable_prompt_caching") {
+                    config_.optimization.enable_prompt_caching = parseBool(value);
+                } else if (key == "compress_tool_results") {
+                    config_.optimization.compress_tool_results = parseBool(value);
+                } else if (key == "max_tool_result_length") {
+                    config_.optimization.max_tool_result_length = parseInt(value);
+                } else if (key == "show_token_stats") {
+                    config_.optimization.show_token_stats = parseBool(value);
+                } else if (key == "stats_update_interval") {
+                    config_.optimization.stats_update_interval = parseInt(value);
+                }
+            } else if (currentSection == "cache") {
+                if (key == "skills_cache_dir") {
+                    config_.cache.skills_cache_dir = value;
+                } else if (key == "skill_cache_ttl") {
+                    config_.cache.skill_cache_ttl = parseInt(value);
+                } else if (key == "prompt_cache_size") {
+                    config_.cache.prompt_cache_size = parseInt(value);
+                }
             } else if (currentSection.find("providers.") == 0) {
                 // 提供商配置
                 std::string providerName = currentSection.substr(10); // "providers."长度
@@ -342,6 +396,41 @@ std::string ConfigManager::generateToml() const {
     }
     ss << "]\n";
 
+    // 技能系统配置
+    ss << "# ============================================\n";
+    ss << "# 技能系统配置\n";
+    ss << "# ============================================\n\n";
+
+    ss << "[skills]\n";
+    ss << "local_skills_dir = \"" << config_.skills.local_skills_dir << "\"\n";
+    ss << "auto_update = " << (config_.skills.auto_update ? "true" : "false") << "\n";
+    ss << "update_interval_hours = " << config_.skills.update_interval_hours << "\n\n";
+
+    // Token优化配置
+    ss << "# ============================================\n";
+    ss << "# Token优化配置\n";
+    ss << "# ============================================\n\n";
+
+    ss << "[optimization]\n";
+    ss << "enable_compression = " << (config_.optimization.enable_compression ? "true" : "false") << "\n";
+    ss << "compression_threshold = " << config_.optimization.compression_threshold << "\n";
+    ss << "target_budget = " << config_.optimization.target_budget << "\n";
+    ss << "enable_prompt_caching = " << (config_.optimization.enable_prompt_caching ? "true" : "false") << "\n";
+    ss << "compress_tool_results = " << (config_.optimization.compress_tool_results ? "true" : "false") << "\n";
+    ss << "max_tool_result_length = " << config_.optimization.max_tool_result_length << "\n";
+    ss << "show_token_stats = " << (config_.optimization.show_token_stats ? "true" : "false") << "\n";
+    ss << "stats_update_interval = " << config_.optimization.stats_update_interval << "\n\n";
+
+    // 缓存配置
+    ss << "# ============================================\n";
+    ss << "# 缓存配置\n";
+    ss << "# ============================================\n\n";
+
+    ss << "[cache]\n";
+    ss << "skills_cache_dir = \"" << config_.cache.skills_cache_dir << "\"\n";
+    ss << "skill_cache_ttl = " << config_.cache.skill_cache_ttl << "\n";
+    ss << "prompt_cache_size = " << config_.cache.prompt_cache_size << "\n";
+
     return ss.str();
 }
 
@@ -404,6 +493,49 @@ ProviderType ConfigManager::stringToProvider(const std::string& str) {
 
 ProviderType ConfigManager::typeFromString(const std::string& str) {
     return stringToProvider(str);
+}
+
+// 便捷获取配置值（支持点号分隔的键）
+std::string ConfigManager::get(const std::string& key, const std::string& defaultVal) const {
+    // 支持格式: "section.key" 或 "key"
+    size_t dotPos = key.find('.');
+
+    if (dotPos != std::string::npos) {
+        std::string section = key.substr(0, dotPos);
+        std::string subKey = key.substr(dotPos + 1);
+
+        if (section == "skills") {
+            if (subKey == "local_skills_dir") return config_.skills.local_skills_dir;
+        } else if (section == "optimization") {
+            if (subKey == "target_budget") return std::to_string(config_.optimization.target_budget);
+        } else if (section == "cache") {
+            if (subKey == "skills_cache_dir") return config_.cache.skills_cache_dir;
+        }
+    }
+
+    return defaultVal;
+}
+
+int ConfigManager::getInt(const std::string& key, int defaultVal) const {
+    std::string value = get(key, "");
+    if (!value.empty()) {
+        try {
+            return std::stoi(value);
+        } catch (...) {
+            return defaultVal;
+        }
+    }
+    return defaultVal;
+}
+
+bool ConfigManager::getBool(const std::string& key, bool defaultVal) const {
+    std::string value = get(key, "");
+    if (!value.empty()) {
+        std::string lower = value;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        return lower == "true" || lower == "yes" || lower == "1";
+    }
+    return defaultVal;
 }
 
 } // namespace roboclaw

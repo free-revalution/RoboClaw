@@ -2,6 +2,7 @@
 
 #include "tool_base.h"
 #include <stdexcept>
+#include <shared_mutex>
 
 namespace roboclaw {
 
@@ -70,11 +71,13 @@ ToolRegistry& ToolRegistry::getInstance() {
 }
 
 void ToolRegistry::registerTool(const std::string& name, std::shared_ptr<ToolBase> tool) {
+    std::unique_lock<std::shared_mutex> lock(tools_mutex_);
     tools_[name] = tool;
     LOG_DEBUG("工具已注册: " + name);
 }
 
 std::shared_ptr<ToolBase> ToolRegistry::getTool(const std::string& name) {
+    std::shared_lock<std::shared_mutex> lock(tools_mutex_);
     auto it = tools_.find(name);
     if (it != tools_.end()) {
         return it->second;
@@ -83,14 +86,16 @@ std::shared_ptr<ToolBase> ToolRegistry::getTool(const std::string& name) {
 }
 
 std::vector<ToolDescription> ToolRegistry::getAllToolDescriptions() const {
+    std::shared_lock<std::shared_mutex> lock(tools_mutex_);
     std::vector<ToolDescription> descriptions;
     for (const auto& pair : tools_) {
-        descriptions.push_back(pair.second->getDescription());
+        descriptions.push_back(pair.second->getToolDescription());
     }
     return descriptions;
 }
 
 std::vector<std::string> ToolRegistry::getAllToolNames() const {
+    std::shared_lock<std::shared_mutex> lock(tools_mutex_);
     std::vector<std::string> names;
     for (const auto& pair : tools_) {
         names.push_back(pair.first);
@@ -99,6 +104,7 @@ std::vector<std::string> ToolRegistry::getAllToolNames() const {
 }
 
 bool ToolRegistry::hasTool(const std::string& name) const {
+    std::shared_lock<std::shared_mutex> lock(tools_mutex_);
     return tools_.find(name) != tools_.end();
 }
 

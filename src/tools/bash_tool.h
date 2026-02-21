@@ -7,6 +7,11 @@
 #include <string>
 #include <vector>
 
+// 平台检测宏
+#if defined(PLATFORM_MACOS) || defined(PLATFORM_LINUX)
+#define PLATFORM_UNIX
+#endif
+
 namespace roboclaw {
 
 class BashTool : public ToolBase {
@@ -15,7 +20,7 @@ public:
     ~BashTool() override = default;
 
     // 获取工具描述
-    ToolDescription getDescription() const override;
+    ToolDescription getToolDescription() const override;
 
     // 验证参数
     bool validateParams(const json& params) const override;
@@ -57,11 +62,6 @@ private:
     int default_timeout_;
     std::vector<std::string> forbidden_commands_;
 };
-
-// 平台检测宏
-#if defined(PLATFORM_MACOS) || defined(PLATFORM_LINUX)
-#define PLATFORM_UNIX
-#endif
 
 } // namespace roboclaw
 

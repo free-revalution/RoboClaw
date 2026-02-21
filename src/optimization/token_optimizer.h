@@ -9,6 +9,10 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <unordered_map>
+#include <mutex>
+#include <list>
+#include <atomic>
 
 namespace roboclaw {
 
@@ -32,13 +36,19 @@ struct TokenOptimizationConfig {
     int max_tool_result_length;
     int target_budget;
 
+    // 缓存配置
+    bool enable_token_cache;
+    size_t max_cache_size;
+
     TokenOptimizationConfig()
         : enable_compression(true)
         , compression_threshold(8000)
         , enable_prompt_caching(true)
         , compress_tool_results(true)
         , max_tool_result_length(5000)
-        , target_budget(12000) {}
+        , target_budget(12000)
+        , enable_token_cache(true)
+        , max_cache_size(1000) {}
 };
 
 // Token优化器
@@ -83,12 +93,21 @@ public:
     // 获取优化建议
     std::string getOptimizationSuggestion() const;
 
+    // 清空缓存
+    void clearCache();
+
+    // 获取缓存统计
+    size_t getCacheSize() const;
+    size_t getCacheHits() const;
+    size_t getCacheMisses() const;
+
 private:
     TokenOptimizationConfig config_;
     TokenStats stats_;
 
     // Token估算算法
-    int estimateTokensOptimized(const std::string& text);
+    int estimateTokensOptimized(const std::string& text) const;
+    int estimateTokensImpl(const std::vector<ChatMessage>& messages) const;
 
     // 简单估算（英文约4字符/token，中文约2字符/token）
     int estimateTokensSimple(const std::string& text);
@@ -103,6 +122,32 @@ private:
         std::vector<ChatMessage> old_summary;  // 远期（总摘要）
     };
     CompressionLayers createCompressionLayers(const std::vector<ChatMessage>& history);
+
+    // Token估算缓存条目
+    struct CacheEntry {
+        int token_count;
+        size_t access_count;
+
+        CacheEntry(int tokens) : token_count(tokens), access_count(1) {}
+    };
+
+    // 缓存键类型
+    using CacheKey = std::string;
+
+    // 生成缓存键
+    CacheKey generateCacheKey(const std::vector<ChatMessage>& messages) const;
+    CacheKey generateCacheKey(const std::string& text) const;
+
+    // 缓存存储（LRU）
+    mutable std::unordered_map<CacheKey, std::list<CacheEntry>::iterator> cache_index_;
+    mutable std::list<CacheEntry> cache_list_;
+
+    // 缓存统计
+    mutable std::atomic<size_t> cache_hits_;
+    mutable std::atomic<size_t> cache_misses_;
+
+    // 缓存互斥锁
+    mutable std::mutex cache_mutex_;
 };
 
 } // namespace roboclaw

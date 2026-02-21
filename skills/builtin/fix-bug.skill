@@ -1,0 +1,39 @@
+{
+  "name": "fix-bug",
+  "description": "分析并修复代码中的bug",
+  "version": "1.0.0",
+  "author": "RoboClaw",
+  "triggers": [
+    "修bug",
+    "fix bug",
+    "修复错误",
+    "调试"
+  ],
+  "parameters": {
+    "file_path": {
+      "type": "string",
+      "description": "包含bug的文件路径",
+      "required": true
+    },
+    "bug_description": {
+      "type": "string",
+      "description": "bug描述",
+      "required": false
+    }
+  },
+  "actions": [
+    {
+      "type": "tool",
+      "name": "read",
+      "description": "读取有问题的代码",
+      "parameters": {
+        "file": "${file_path}"
+      }
+    },
+    {
+      "type": "llm",
+      "description": "分析bug原因并提供修复方案",
+      "prompt_template": "请分析以下代码中的bug：\n\nBug描述：${bug_description}\n\n代码内容：\n${file_content}\n\n请提供：\n1. Bug原因分析\n2. 修复方案\n3. 修复后的代码"
+    }
+  ]
+}

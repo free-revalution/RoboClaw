@@ -8,12 +8,17 @@
 #include "storage/config_manager.h"
 #include "cli/config_wizard.h"
 #include "cli/interactive_mode.h"
+#include "cli/skill_commands.h"
 #include "llm/llm_provider.h"
 #include "llm/anthropic_provider.h"
 #include "llm/openai_provider.h"
 #include "agent/agent.h"
 #include "agent/tool_executor.h"
 #include "session/session_manager.h"
+#include "skills/skill_registry.h"
+#include "skills/skill_executor.h"
+#include "optimization/token_optimizer.h"
+#include "optimization/token_budget.h"
 
 using namespace std;
 using namespace roboclaw;
@@ -31,6 +36,7 @@ enum class Command {
     CONFIG,
     BRANCH,
     CONVERSATION,
+    SKILL,      // 技能管理
     CHAT        // 显式启动对话
 };
 
@@ -41,16 +47,17 @@ struct CLIOptions {
     string config_action;       // config子命令
     string branch_action;       // branch子命令
     string conversation_action; // conversation子命令
+    string skill_action;        // skill子命令
     string argument;            // 附加参数
     string new_conversation;    // 新对话标题
 };
 
 // 显示横幅
 void showBanner() {
-    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" << endl;
+    cout << "==================================================" << endl;
     cout << "  " << ROBOCLAW_NAME << " v" << ROBOCLAW_VERSION << endl;
     cout << "  " << ROBOCLAW_DESCRIPTION << endl;
-    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" << endl;
+    cout << "==================================================" << endl;
 }
 
 // 显示帮助信息
@@ -64,6 +71,7 @@ void showHelp() {
     cout << "  branch           分支管理\n";
     cout << "  conversation     对话管理\n";
     cout << "  config           配置管理\n";
+    cout << "  skill            技能管理\n";
     cout << "\n选项:\n";
     cout << "  --help, -h       显示此帮助信息\n";
     cout << "  --version, -v    显示版本信息\n";
@@ -83,6 +91,13 @@ void showHelp() {
     cout << "  roboclaw conversation --list        列出所有对话\n";
     cout << "  roboclaw conversation --show <id>   显示对话详情\n";
     cout << "  roboclaw conversation --delete <id> 删除对话\n\n";
+
+    cout << "技能命令:\n";
+    cout << "  roboclaw skill --list              列出所有技能\n";
+    cout << "  roboclaw skill --show <name>       显示技能详情\n";
+    cout << "  roboclaw skill --install <file>    安装技能\n";
+    cout << "  roboclaw skill --uninstall <name>  卸载技能\n";
+    cout << "  roboclaw skill --create <name>     创建新技能\n\n";
 
     cout << "示例:\n";
     cout << "  roboclaw              # 启动对话\n";
@@ -165,6 +180,16 @@ CLIOptions parseArguments(int argc, char* argv[]) {
                     options.conversation_action = next;
                 }
             }
+        } else if (arg == "skill") {
+            options.command = Command::SKILL;
+            if (i + 1 < argc) {
+                string next = argv[++i];
+                if (next.find("--") == 0) {
+                    options.skill_action = next.substr(2);
+                } else {
+                    options.skill_action = next;
+                }
+            }
         } else if (arg == "chat") {
             options.command = Command::CHAT;
         }
@@ -182,9 +207,9 @@ void showConfig(ConfigManager& config_mgr) {
 
     const auto& config = config_mgr.getConfig();
 
-    cout << "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    cout << "\n==================================================\n";
     cout << "  RoboClaw 配置\n";
-    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+    cout << "==================================================\n\n";
 
     cout << "默认设置:\n";
     cout << "  提供商: " << ConfigManager::providerToString(config.default_config.provider) << "\n";
@@ -198,6 +223,17 @@ void showConfig(ConfigManager& config_mgr) {
     cout << "工具设置:\n";
     cout << "  Bash超时: " << config.tools.bash_timeout << " 秒\n";
     cout << "  最大读取: " << config.tools.max_read_size << " MB\n\n";
+
+    cout << "技能设置:\n";
+    cout << "  本地目录: " << config.skills.local_skills_dir << "\n";
+    cout << "  自动更新: " << (config.skills.auto_update ? "开启" : "关闭") << "\n";
+    cout << "  更新间隔: " << config.skills.update_interval_hours << " 小时\n\n";
+
+    cout << "Token优化:\n";
+    cout << "  历史压缩: " << (config.optimization.enable_compression ? "开启" : "关闭") << "\n";
+    cout << "  压缩阈值: " << config.optimization.compression_threshold << " tokens\n";
+    cout << "  目标预算: " << config.optimization.target_budget << " tokens\n";
+    cout << "  提示词缓存: " << (config.optimization.enable_prompt_caching ? "开启" : "关闭") << "\n\n";
 
     // 显示API密钥状态
     cout << "API密钥状态:\n";
@@ -244,7 +280,7 @@ void listConversations(SessionManager& session_mgr) {
         cout << "  ID: " << session.id << "\n";
         cout << "  标题: " << session.title << "\n";
         cout << "  消息数: " << session.message_count << "\n";
-        cout << "  ────────────────────────────────────────────────\n";
+        cout << "  ----------------------------------------------\n";
     }
     cout << endl;
 }
@@ -276,6 +312,8 @@ void startInteractiveMode(ConfigManager& config_mgr) {
         return;
     }
 
+    const auto& config = config_mgr.getConfig();
+
     // 创建LLM提供商
     auto llmProvider = createLLMProvider(config_mgr);
     if (!llmProvider) {
@@ -284,11 +322,34 @@ void startInteractiveMode(ConfigManager& config_mgr) {
     }
 
     // 创建工具执行器
-    auto toolExecutor = std::make_shared<ToolExecutor>();
+    auto toolExecutor = std::make_unique<ToolExecutor>();
     toolExecutor->initialize();
 
     // 创建Agent
-    auto agent = std::make_shared<Agent>(std::move(llmProvider), toolExecutor);
+    auto agent = std::make_shared<Agent>(std::move(llmProvider), std::move(toolExecutor));
+
+    // 创建Token优化器
+    std::shared_ptr<TokenOptimizer> tokenOptimizer;
+    if (config.optimization.enable_compression) {
+        tokenOptimizer = std::make_shared<TokenOptimizer>();
+        agent->setTokenOptimizer(tokenOptimizer);
+        agent->enableTokenOptimization(true);
+        LOG_INFO("Token优化已启用");
+    }
+
+    // 创建Token预算管理
+    auto tokenBudget = std::make_shared<TokenBudget>();
+    tokenBudget->setBudget(config.optimization.target_budget);
+    if (tokenOptimizer) {
+        tokenBudget->setOptimizer(tokenOptimizer);
+    }
+    agent->setTokenBudget(tokenBudget);
+
+    // 创建技能注册表并加载技能
+    auto skillRegistry = std::make_shared<SkillRegistry>();
+    skillRegistry->loadSkillsFromDirectory("skills/builtin");
+    skillRegistry->loadSkillsFromDirectory(config.skills.local_skills_dir);
+    LOG_INFO("已加载 " + std::to_string(skillRegistry->getAllSkills().size()) + " 个技能");
 
     // 创建会话管理器
     auto sessionManager = std::make_shared<SessionManager>();
@@ -386,6 +447,29 @@ int main(int argc, char* argv[]) {
                 cout << "对话管理功能开发中...\n";
             }
             return 0;
+        }
+
+        case Command::SKILL: {
+            auto skillRegistry = std::make_shared<SkillRegistry>();
+            SkillCommands skillCmd(skillRegistry, config_mgr);
+            skillCmd.reloadSkills();
+
+            if (options.skill_action == "list" || options.skill_action.empty()) {
+                return skillCmd.listSkills();
+            } else if (options.skill_action == "show") {
+                return skillCmd.showSkill(options.argument);
+            } else if (options.skill_action == "install") {
+                return skillCmd.installSkill(options.argument);
+            } else if (options.skill_action == "uninstall") {
+                return skillCmd.uninstallSkill(options.argument);
+            } else if (options.skill_action == "create") {
+                return skillCmd.createSkill(options.argument);
+            } else if (options.skill_action == "reload") {
+                return skillCmd.reloadSkills();
+            } else {
+                cout << "未知技能命令: " << options.skill_action << "\n";
+                return 1;
+            }
         }
 
         case Command::CHAT:

@@ -51,6 +51,40 @@ struct ToolsConfig {
     int max_read_size;
 };
 
+// 技能仓库配置
+struct SkillRepositoryConfig {
+    std::string name;
+    std::string url;
+    bool enabled;
+};
+
+// 技能设置
+struct SkillsConfig {
+    std::string local_skills_dir;
+    std::vector<SkillRepositoryConfig> repositories;
+    bool auto_update;
+    int update_interval_hours;
+};
+
+// Token优化设置
+struct OptimizationConfig {
+    bool enable_compression;
+    int compression_threshold;
+    int target_budget;
+    bool enable_prompt_caching;
+    bool compress_tool_results;
+    int max_tool_result_length;
+    bool show_token_stats;
+    int stats_update_interval;
+};
+
+// 缓存设置
+struct CacheConfig {
+    std::string skills_cache_dir;
+    int skill_cache_ttl;
+    int prompt_cache_size;
+};
+
 // 配置类
 class Config {
 public:
@@ -60,6 +94,9 @@ public:
     std::map<ProviderType, ProviderInfo> providers;
     BehaviorConfig behavior;
     ToolsConfig tools;
+    SkillsConfig skills;
+    OptimizationConfig optimization;
+    CacheConfig cache;
 
     // 获取当前提供商信息
     ProviderInfo* getCurrentProvider();
@@ -107,6 +144,11 @@ public:
     void setProvider(ProviderType provider);
     void setModel(const std::string& model);
     void setApiKey(ProviderType provider, const std::string& key);
+
+    // 获取通用配置值（用于扩展配置）
+    std::string get(const std::string& key, const std::string& defaultVal = "") const;
+    int getInt(const std::string& key, int defaultVal = 0) const;
+    bool getBool(const std::string& key, bool defaultVal = false) const;
 
     // 提供商类型转换
     static std::string providerToString(ProviderType type);
