@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# RoboPartner Installation Script
+# Supports: macOS, Linux
+
+set -e
+
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.robopartner}"
+BIN_DIR="$HOME/bin"
+REPO_URL="https://github.com/xxx/RoboClaw.git"
+
+detect_platform() {
+    case "$(uname -s)" in
+        Darwin) echo "macOS"; return 0 ;;
+        Linux)  echo "Linux"; return 0 ;;
+        *)       echo "Unsupported"; return 1 ;;
+    esac
+}
+
+PLATFORM=$(detect_platform)
+echo ">>> 检测到系统: $PLATFORM"
+
+check_dependencies() {
+    local missing=()
+
+    command -v cmake >/dev/null 2>&1 || missing+=("cmake")
+    command -v g++ >/dev/null 2>&1 || missing+=("g++")
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo ">>> 缺少依赖: ${missing[*]}"
+        if [ "$PLATFORM" = "macOS" ]; then
+            echo "安装命令: brew install ${missing[*]}"
+        else
+            echo "安装命令: sudo apt-get install ${missing[*]}"
+        fi
+        return 1
+    fi
+}
+
+build_robopartner() {
+    # Check if we're already in a git repository
+    if [ -d .git ] || git rev-parse --git-dir >/dev/null 2>&1; then
+        echo ">>> 检测到本地仓库，直接使用..."
+        SOURCE_DIR="$(pwd)"
+    else
+        TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+
+        echo ">>> 正在下载源码..."
+        if [ "$REPO_URL" = "https://github.com/xxx/RoboClaw.git" ]; then
+            echo ">>> 警告: REPO_URL 未设置，请手动指定或从本地目录运行"
+            echo ">>> 使用: REPO_URL=<your-repo-url> ./install"
+            exit 1
+        fi
+
+        git clone "$REPO_URL" .
+        SOURCE_DIR="$(pwd)"
+    fi
+
+    cd "$SOURCE_DIR"
+
+    echo ">>> 正在编译..."
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    make -j$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 2)
+
+    echo ">>> 正在安装..."
+    mkdir -p "$INSTALL_DIR"
+
+    # Find and copy the robopartner executable
+    if [ -f robopartner ]; then
+        cp robopartner "$INSTALL_DIR/"
+    elif [ -f src/robopartner ]; then
+        cp src/robopartner "$INSTALL_DIR/"
+    elif [ -f build/robopartner ]; then
+        cp build/robopartner "$INSTALL_DIR/"
+    else
+        echo ">>> 警告: 无法找到 robopartner 可执行文件"
+        echo ">>> 请手动编译并安装"
+        return 1
+    fi
+
+    chmod +x "$INSTALL_DIR/robopartner"
+
+    # Create symlink
+    mkdir -p "$BIN_DIR"
+    ln -sf "$INSTALL_DIR/robopartner" "$BIN_DIR/robopartner"
+
+    # Clean up temp directory if we created one
+    if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
+        cd -
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+main() {
+    echo "=========================================="
+    echo "   RoboPartner 安装程序"
+    echo "=========================================="
+    echo ""
+
+    check_dependencies
+    build_robopartner
+
+    echo ""
+    echo ">>> 安装完成！"
+    echo ""
+    echo "运行: robopartner"
+    echo ""
+
+    # Setup PATH
+    if ! echo "$PATH" | grep -q "$BIN_DIR"; then
+        echo "添加到 ~/.zshrc 或 ~/.bashrc:"
+        echo "  export PATH=\"$BIN_DIR:\$PATH\""
+    fi
+}
+
+main "$@"
