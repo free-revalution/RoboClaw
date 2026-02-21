@@ -8,11 +8,12 @@
 $ErrorActionPreference = "Stop"
 
 # Script parameters
+[CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [string]$InstallDir = "$env:USERPROFILE\.robopartner",
-    [string]$RepoUrl = "https://github.com/xxx/RoboClaw.git",
-    [switch]$SkipPathCheck = $false,
-    [switch]$WhatIf = $false
+    [string]$RepoUrl = "",
+    [string]$CommitHash = "",
+    [switch]$SkipPathCheck = $false
 )
 
 # Color output functions
@@ -34,6 +35,76 @@ function Write-Warning {
 function Write-Error {
     param([string]$Message)
     Write-Host ">>> $Message" -ForegroundColor Red
+}
+
+# Validate Git repository URL for security
+function Test-GitUrl {
+    param([string]$Url)
+
+    if ([string]::IsNullOrWhiteSpace($Url)) {
+        return $false
+    }
+
+    # Check if URL starts with https:// or git://
+    if (-not ($Url -match '^https://|^git://')) {
+        Write-Error "Invalid repository URL: must start with https:// or git://"
+        return $false
+    }
+
+    # Check if URL ends with .git
+    if (-not ($Url -match '\.git$')) {
+        Write-Error "Invalid repository URL: must end with .git"
+        return $false
+    }
+
+    # Check for suspicious characters that could lead to command injection
+    if ($Url -match '[;&|`$]') {
+        Write-Error "Invalid repository URL: contains suspicious characters"
+        return $false
+    }
+
+    return $true
+}
+
+# Validate installation directory path for security
+function Test-InstallDir {
+    param([string]$Path)
+
+    try {
+        # Resolve the path to get absolute path
+        $resolvedPath = Resolve-Path $Path -ErrorAction SilentlyContinue
+
+        if (-not $resolvedPath) {
+            # Path doesn't exist yet, check parent directory
+            $parentDir = Split-Path $Path -Parent
+            if ($parentDir) {
+                $resolvedParent = Resolve-Path $parentDir -ErrorAction SilentlyContinue
+                if (-not $resolvedParent) {
+                    Write-Error "Parent directory does not exist: $parentDir"
+                    return $false
+                }
+            } else {
+                Write-Error "Invalid install directory path"
+                return $false
+            }
+        }
+
+        # Warn if installing outside user profile
+        $userProfile = Resolve-Path $env:USERPROFILE
+        if ($resolvedPath -and $resolvedPath.Path -notlike "$userProfile*") {
+            Write-Warning "Installing outside user profile directory: $resolvedPath"
+            Write-Warning "This may require administrator privileges"
+            $response = Read-Host "Continue? (y/N)"
+            if ($response -ne 'y' -and $response -ne 'Y') {
+                return $false
+            }
+        }
+
+        return $true
+    } catch {
+        Write-Error "Failed to validate install directory: $_"
+        return $false
+    }
 }
 
 # Detect Windows version
@@ -155,12 +226,17 @@ function Get-SourceDirectory {
     }
 
     # Download from repository
-    if ($RepoUrl -eq "https://github.com/xxx/RoboClaw.git") {
+    if ([string]::IsNullOrWhiteSpace($RepoUrl)) {
         Write-Warning "REPO_URL 未设置，请手动指定或从本地目录运行"
         Write-Warning "REPO_URL not set, please specify manually or run from local directory"
         Write-Info "使用方法: .\install.ps1 -RepoUrl <your-repo-url>"
         Write-Info "Usage: .\install.ps1 -RepoUrl <your-repo-url>"
         throw "REPO_URL not configured"
+    }
+
+    # Validate repository URL for security
+    if (-not (Test-GitUrl -Url $RepoUrl)) {
+        throw "Invalid repository URL"
     }
 
     $tempDir = Join-Path $env:TEMP "robopartner-build"
@@ -175,12 +251,36 @@ function Get-SourceDirectory {
         Write-Info "Repository: $RepoUrl"
 
         Push-Location $tempDir
-        git clone $RepoUrl . 2>$null
+        git clone $RepoUrl robopartner 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            throw "git clone failed"
+        }
+        Set-Location robopartner
+
+        # Verify commit hash if provided
+        if ($CommitHash) {
+            Write-Info "验证提交哈希: $CommitHash / Verifying commit hash..."
+            $currentHash = git rev-parse HEAD 2>$null
+            if ($currentHash -ne $CommitHash) {
+                Write-Warning "当前提交哈希: $currentHash"
+                Write-Warning "Expected commit hash: $CommitHash"
+                Write-Warning "提交哈希不匹配，尝试切换..."
+                Write-Warning "Commit hash mismatch, attempting to checkout..."
+
+                git checkout $CommitHash 2>$null
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to verify commit hash"
+                }
+            }
+            Write-Success "提交哈希验证通过 / Commit hash verified"
+        }
+
         Pop-Location
 
         Write-Success "源码下载完成 / Source code downloaded"
-        return $tempDir
+        return Join-Path $tempDir "robopartner"
     } catch {
+        Pop-Location -ErrorAction SilentlyContinue
         Write-Error "无法下载源码: $_"
         Write-Error "Failed to download source code: $_"
         throw
@@ -356,49 +456,61 @@ function Start-Installation {
         return $false
     }
 
-    $sourceDir = $null
-    $exePath = $null
-
-    try {
-        $sourceDir = Get-SourceDirectory
-        $exePath = Build-RoboPartner -SourceDir $sourceDir
-        $installedPath = Install-RoboPartner -ExecutablePath $exePath
-
-        Write-Info ""
-        Write-Success "安装成功！/ Installation successful!"
-        Write-Info ""
-        Write-Info "可执行文件位置: $installedPath"
-        Write-Info "Executable location: $installedPath"
-        Write-Info ""
-
-        if (-not $SkipPathCheck) {
-            Setup-Path
-        }
-
-        Write-Info ""
-        Write-Info "运行命令: robopartner"
-        Write-Info "Run command: robopartner"
-        Write-Info ""
-
-        return $true
-
-    } catch {
-        Write-Error ""
-        Write-Error "安装失败: $_"
-        Write-Error "Installation failed: $_"
-        Write-Error ""
+    # Validate install directory for security
+    if (-not (Test-InstallDir -Path $InstallDir)) {
+        Write-Error "安装目录验证失败 / Install directory validation failed"
         return $false
+    }
 
-    } finally {
-        # Clean up temp directory if we created it
-        if ($sourceDir -and ($sourceDir -like "*\Temp\robopartner-build*")) {
-            try {
-                Write-Info "清理临时文件... / Cleaning up temporary files..."
-                Remove-Item -Recurse -Force $sourceDir -ErrorAction SilentlyContinue
-            } catch {
-                Write-Warning "清理临时文件失败 / Failed to clean up temporary files"
+    # WhatIf mode support
+    if ($PSCmdlet.ShouldProcess($InstallDir, "Install RoboPartner")) {
+        $sourceDir = $null
+        $exePath = $null
+
+        try {
+            $sourceDir = Get-SourceDirectory
+            $exePath = Build-RoboPartner -SourceDir $sourceDir
+            $installedPath = Install-RoboPartner -ExecutablePath $exePath
+
+            Write-Info ""
+            Write-Success "安装成功！/ Installation successful!"
+            Write-Info ""
+            Write-Info "可执行文件位置: $installedPath"
+            Write-Info "Executable location: $installedPath"
+            Write-Info ""
+
+            if (-not $SkipPathCheck) {
+                Setup-Path
+            }
+
+            Write-Info ""
+            Write-Info "运行命令: robopartner"
+            Write-Info "Run command: robopartner"
+            Write-Info ""
+
+            return $true
+
+        } catch {
+            Write-Error ""
+            Write-Error "安装失败: $_"
+            Write-Error "Installation failed: $_"
+            Write-Error ""
+            return $false
+
+        } finally {
+            # Clean up temp directory if we created it
+            if ($sourceDir -and ($sourceDir -like "*\Temp\robopartner-build*")) {
+                try {
+                    Write-Info "清理临时文件... / Cleaning up temporary files..."
+                    Remove-Item -Recurse -Force $sourceDir -ErrorAction SilentlyContinue
+                } catch {
+                    Write-Warning "清理临时文件失败 / Failed to clean up temporary files"
+                }
             }
         }
+    } else {
+        Write-Info "WhatIf 模式：跳过实际安装 / WhatIf mode: Skipping actual installation"
+        return $true
     }
 }
 
