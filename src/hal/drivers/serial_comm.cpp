@@ -10,7 +10,11 @@ namespace roboclaw::hal::drivers {
 SerialComm::SerialComm() : fd_(-1), baudrate_(115200), open_(false) {}
 
 SerialComm::~SerialComm() {
-    close();
+    try {
+        close();
+    } catch (...) {
+        // Destructor should not throw exceptions
+    }
 }
 
 bool SerialComm::open(const std::string& port, int baudrate) {
@@ -101,6 +105,14 @@ std::vector<uint8_t> SerialComm::read(int timeout_ms) {
     if (!open_) {
         throw CommException(port_, "Port not open");
     }
+
+    // Set timeout based on timeout_ms parameter
+    // VTIME is in tenths of seconds (0-255), so divide by 100
+    struct termios options;
+    tcgetattr(fd_, &options);
+    options.c_cc[VTIME] = static_cast<cc_t>(std::max(0, std::min(255, timeout_ms / 100)));
+    options.c_cc[VMIN] = 0;
+    tcsetattr(fd_, TCSANOW, &options);
 
     std::vector<uint8_t> buffer(256);
     ssize_t bytes = ::read(fd_, buffer.data(), buffer.size());
