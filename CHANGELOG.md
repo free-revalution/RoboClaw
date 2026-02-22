@@ -108,6 +108,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2025-02-22
+
+### Added - 嵌入式机器人平台 / Embedded Robotics Platform
+
+#### Hardware Abstraction Layer (HAL) / 硬件抽象层
+- **IMotorController interface** / 电机控制器接口：支持 RoboClaw、Sabertooth、L298N、PWM drivers
+- **ISensor interface** / 传感器接口：支持 IMU (MPU6050)、LiDAR (RPLIDAR)、超声波 (HC-SR04)、编码器
+- **IComm interface** / 通信接口：支持 Serial、I2C、SPI、CAN bus
+- **SerialComm driver** / 串口驱动：跨平台串口通信实现（Linux/macOS termios、Windows Win32 API）
+- **Hardware exception hierarchy** / 硬件异常层次：HardwareException、CommException、SensorException、MotorException
+
+#### Robot Control Skills / 机器人控制技能
+- **MotionSkill** / 运动控制技能：差速驱动机器人运动控制
+  - `forward(speed, duration)` - 前进 / Move forward
+  - `backward(speed, duration)` - 后退 / Move backward
+  - `turn(angle, speed)` - 转向 / Turn by angle
+  - `stop()` - 紧急停止 / Emergency stop
+- **SensorSkill** / 传感器技能：多传感器管理和读取
+  - `registerSensor(name, sensor)` - 注册传感器 / Register sensor
+  - `readSensor(name)` - 读取指定传感器 / Read specific sensor
+  - `readAll()` - 读取所有传感器 / Read all sensors
+  - `isAvailable(name)` - 检查传感器可用性 / Check sensor availability
+
+#### Hardware Configuration / 硬件配置
+- **HardwareConfig manager** / 硬件配置管理器：从 JSON 文件加载硬件配置
+- **Configuration format** / 配置格式：JSON 格式硬件配置文件
+- **Example configuration** / 示例配置：`configs/hardware.json.example`
+
+#### CLI Enhancements / CLI 增强
+- `robopartner hardware list` - 列出所有已配置硬件 / List all configured hardware
+- `robopartner hardware test` - 测试硬件连接 / Test hardware connections
+
+#### Documentation / 文档
+- **Embedded quickstart guide** / 嵌入式快速入门指南：`docs/embedded-quickstart.md`
+- **Hardware configuration example** / 硬件配置示例：`configs/hardware.json.example`
+- **Updated README** / 更新的 README：添加嵌入式平台概述
+
+### Technical Improvements / 技术改进
+- **Cross-platform serial communication** / 跨平台串口通信：使用原生 API 实现，无第三方依赖
+- **Hardware abstraction design** / 硬件抽象设计：三层架构（Core、HAL、Application）
+- **Exception handling** / 异常处理：专门的硬件异常类型
+- **Unit test coverage** / 单元测试覆盖：所有 HAL 接口和技能都有测试
+
+### Dependencies / 依赖变更
+- **No new external dependencies** / 无新增外部依赖
+- Uses existing `json/json.h` for configuration / 使用现有的 json/json.h 进行配置
+
+### Architecture / 架构
+```
+Application Layer    → Robot Control Skills, Embedded Dev Skills, ROS Bridge
+Hardware Abstraction → Motor Controllers, Sensors, Communication, Config
+Core Layer           → AI Engine, Task Parser, Code Generator, Session
+```
+
+---
+
 ## [Unreleased]
 
 ### Added / 新增
