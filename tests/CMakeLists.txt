@@ -50,6 +50,7 @@ set(TEST_SOURCES
     unit/test_social_message.cpp
     unit/test_task_coordinator.cpp
     unit/test_agent_bridge.cpp
+    unit/test_claude_code_bridge.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
 )
@@ -74,6 +75,7 @@ set(MAIN_SOURCES
     ../src/skills/robot/sensor_skill.cpp
     ../src/cli/link_command.cpp
     ../src/social/telegram_adapter.cpp
+    ../src/agent/claude_code_bridge.cpp
 )
 
 # 链接CPR（如果需要）
