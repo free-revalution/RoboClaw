@@ -54,6 +54,7 @@ set(TEST_SOURCES
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
     integration/test_social_manager.cpp
+    e2e/test_social_link_flow.cpp
 )
 
 # 主项目源文件（用于链接）
