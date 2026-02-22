@@ -70,6 +70,7 @@ set(SOURCES
     src/skills/skill_registry.cpp
     src/skills/skill_executor.cpp
     src/skills/skill_downloader.cpp
+    src/skills/robot/motion_skill.cpp
 
     # 工具类
     src/utils/logger.cpp
