@@ -133,6 +133,46 @@ ID: cursor_app
 
 ## Installation / 安装部署
 
+### Quick Install / 快速安装
+
+**Unix (macOS/Linux) / Unix 系统（macOS/Linux）**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/yourusername/RoboClaw/main/install | bash
+```
+
+Or manually:
+```bash
+git clone https://github.com/yourusername/RoboClaw.git
+cd RoboClaw
+./install
+```
+
+**Windows / Windows 系统**
+
+```powershell
+# Download and run the installer
+irm https://raw.githubusercontent.com/yourusername/RoboClaw/main/install.ps1 | iex
+```
+
+Or manually:
+```powershell
+git clone https://github.com/yourusername/RoboClaw.git
+cd RoboClaw
+.\install.ps1
+```
+
+The installer will:
+- 检测并安装依赖 / Detect and install dependencies
+- 自动配置构建系统 / Automatically configure build system
+- 编译并安装到 ~/.robopartner / Compile and install to ~/.robopartner
+- 创建命令行快捷方式 / Create command-line shortcut
+
+After installation, run:
+- After install: `robopartner` or `~/bin/robopartner`
+
+---
+
 ### Prerequisites / 前置要求
 
 | Dependency | Version | macOS | Linux | Windows |
