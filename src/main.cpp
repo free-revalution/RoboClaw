@@ -9,6 +9,7 @@
 #include "cli/config_wizard.h"
 #include "cli/interactive_mode.h"
 #include "cli/skill_commands.h"
+#include "cli/link_command.h"
 #include "llm/llm_provider.h"
 #include "llm/anthropic_provider.h"
 #include "llm/openai_provider.h"
@@ -76,6 +77,7 @@ enum class Command {
     CONVERSATION,
     SKILL,      // 技能管理
     HARDWARE,   // 硬件管理
+    LINK,       // 社交平台连接
     CHAT        // 显式启动对话
 };
 
@@ -88,6 +90,7 @@ struct CLIOptions {
     string conversation_action; // conversation子命令
     string skill_action;        // skill子命令
     string hardware_action;     // hardware子命令
+    string link_action;         // link子命令
     string argument;            // 附加参数
     string new_conversation;    // 新对话标题
 };
@@ -113,6 +116,7 @@ void showHelp() {
     cout << "  config           配置管理\n";
     cout << "  skill            技能管理\n";
     cout << "  hardware         硬件管理\n";
+    cout << "  link             社交平台连接\n";
     cout << "  agent            Agent管理 (新增)\n";
     cout << "  browser          浏览器自动化 (新增)\n";
     cout << "\n选项:\n";
@@ -157,6 +161,11 @@ void showHelp() {
     cout << "硬件命令:\n";
     cout << "  robopartner hardware --list          列出所有硬件\n";
     cout << "  robopartner hardware --test          测试硬件连接\n\n";
+
+    cout << "连接命令:\n";
+    cout << "  robopartner link --list             列出可用平台\n";
+    cout << "  robopartner link --connect <platform> 连接到平台\n";
+    cout << "  robopartner link --status           显示连接状态\n\n";
 
     cout << "示例:\n";
     cout << "  robopartner              # 启动对话\n";
@@ -258,6 +267,16 @@ CLIOptions parseArguments(int argc, char* argv[]) {
                     options.hardware_action = next.substr(2);
                 } else {
                     options.hardware_action = next;
+                }
+            }
+        } else if (arg == "link") {
+            options.command = Command::LINK;
+            if (i + 1 < argc) {
+                string next = argv[++i];
+                if (next.find("--") == 0) {
+                    options.link_action = next.substr(2);
+                } else {
+                    options.link_action = next;
                 }
             }
         } else if (arg == "chat") {
@@ -695,6 +714,65 @@ int main(int argc, char* argv[]) {
 
         case Command::HARDWARE:
             return handleHardwareCommand(options.hardware_action, options.argument);
+
+        case Command::LINK: {
+            using namespace roboclaw::cli;
+            LinkCommand linkCmd;
+
+            if (options.link_action == "list" || options.link_action.empty()) {
+                auto platforms = linkCmd.getAvailablePlatforms();
+                cout << "\n可用平台:\n";
+                for (size_t i = 0; i < platforms.size(); i++) {
+                    cout << "  " << (i + 1) << ". " << platforms[i].name
+                         << " (" << platforms[i].description << ")";
+                    if (!platforms[i].enabled) {
+                        cout << " [未启用]";
+                    }
+                    cout << "\n";
+                }
+                cout << "\n使用 'robopartner link --connect <platform_id>' 连接到平台\n";
+                cout << "使用 'robopartner link --status' 查看连接状态\n\n";
+                return 0;
+            } else if (options.link_action == "status") {
+                cout << "\n" << linkCmd.getConnectionStatus() << "\n\n";
+                return 0;
+            } else if (options.link_action == "connect") {
+                string platform_id = options.argument;
+                if (platform_id.empty()) {
+                    cout << "请指定平台ID (例如: telegram)\n";
+                    cout << "使用 'robopartner link --list' 查看可用平台\n\n";
+                    return 1;
+                }
+
+                cout << "\n连接到平台: " << platform_id << "\n";
+                cout << "请输入 Bot Token: ";
+                string token;
+                cin >> token;
+
+                nlohmann::json config = {{"bot_token", token}};
+                if (linkCmd.connectToPlatform(platform_id, config)) {
+                    cout << "连接成功！\n\n";
+                    return 0;
+                } else {
+                    cout << "连接失败，请检查配置。\n\n";
+                    return 1;
+                }
+            } else if (options.link_action == "help" || options.link_action == "--help" || options.link_action == "-h") {
+                cout << "\n连接命令:\n\n";
+                cout << "  robopartner link --list             列出可用平台\n";
+                cout << "  robopartner link --connect <platform> 连接到平台\n";
+                cout << "  robopartner link --status           显示连接状态\n\n";
+                cout << "示例:\n";
+                cout << "  robopartner link --list             # 显示所有平台\n";
+                cout << "  robopartner link --connect telegram # 连接到Telegram\n";
+                cout << "  robopartner link --status           # 查看连接状态\n\n";
+                return 0;
+            } else {
+                cout << "未知连接命令: " << options.link_action << "\n";
+                cout << "使用 'robopartner link --help' 查看帮助\n\n";
+                return 1;
+            }
+        }
 
         case Command::CHAT:
         case Command::NONE:

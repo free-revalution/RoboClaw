@@ -49,6 +49,7 @@ set(TEST_SOURCES
     unit/test_hardware_config.cpp
     unit/test_social_message.cpp
     integration/test_hardware_cli.cpp
+    integration/test_link_command.cpp
 )
 
 # 主项目源文件（用于链接）
@@ -68,6 +69,8 @@ set(MAIN_SOURCES
     ../src/hal/hardware_config.cpp
     ../src/skills/robot/motion_skill.cpp
     ../src/skills/robot/sensor_skill.cpp
+    ../src/cli/link_command.cpp
+    ../src/social/telegram_adapter.cpp
 )
 
 # 链接CPR（如果需要）

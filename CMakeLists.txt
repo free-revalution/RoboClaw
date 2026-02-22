@@ -85,6 +85,7 @@ set(SOURCES
     src/cli/config_wizard.cpp
     src/cli/interactive_mode.cpp
     src/cli/skill_commands.cpp
+    src/cli/link_command.cpp
 
     # HAL模块
     src/hal/drivers/serial_comm.cpp
