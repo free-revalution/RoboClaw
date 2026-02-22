@@ -16,7 +16,7 @@ public:
     virtual bool isConnected() const = 0;
 
     // 消息接收
-    virtual std::vector<SocialMessage> receiveMessages() = 0;
+    virtual std::vector<SocialMessage> receiveMessages() const = 0;
 
     // 消息发送
     virtual bool sendMessage(const std::string& chat_id, const std::string& content) = 0;
