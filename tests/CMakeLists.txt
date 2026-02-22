@@ -47,6 +47,7 @@ set(TEST_SOURCES
     unit/test_motion_skill.cpp
     unit/test_sensor_skill.cpp
     unit/test_hardware_config.cpp
+    integration/test_hardware_cli.cpp
 )
 
 # 主项目源文件（用于链接）

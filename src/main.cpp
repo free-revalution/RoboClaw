@@ -19,6 +19,7 @@
 #include "skills/skill_executor.h"
 #include "optimization/token_optimizer.h"
 #include "optimization/token_budget.h"
+#include "hal/hardware_config.h"
 
 using namespace std;
 using namespace roboclaw;
@@ -74,6 +75,7 @@ enum class Command {
     BRANCH,
     CONVERSATION,
     SKILL,      // 技能管理
+    HARDWARE,   // 硬件管理
     CHAT        // 显式启动对话
 };
 
@@ -85,6 +87,7 @@ struct CLIOptions {
     string branch_action;       // branch子命令
     string conversation_action; // conversation子命令
     string skill_action;        // skill子命令
+    string hardware_action;     // hardware子命令
     string argument;            // 附加参数
     string new_conversation;    // 新对话标题
 };
@@ -109,6 +112,7 @@ void showHelp() {
     cout << "  conversation     对话管理\n";
     cout << "  config           配置管理\n";
     cout << "  skill            技能管理\n";
+    cout << "  hardware         硬件管理\n";
     cout << "  agent            Agent管理 (新增)\n";
     cout << "  browser          浏览器自动化 (新增)\n";
     cout << "\n选项:\n";
@@ -149,6 +153,10 @@ void showHelp() {
     cout << "  robopartner browser --navigate <url> 导航到URL\n";
     cout << "  robopartner browser --click <selector> 点击元素\n";
     cout << "  robopartner browser --type <text>     输入文本\n\n";
+
+    cout << "硬件命令:\n";
+    cout << "  robopartner hardware --list          列出所有硬件\n";
+    cout << "  robopartner hardware --test          测试硬件连接\n\n";
 
     cout << "示例:\n";
     cout << "  robopartner              # 启动对话\n";
@@ -242,6 +250,16 @@ CLIOptions parseArguments(int argc, char* argv[]) {
                     options.skill_action = next;
                 }
             }
+        } else if (arg == "hardware") {
+            options.command = Command::HARDWARE;
+            if (i + 1 < argc) {
+                string next = argv[++i];
+                if (next.find("--") == 0) {
+                    options.hardware_action = next.substr(2);
+                } else {
+                    options.hardware_action = next;
+                }
+            }
         } else if (arg == "chat") {
             options.command = Command::CHAT;
         }
@@ -315,6 +333,145 @@ void editConfig() {
     #elif defined(PLATFORM_WINDOWS)
     cout << "Windows 命令: notepad " << configPath << "\n";
     #endif
+}
+
+// 显示硬件帮助信息
+void showHardwareHelp() {
+    cout << "\n硬件命令:\n\n";
+    cout << "  robopartner hardware --list          列出所有已配置的硬件\n";
+    cout << "  robopartner hardware --test          测试硬件连接状态\n";
+    cout << "\n示例:\n";
+    cout << "  robopartner hardware --list          # 显示所有硬件\n";
+    cout << "  robopartner hardware --test          # 测试硬件连接\n\n";
+}
+
+// 处理硬件命令
+int handleHardwareCommand(const std::string& action, const std::string& argument) {
+    using namespace roboclaw::hal;
+
+    // 查找硬件配置文件
+    std::string configPath = "config/hardware.json";
+
+    // 尝试多个可能的配置文件位置
+    if (!std::filesystem::exists(configPath)) {
+        if (std::filesystem::exists("../config/hardware.json")) {
+            configPath = "../config/hardware.json";
+        } else if (std::filesystem::exists("/usr/local/etc/robopartner/hardware.json")) {
+            configPath = "/usr/local/etc/robopartner/hardware.json";
+        }
+    }
+
+    HardwareConfig hwConfig;
+
+    if (action == "list" || action.empty()) {
+        // 列出所有硬件
+        cout << "\n==================================================\n";
+        cout << "  硬件配置列表\n";
+        cout << "==================================================\n\n";
+
+        if (std::filesystem::exists(configPath)) {
+            if (!hwConfig.loadFromFile(configPath)) {
+                cout << "错误: 无法加载硬件配置文件: " << configPath << "\n\n";
+                return 1;
+            }
+
+            // 显示电机配置
+            auto motorNames = hwConfig.getMotorNames();
+            if (!motorNames.empty()) {
+                cout << "电机 (" << motorNames.size() << "):\n";
+                for (const auto& name : motorNames) {
+                    auto motorConfig = hwConfig.getMotorConfig(name);
+                    string type = motorConfig.value("type", "unknown");
+                    cout << "  - " << name << " (" << type << ")\n";
+                }
+                cout << "\n";
+            } else {
+                cout << "电机: 未配置\n\n";
+            }
+
+            // 显示传感器配置
+            auto sensorNames = hwConfig.getSensorNames();
+            if (!sensorNames.empty()) {
+                cout << "传感器 (" << sensorNames.size() << "):\n";
+                for (const auto& name : sensorNames) {
+                    auto sensorConfig = hwConfig.getSensorConfig(name);
+                    string type = sensorConfig.value("type", "unknown");
+                    cout << "  - " << name << " (" << type << ")\n";
+                }
+                cout << "\n";
+            } else {
+                cout << "传感器: 未配置\n\n";
+            }
+
+            cout << "配置文件: " << configPath << "\n\n";
+        } else {
+            cout << "未找到硬件配置文件。\n\n";
+            cout << "预期位置:\n";
+            cout << "  - " << "config/hardware.json\n";
+            cout << "  - " << "/usr/local/etc/robopartner/hardware.json\n\n";
+            cout << "请创建硬件配置文件以继续。\n\n";
+            return 1;
+        }
+
+    } else if (action == "test") {
+        // 测试硬件连接
+        cout << "\n==================================================\n";
+        cout << "  硬件连接测试\n";
+        cout << "==================================================\n\n";
+
+        if (!std::filesystem::exists(configPath)) {
+            cout << "错误: 未找到硬件配置文件: " << configPath << "\n\n";
+            cout << "请先创建硬件配置文件。\n\n";
+            return 1;
+        }
+
+        if (!hwConfig.loadFromFile(configPath)) {
+            cout << "错误: 无法加载硬件配置文件\n\n";
+            return 1;
+        }
+
+        cout << "硬件配置文件加载成功\n\n";
+
+        // 测试电机
+        auto motorNames = hwConfig.getMotorNames();
+        if (!motorNames.empty()) {
+            cout << "电机配置验证:\n";
+            for (const auto& name : motorNames) {
+                if (hwConfig.hasMotor(name)) {
+                    auto motorConfig = hwConfig.getMotorConfig(name);
+                    string type = motorConfig.value("type", "unknown");
+                    cout << "  [OK] " << name << " (" << type << ")\n";
+                }
+            }
+            cout << "\n";
+        }
+
+        // 测试传感器
+        auto sensorNames = hwConfig.getSensorNames();
+        if (!sensorNames.empty()) {
+            cout << "传感器配置验证:\n";
+            for (const auto& name : sensorNames) {
+                if (hwConfig.hasSensor(name)) {
+                    auto sensorConfig = hwConfig.getSensorConfig(name);
+                    string type = sensorConfig.value("type", "unknown");
+                    cout << "  [OK] " << name << " (" << type << ")\n";
+                }
+            }
+            cout << "\n";
+        }
+
+        cout << "注意: 配置文件验证通过。\n";
+        cout << "实际硬件连接测试需要相应的硬件抽象层实现。\n\n";
+
+    } else if (action == "help" || action == "--help" || action == "-h") {
+        showHardwareHelp();
+    } else {
+        cout << "未知硬件命令: " << action << "\n";
+        showHardwareHelp();
+        return 1;
+    }
+
+    return 0;
 }
 
 // 列出对话
@@ -535,6 +692,9 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
         }
+
+        case Command::HARDWARE:
+            return handleHardwareCommand(options.hardware_action, options.argument);
 
         case Command::CHAT:
         case Command::NONE:
