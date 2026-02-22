@@ -45,6 +45,7 @@ set(TEST_SOURCES
     unit/test_hal_exception.cpp
     unit/test_serial_comm.cpp
     unit/test_motion_skill.cpp
+    unit/test_sensor_skill.cpp
 )
 
 # 主项目源文件（用于链接）
@@ -62,6 +63,7 @@ set(MAIN_SOURCES
     ../src/agent/prompt_builder.cpp
     ../src/hal/drivers/serial_comm.cpp
     ../src/skills/robot/motion_skill.cpp
+    ../src/skills/robot/sensor_skill.cpp
 )
 
 # 链接CPR（如果需要）
