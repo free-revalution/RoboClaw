@@ -1,4 +1,5 @@
 #include "telegram_adapter.h"
+#include "utils/logger.h"
 #include <stdexcept>
 #include <regex>
 
@@ -29,7 +30,11 @@ bool TelegramAdapter::connect(const nlohmann::json& config) {
             connected_ = true;
             return true;
         }
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram operation failed: " + std::string(e.what()));
+        return false;
     } catch (...) {
+        LOG_ERROR("Telegram operation failed: unknown error");
         return false;
     }
 
@@ -81,8 +86,10 @@ std::vector<SocialMessage> TelegramAdapter::receiveMessages() const {
                 }
             }
         }
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram receiveMessages failed: " + std::string(e.what()));
     } catch (...) {
-        // 连接错误，返回空消息列表
+        LOG_ERROR("Telegram receiveMessages failed: unknown error");
     }
 
     return messages;
@@ -102,7 +109,11 @@ bool TelegramAdapter::sendMessage(const std::string& chat_id, const std::string&
 
         nlohmann::json response = httpPost(url, payload);
         return response.contains("ok") && response["ok"];
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram sendMessage failed: " + std::string(e.what()));
+        return false;
     } catch (...) {
+        LOG_ERROR("Telegram sendMessage failed: unknown error");
         return false;
     }
 }
@@ -118,7 +129,11 @@ bool TelegramAdapter::sendFile(const std::string& chat_id, const std::string& fi
         std::string url = buildApiUrl("sendDocument");
         // Placeholder implementation
         return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram sendFile failed: " + std::string(e.what()));
+        return false;
     } catch (...) {
+        LOG_ERROR("Telegram sendFile failed: unknown error");
         return false;
     }
 }

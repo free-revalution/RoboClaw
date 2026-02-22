@@ -13,6 +13,12 @@ public:
     TelegramAdapter();
     ~TelegramAdapter() override;
 
+    // Disable copy, enable move
+    TelegramAdapter(const TelegramAdapter&) = delete;
+    TelegramAdapter& operator=(const TelegramAdapter&) = delete;
+    TelegramAdapter(TelegramAdapter&&) noexcept = default;
+    TelegramAdapter& operator=(TelegramAdapter&&) noexcept = default;
+
     // ISocialAdapter 实现
     bool connect(const nlohmann::json& config) override;
     void disconnect() override;
