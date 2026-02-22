@@ -48,6 +48,7 @@ set(SOURCES
     # Agent模块
     src/agent/tool_executor.cpp
     src/agent/prompt_builder.cpp
+    src/agent/task_coordinator.cpp
     src/agent/agent.cpp
 
     # LLM模块

@@ -48,6 +48,7 @@ set(TEST_SOURCES
     unit/test_sensor_skill.cpp
     unit/test_hardware_config.cpp
     unit/test_social_message.cpp
+    unit/test_task_coordinator.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
 )
@@ -65,6 +66,7 @@ set(MAIN_SOURCES
     ../src/utils/thread_pool.cpp
     ../src/agent/tool_executor.cpp
     ../src/agent/prompt_builder.cpp
+    ../src/agent/task_coordinator.cpp
     ../src/hal/drivers/serial_comm.cpp
     ../src/hal/hardware_config.cpp
     ../src/skills/robot/motion_skill.cpp

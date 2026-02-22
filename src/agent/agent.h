@@ -7,6 +7,7 @@
 #include "../llm/llm_provider.h"
 #include "tool_executor.h"
 #include "prompt_builder.h"
+#include "task_coordinator.h"
 #include "../optimization/token_optimizer.h"
 #include "../optimization/token_budget.h"
 #include "../utils/thread_pool.h"
@@ -122,6 +123,16 @@ public:
         thread_pool_ = pool;
     }
 
+    // 设置任务协调器
+    void setTaskCoordinator(std::shared_ptr<agent::TaskCoordinator> coordinator) {
+        task_coordinator_ = coordinator;
+    }
+
+    // 获取任务协调器
+    std::shared_ptr<agent::TaskCoordinator> getTaskCoordinator() const {
+        return task_coordinator_;
+    }
+
 private:
     // 执行一轮对话
     AgentResponse performOneRound(const std::vector<ChatMessage>& messages);
@@ -154,6 +165,9 @@ private:
 
     // 线程池
     std::shared_ptr<ThreadPool> thread_pool_;
+
+    // 任务协调器
+    std::shared_ptr<agent::TaskCoordinator> task_coordinator_;
 
     // 对话历史
     std::vector<ChatMessage> history_;

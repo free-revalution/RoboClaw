@@ -9,6 +9,7 @@
 #include <mutex>
 #include <future>
 #include <utility>
+#include "task_coordinator.h"
 
 namespace roboclaw {
 
@@ -16,6 +17,7 @@ Agent::Agent(std::unique_ptr<LLMProvider> llmProvider,
              std::unique_ptr<ToolExecutor> toolExecutor)
     : llm_provider_(std::move(llmProvider))
     , tool_executor_(std::move(toolExecutor))
+    , task_coordinator_(std::make_shared<agent::TaskCoordinator>())
     , token_optimization_enabled_(false) {
 }
 
