@@ -2,6 +2,8 @@
 
 #include "interactive_mode.h"
 #include "../utils/logger.h"
+#include "../utils/terminal.h"  // NEW
+#include "../storage/config_manager.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -44,8 +46,8 @@ void InteractiveMode::run() {
         }
 
         // 处理命令
-        if (input[0] == '/' || input[0] == '.') {
-            if (!handleCommand(input)) {
+        if (input[0] == '/') {
+            if (!handleSlashCommand(input)) {
                 break;
             }
             continue;
@@ -76,41 +78,144 @@ bool InteractiveMode::processMessage(const std::string& message) {
 }
 
 void InteractiveMode::displayResponse(const AgentResponse& response) {
+    using namespace Color;
+
     if (!response.success) {
-        std::cout << "\033[31m";  // 红色
-        std::cout << "错误: " << response.error;
-        std::cout << "\033[0m" << std::endl;
+        std::cout << RED << "Error: " << response.error << RESET << std::endl;
         return;
     }
 
-    // 显示内容
     if (!response.content.empty()) {
-        std::cout << response.content << std::endl;
+        std::cout << WHITE << response.content << RESET << std::endl;
     }
 
-    // 显示工具调用
     if (config_.show_tool_calls && !response.tool_calls.empty()) {
-        std::cout << "\n\033[36m";  // 青色
-        std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
-        std::cout << "\033[0m" << std::endl;
+        std::cout << GRAY;
+        UI::drawSeparator("single");
+        std::cout << RESET;
 
         for (const auto& call : response.tool_calls) {
-            std::cout << "\033[33m[Tool: " << call.name << "]\033[0m ";
-            std::cout << call.arguments.dump() << std::endl;
+            std::cout << YELLOW << "[Tool: " << call.name << "]" << RESET << " ";
+            std::cout << GRAY << call.arguments.dump() << RESET << std::endl;
         }
 
-        std::cout << "\033[36m";
-        std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
-        std::cout << "\033[0m\n" << std::endl;
+        std::cout << GRAY;
+        UI::drawSeparator("single");
+        std::cout << RESET << std::endl;
     }
 
-    // 显示token使用
     if (response.total_input_tokens > 0 || response.total_output_tokens > 0) {
-        std::cout << "\033[90m";  // 灰色
-        std::cout << "Tokens: " << response.total_input_tokens
-                  << " input, " << response.total_output_tokens << " output";
-        std::cout << "\033[0m" << std::endl;
+        std::cout << GRAY << "Tokens: " << response.total_input_tokens
+                  << " input, " << response.total_output_tokens << " output"
+                  << RESET << std::endl;
     }
+}
+
+void InteractiveMode::displayToolCall(const ChatMessage::ToolCall& call, const ToolResult& result) {
+    using namespace Color;
+
+    std::cout << YELLOW << "[Tool: " << call.name << "]" << RESET << " ";
+    std::cout << GRAY << call.arguments.dump() << RESET << std::endl;
+
+    if (result.success) {
+        std::cout << GREEN << "Result: " << result.content << RESET << std::endl;
+    } else {
+        std::cout << RED << "Error: " << result.error_message << RESET << std::endl;
+    }
+}
+
+bool InteractiveMode::handleSlashCommand(const std::string& command) {
+    std::istringstream iss(command);
+    std::string cmd;
+    iss >> cmd;
+
+    // Remove leading /
+    if (!cmd.empty() && cmd[0] == '/') {
+        cmd = cmd.substr(1);
+    }
+
+    std::string args;
+    if (iss) {
+        std::getline(iss, args);
+    }
+
+    // Trim leading whitespace
+    if (!args.empty() && args[0] == ' ') {
+        args = args.substr(1);
+    }
+
+    if (cmd == "exit" || cmd == "quit") {
+        setExitFlag(true);
+        return false;
+    }
+
+    if (cmd == "help") return cmdHelp();
+    if (cmd == "config") return cmdConfig();
+    if (cmd == "clear") return cmdClear();
+    if (cmd == "agent") return cmdAgent(args);
+    if (cmd == "browser") return cmdBrowser(args);
+
+    std::cout << Color::RED << "Unknown command: " << cmd << Color::RESET << std::endl;
+    std::cout << "Type /help for available commands" << std::endl;
+    return true;
+}
+
+bool InteractiveMode::cmdHelp() {
+    showHelp();
+    return true;
+}
+
+bool InteractiveMode::cmdConfig() {
+    std::string configPath = ConfigManager::getConfigPath();
+    using namespace Color;
+
+    std::cout << CYAN << "Configuration file location: " << RESET << configPath << "\n\n";
+    std::cout << YELLOW << "To edit, use: " << RESET
+              << "nano " << configPath << " or vim " << configPath << "\n";
+
+#ifdef PLATFORM_MACOS
+    std::cout << YELLOW << "macOS: " << RESET << "open " << configPath << "\n";
+#elif defined(PLATFORM_LINUX)
+    std::cout << YELLOW << "Linux: " << RESET << "xdg-open " << configPath << "\n";
+#elif defined(PLATFORM_WINDOWS)
+    std::cout << YELLOW << "Windows: " << RESET << "notepad " << configPath << "\n";
+#endif
+
+    return true;
+}
+
+bool InteractiveMode::cmdClear() {
+    Terminal::clear();
+    showWelcome();
+    return true;
+}
+
+bool InteractiveMode::cmdAgent(const std::string& args) {
+    using namespace Color;
+
+    // TODO: Implement agent management when Agent exposes tool_executor
+    if (args.empty() || args == "list") {
+        std::cout << YELLOW << "Agent management feature coming soon!" << RESET << std::endl;
+        std::cout << "Available commands: list, show <id>, launch <id>" << std::endl;
+        return true;
+    }
+
+    std::cout << YELLOW << "Agent commands: list, show <id>, launch <id>" << RESET << std::endl;
+    return true;
+}
+
+bool InteractiveMode::cmdBrowser(const std::string& args) {
+    using namespace Color;
+
+    // TODO: Implement browser automation when Agent exposes tool_executor
+    if (args.empty()) {
+        std::cout << YELLOW << "Browser automation feature coming soon!" << RESET << std::endl;
+        std::cout << "Available commands: open, screenshot, navigate <url>" << std::endl;
+        return true;
+    }
+
+    std::cout << YELLOW << "Browser commands: open, screenshot, navigate <url>" << RESET << std::endl;
+    return true;
 }
 
 bool InteractiveMode::handleCommand(const std::string& input) {
@@ -190,11 +295,22 @@ bool InteractiveMode::handleCommand(const std::string& input) {
 }
 
 void InteractiveMode::showWelcome() {
-    std::cout << "\n";
-    std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    std::cout << "  欢迎使用 RoboClaw 交互式对话模式\n";
-    std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    std::cout << "\n输入 /help 查看可用命令\n\n";
+    using namespace Color;
+
+    // Clear screen
+    Terminal::clear();
+
+    // Draw logo
+    UI::drawLogo();
+
+    // Get model info
+    const auto& config = config_manager_.getConfig();
+    std::string modelName = config.default_config.model;
+    std::string providerName = ConfigManager::providerToString(config.default_config.provider);
+    UI::drawModelInfo(modelName, providerName);
+
+    // Draw usage tips
+    UI::drawUsageTips();
 }
 
 void InteractiveMode::showBanner() {
@@ -239,7 +355,8 @@ void InteractiveMode::showBanner() {
 }
 
 void InteractiveMode::showPrompt() {
-    std::cout << "\033[32m你\033[0m: ";
+    using namespace Color;
+    std::cout << CYAN << ">>> " << RESET;
     std::cout.flush();
 }
 
@@ -250,17 +367,28 @@ std::string InteractiveMode::readInput() {
 }
 
 void InteractiveMode::showHelp() {
-    std::cout << "\n可用命令:\n\n";
-    std::cout << "  /help, /h, /?     显示此帮助\n";
-    std::cout << "  /exit, /quit, /q  退出程序\n";
-    std::cout << "  /clear, /cls     清屏\n";
-    std::cout << "  /session, /s      显示会话信息\n";
-    std::cout << "  /branch, /b       分支管理\n";
-    std::cout << "    /branch list    列出所有分支\n";
-    std::cout << "    /branch new <name>  创建新分支\n";
-    std::cout << "    /branch switch <name> 切换分支\n";
-    std::cout << "  /save            保存当前会话\n\n";
-    std::cout << "直接输入消息开始对话\n\n";
+    using namespace Color;
+
+    std::string helpContent = R"(
+Direct input to start conversation / 直接输入开始对话
+
+Slash Commands / 斜杠命令:
+  /help       Show this help / 显示帮助
+  /config     Edit configuration / 编辑配置
+  /clear      Clear conversation / 清空对话
+  /agent      Manage AI Agents / 管理 AI Agents
+  /browser    Browser automation / 浏览器自动化
+  Ctrl+D      Exit / 退出
+)";
+
+    std::vector<std::string> contentLines;
+    std::istringstream iss(helpContent);
+    std::string line;
+    while (std::getline(iss, line)) {
+        contentLines.push_back(line);
+    }
+
+    UI::drawBox("Available Commands / 可用命令", contentLines);
 }
 
 void InteractiveMode::showSessionInfo() {

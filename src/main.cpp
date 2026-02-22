@@ -308,13 +308,25 @@ std::unique_ptr<LLMProvider> createLLMProvider(const ConfigManager& config_mgr) 
     string baseUrl = config_mgr.getBaseUrl(providerType);
     string model = config.default_config.model;
 
+    // 检查API密钥是否已设置
+    if (apiKey.empty()) {
+        cerr << "错误: API密钥未设置。请运行 'robopartner config --edit' 配置API密钥。" << endl;
+        cerr << "当前提供商: " << ConfigManager::providerToString(providerType) << endl;
+        return nullptr;
+    }
+
     switch (providerType) {
         case ProviderType::ANTHROPIC:
             return std::make_unique<AnthropicProvider>(apiKey, model, baseUrl);
         case ProviderType::OPENAI:
+        case ProviderType::GEMINI:
+        case ProviderType::DEEPSEEK:
+        case ProviderType::DOUBAO:
+        case ProviderType::QWEN:
+            // 使用OpenAI兼容接口（支持大多数国产大模型）
             return std::make_unique<OpenAIProvider>(apiKey, model, baseUrl);
         default:
-            cerr << "暂不支持的提供商类型" << endl;
+            cerr << "暂不支持的提供商类型: " << ConfigManager::providerToString(providerType) << endl;
             return nullptr;
     }
 }

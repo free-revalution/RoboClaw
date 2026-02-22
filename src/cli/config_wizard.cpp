@@ -11,9 +11,9 @@ namespace roboclaw {
 
 // 本地化文本映射
 static const std::map<std::string, std::map<Language, std::string>> i18n = {
-    {"welcome_title", {{Language::CHINESE, "欢迎使用 RoboClaw！"}, {Language::ENGLISH, "Welcome to RoboClaw!"}}},
+    {"welcome_title", {{Language::CHINESE, "欢迎使用 RoboPartner！"}, {Language::ENGLISH, "Welcome to RoboPartner!"}}},
     {"welcome_subtitle", {{Language::CHINESE, "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}, {Language::ENGLISH, "============================================================"}}},
-    {"first_run", {{Language::CHINESE, "\n这是您第一次运行 RoboClaw，我们需要进行一些基本配置。\n配置将保存在: "}, {Language::ENGLISH, "\nThis is your first time running RoboClaw. Let's do some basic setup.\nConfiguration will be saved to: "}}},
+    {"first_run", {{Language::CHINESE, "\n这是您第一次运行 RoboPartner，我们需要进行一些基本配置。\n配置将保存在: "}, {Language::ENGLISH, "\nThis is your first time running RoboPartner. Let's do some basic setup.\nConfiguration will be saved to: "}}},
     {"select_language", {{Language::CHINESE, "\n请选择语言 / Please select language:\n\n  1. 简体中文 (Simplified Chinese)\n  2. English\n"}, {Language::ENGLISH, "\nPlease select language:\n\n  1. Simplified Chinese (简体中文)\n  2. English\n"}}},
     {"language_prompt", {{Language::CHINESE, "\n请输入选项 (1-2): "}, {Language::ENGLISH, "\nPlease enter option (1-2): "}}},
     {"select_provider", {{Language::CHINESE, "\n请选择默认的 LLM 提供商:\n\n"}, {Language::ENGLISH, "\nPlease select default LLM provider:\n\n"}}},
@@ -42,11 +42,11 @@ static const std::map<std::string, std::map<Language, std::string>> i18n = {
     {"check_permissions", {{Language::CHINESE, "请检查目录权限: "}, {Language::ENGLISH, "Please check directory permissions: "}}},
     {"config_complete_title", {{Language::CHINESE, "  配置完成！"}, {Language::ENGLISH, "  Configuration Complete!"}}},
     {"config_saved", {{Language::CHINESE, "\n配置已保存到: "}, {Language::ENGLISH, "\nConfiguration saved to: "}}},
-    {"ready_to_use", {{Language::CHINESE, "\n现在可以开始使用 RoboClaw 了！\n"}, {Language::ENGLISH, "\nYou are now ready to use RoboClaw!\n"}}},
+    {"ready_to_use", {{Language::CHINESE, "\n现在可以开始使用 RoboPartner 了！\n"}, {Language::ENGLISH, "\nYou are now ready to use RoboPartner!\n"}}},
     {"tips", {{Language::CHINESE, "提示:\n"}, {Language::ENGLISH, "Tips:\n"}}},
-    {"tip_run", {{Language::CHINESE, "  - 运行 'roboclaw' 启动对话\n"}, {Language::ENGLISH, "  - Run 'roboclaw' to start conversation\n"}}},
-    {"tip_help", {{Language::CHINESE, "  - 运行 'roboclaw --help' 查看所有命令\n"}, {Language::ENGLISH, "  - Run 'roboclaw --help' to see all commands\n"}}},
-    {"tip_edit", {{Language::CHINESE, "  - 运行 'roboclaw config --edit' 编辑配置\n\n"}, {Language::ENGLISH, "  - Run 'roboclaw config --edit' to edit configuration\n\n"}}},
+    {"tip_run", {{Language::CHINESE, "  - 运行 'robopartner' 启动对话\n"}, {Language::ENGLISH, "  - Run 'robopartner' to start conversation\n"}}},
+    {"tip_help", {{Language::CHINESE, "  - 运行 'robopartner --help' 查看所有命令\n"}, {Language::ENGLISH, "  - Run 'robopartner --help' to see all commands\n"}}},
+    {"tip_edit", {{Language::CHINESE, "  - 运行 'robopartner config --edit' 编辑配置\n\n"}, {Language::ENGLISH, "  - Run 'robopartner config --edit' to edit configuration\n\n"}}},
     {"config_cancelled", {{Language::CHINESE, "\n配置已取消。"}, {Language::ENGLISH, "\nConfiguration cancelled."}}},
     {"enter_number", {{Language::CHINESE, "请输入有效的数字。"}, {Language::ENGLISH, "Please enter a valid number."}}},
     {"number_range", {{Language::CHINESE, "请输入 "}, {Language::ENGLISH, "Please enter a number between "}}},
@@ -288,4 +288,4 @@ bool ConfigWizard::run() {
     return true;
 }
 
-} // namespace roboclaw
+} // namespace robopartner

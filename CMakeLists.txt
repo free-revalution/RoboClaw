@@ -74,6 +74,7 @@ set(SOURCES
     # 工具类
     src/utils/logger.cpp
     src/utils/thread_pool.cpp
+    src/utils/terminal.cpp
 
     # 存储模块
     src/storage/config_manager.cpp

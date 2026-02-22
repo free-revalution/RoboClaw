@@ -2,7 +2,7 @@
 # RoboPartner Installation Script
 # Supports: macOS, Linux
 
-set -e
+set -euo pipefail
 
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.robopartner}"
 BIN_DIR="$HOME/bin"
@@ -43,7 +43,7 @@ build_robopartner() {
         SOURCE_DIR="$(pwd)"
     else
         TEMP_DIR=$(mktemp -d)
-        cd "$TEMP_DIR"
+        cd "$TEMP_DIR" || { echo ">>> 错误: 无法进入临时目录"; exit 1; }
 
         echo ">>> 正在下载源码..."
         if [ "$REPO_URL" = "https://github.com/xxx/RoboClaw.git" ]; then
@@ -52,16 +52,31 @@ build_robopartner() {
             exit 1
         fi
 
-        git clone "$REPO_URL" .
+        if ! git clone "$REPO_URL" . 2>/dev/null; then
+            # Check if we're already in a git repo
+            if ! git rev-parse --is-inside-work-tree 2>/dev/null; then
+                echo ">>> 错误: 无法下载源码"
+                exit 1
+            fi
+        fi
         SOURCE_DIR="$(pwd)"
     fi
 
-    cd "$SOURCE_DIR"
+    cd "$SOURCE_DIR" || { echo ">>> 错误: 无法进入源码目录"; exit 1; }
 
     echo ">>> 正在编译..."
-    mkdir -p build && cd build
+    mkdir -p build && cd build || { echo ">>> 错误: 无法进入构建目录"; exit 1; }
     cmake .. -DCMAKE_BUILD_TYPE=Release
-    make -j$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 2)
+    # Limit parallel jobs to avoid resource exhaustion
+    NPROC=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 2)
+    JOBS=$(( NPROC > 4 ? 4 : NPROC ))
+    make -j"$JOBS"
+
+    # Verify build succeeded
+    if [ ! -f "robopartner" ] && [ ! -f "src/robopartner" ] && [ ! -f "../robopartner" ]; then
+        echo ">>> 错误: 编译失败，找不到可执行文件"
+        exit 1
+    fi
 
     echo ">>> 正在安装..."
     mkdir -p "$INSTALL_DIR"
@@ -81,13 +96,15 @@ build_robopartner() {
 
     chmod +x "$INSTALL_DIR/robopartner"
 
-    # Create symlink
-    mkdir -p "$BIN_DIR"
+    # Create symlink - verify ~/bin exists and is usable
+    if ! echo "$PATH" | grep -q "$BIN_DIR"; then
+        mkdir -p "$BIN_DIR"
+    fi
     ln -sf "$INSTALL_DIR/robopartner" "$BIN_DIR/robopartner"
 
     # Clean up temp directory if we created one
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
-        cd -
+        cd "$HOME" || { echo ">>> 警告: 无法离开临时目录"; }
         rm -rf "$TEMP_DIR"
     fi
 }
@@ -98,7 +115,9 @@ main() {
     echo "=========================================="
     echo ""
 
-    check_dependencies
+    if ! check_dependencies; then
+        exit 1
+    fi
     build_robopartner
 
     echo ""
