@@ -8,6 +8,7 @@ using namespace std;
 namespace platform {
 
 // 获取用户主目录
+// 正常情况下安装在主目录中
 string getHomeDirectory() {
     const char* home = getenv("HOME");
     if (home) {
