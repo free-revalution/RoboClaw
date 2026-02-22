@@ -39,6 +39,7 @@ set(TEST_SOURCES
     unit/test_tools.cpp
     unit/test_thread_pool.cpp
     unit/test_language.cpp
+    unit/test_motor_controller_interface.cpp
 )
 
 # 主项目源文件（用于链接）
