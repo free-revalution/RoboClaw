@@ -55,6 +55,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] - 2025-02-22
+
+### Added / 新增
+- **One-Command Installation**: Cross-platform automated installation / 一键安装：跨平台自动化安装
+  - Unix (macOS/Linux) installer script with dependency detection / Unix 安装脚本，支持依赖检测
+  - Windows PowerShell installer with Visual Studio detection / Windows PowerShell 安装脚本，支持 VS 检测
+  - Automatic build and installation to ~/.robopartner / 自动编译并安装到 ~/.robopartner
+  - PATH setup with ~/bin symlink / PATH 配置，通过 ~/bin 符号链接
+- **Terminal UI Module**: Professional terminal interface utilities / 终端 UI 模块：专业终端界面工具
+  - Terminal class: width/height detection, screen clearing, cursor control / Terminal 类：宽高检测、清屏、光标控制
+  - UI class: draw boxes, separators, tables, progress bars, spinners / UI 类：绘制边框、分隔线、表格、进度条、加载动画
+  - ANSI color support with tech blue branding / ANSI 颜色支持，科技蓝主题
+  - Cross-platform: Windows (Console API), Unix (ioctl) / 跨平台：Windows 控制台 API、Unix ioctl
+  - Multiple box styles: single, double, rounded, ASCII, bold / 多种边框样式
+- **Claude Code-Style Welcome Screen**: ASCII art logo with colored borders / Claude Code 风格欢迎界面：ASCII 艺术字 Logo 彩色边框
+  - "RoboPartner v0.2.0" ASCII art logo / "RoboPartner v0.2.0" ASCII 艺术 Logo
+  - Current model and provider display / 当前模型和提供商显示
+  - Usage tips section / 使用提示部分
+  - Adaptive width based on terminal size / 根据终端大小自适应宽度
+- **Slash Command System**: In-chat command interface / 斜杠命令系统：聊天内命令界面
+  - `/help` - Show available commands / 显示可用命令
+  - `/config` - Edit configuration file / 编辑配置文件
+  - `/clear` - Clear conversation and redraw welcome screen / 清空对话并重绘欢迎界面
+  - `/agent` - Manage AI Agents (list, show, launch) / 管理 AI Agents
+  - `/browser` - Browser automation commands / 浏览器自动化命令
+  - `Ctrl+D` - Exit the application / 退出应用
+- **Colored Output**: ANSI color-coded messages / 彩色输出：ANSI 颜色编码消息
+  - Errors in RED / 错误信息红色
+  - User prompts in CYAN / 用户提示青色
+  - Tool calls in YELLOW / 工具调用黄色
+  - Success messages in GREEN / 成功消息绿色
+  - System messages in GRAY / 系统消息灰色
+
+### Changed / 更改
+- **Welcome screen redesign**: From simple text banner to professional UI / 欢迎界面重新设计：从简单文本横幅改为专业 UI
+- **Prompt style**: From "你:" to modern ">>>" prompt / 提示符样式：从 "你:" 改为现代 ">>>" 提示符
+- **Help display**: From text list to formatted box / 帮助显示：从文本列表改为格式化边框
+- **Command routing**: Dedicated `handleSlashCommand()` for slash commands / 命令路由：专用 `handleSlashCommand()` 处理斜杠命令
+
+### Technical / 技术细节
+- **New files**:
+  - `install` - Unix installation script (117 lines) / Unix 安装脚本
+  - `install.ps1` - Windows PowerShell script (400+ lines) / Windows PowerShell 脚本
+  - `src/utils/terminal.h` - Terminal utility header (270+ lines) / 终端工具头文件
+  - `src/utils/terminal.cpp` - Terminal utility implementation (400+ lines) / 终端工具实现
+- **Security improvements**:
+  - URL validation in install.ps1 / PowerShell 安装脚本 URL 验证
+  - Path traversal protection / 路径遍历保护
+  - Commit hash verification option / 提交哈希验证选项
+  - WhatIf support for safe preview / WhatIf 支持安全预览
+
+---
+
 ## [Unreleased]
 
 ### Added / 新增
