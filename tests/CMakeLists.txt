@@ -43,6 +43,7 @@ set(TEST_SOURCES
     unit/test_sensor_interface.cpp
     unit/test_comm_interface.cpp
     unit/test_hal_exception.cpp
+    unit/test_serial_comm.cpp
 )
 
 # 主项目源文件（用于链接）
@@ -58,6 +59,7 @@ set(MAIN_SOURCES
     ../src/utils/thread_pool.cpp
     ../src/agent/tool_executor.cpp
     ../src/agent/prompt_builder.cpp
+    ../src/hal/drivers/serial_comm.cpp
 )
 
 # 链接CPR（如果需要）

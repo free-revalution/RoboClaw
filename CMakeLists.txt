@@ -84,6 +84,9 @@ set(SOURCES
     src/cli/interactive_mode.cpp
     src/cli/skill_commands.cpp
 
+    # HAL模块
+    src/hal/drivers/serial_comm.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )
