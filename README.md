@@ -58,8 +58,9 @@ RoboPartner 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了�
 | **Edit** | Precise string replacement in files | 精确替换文件中的字符串 |
 | **Bash** | Execute shell commands with cross-platform support | 执行 shell 命令，跨平台支持 |
 | **Serial** | Serial port communication for embedded development | 串口通信工具，用于嵌入式开发 |
-| **Browser** | Browser automation (OpenClaw-style visual control) | **浏览器自动化（OpenClaw 风格可视化控制，新增）** |
-| **Agent** | Discover and manage local AI assistants | **Agent 发现和管理（新增）** |
+| **Browser** | Browser automation (OpenClaw-style visual control) | 浏览器自动化（OpenClaw 风格可视化控制） |
+| **Agent** | Discover and manage local AI assistants | Agent 发现和管理 |
+| **Hardware** | Motor controllers, sensors, and embedded robotics | **硬件控制、传感器和嵌入式机器人（新增）** |
 
 ### New in v0.2.0 / v0.2.0 新功能
 
@@ -128,6 +129,58 @@ ID: cursor_app
 - Replit Ghostwriter
 - OpenClaw
 - And more...
+
+---
+
+### Embedded Robotics Platform / 嵌入式机器人平台 (v0.3.0 NEW)
+
+**[English]**
+
+RoboPartner now supports embedded robotics development! Transform your Raspberry Pi or Jetson Nano into an intelligent robot controller with natural language commands.
+
+**[中文]**
+
+RoboPartner 现在支持嵌入式机器人开发！将您的 Raspberry Pi 或 Jetson Nano 变成支持自然语言命令的智能机器人控制器。
+
+**Key Features / 核心功能**:
+
+- Hardware Abstraction Layer (HAL) / 硬件抽象层
+  - Motor Controllers: RoboClaw, Sabertooth, L298N, PWM drivers / 电机控制器：RoboClaw、Sabertooth、L298N、PWM 驱动
+  - Sensors: IMU (MPU6050), LiDAR, Ultrasonic, Encoders / 传感器：IMU (MPU6050)、LiDAR、超声波、编码器
+  - Communication: Serial/UART, I2C, SPI / 通信：Serial/UART、I2C、SPI
+
+- Robot Control Skills / 机器人控制技能
+  - Motion control: forward, backward, turn, stop / 运动控制：前进、后退、转向、停止
+  - Sensor reading: multi-sensor management / 传感器读取：多传感器管理
+  - Hardware configuration: JSON-based setup / 硬件配置：基于 JSON 的配置
+
+**Supported Platforms / 支持的平台**:
+- Raspberry Pi 4, 3B+ (ARM64/ARM32)
+- Jetson Nano, Jetson Orin (ARM64)
+- BeagleBone Black (In Development / 开发中)
+
+**Quick Start / 快速开始**:
+
+```bash
+# Configure hardware / 配置硬件
+cp configs/hardware.json.example ~/.robopartner/hardware.json
+nano ~/.robopartner/hardware.json
+
+# List hardware / 列出硬件
+robopartner hardware list
+
+# Test connections / 测试连接
+robopartner hardware test
+
+# Interactive robot control / 交互式机器人控制
+robopartner
+>>> 前进 50% 速度 2 秒
+>>> 左转 90 度
+>>> 读取 IMU 数据
+>>> 停止
+```
+
+**Documentation / 文档**: [Embedded Quick Start Guide](docs/embedded-quickstart.md)
 
 ---
 
@@ -294,12 +347,14 @@ RoboPartner/
 ├── CMakeLists.txt              # CMake configuration
 ├── README.md                   # This file
 ├── LICENSE                     # MIT License
+├── configs/
+│   └── hardware.json.example  # Hardware configuration example (NEW)
 ├── src/
 │   ├── main.cpp               # Entry point
 │   ├── cli/                   # CLI module
 │   │   ├── config_wizard.cpp   # Configuration wizard with language selection
 │   │   ├── interactive_mode.cpp # Interactive mode
-│   │   └── agent_commands.cpp  # Agent management commands (NEW)
+│   │   └── agent_commands.cpp  # Agent management commands
 │   ├── tools/                 # Tools implementation
 │   │   ├── tool_base.{h,cpp}   # Base tool class
 │   │   ├── read_tool.{h,cpp}   # Read tool
@@ -307,16 +362,34 @@ RoboPartner/
 │   │   ├── edit_tool.{h,cpp}   # Edit tool
 │   │   ├── bash_tool.{h,cpp}   # Bash tool
 │   │   ├── serial_tool.{h,cpp}  # Serial port tool
-│   │   ├── browser_tool.{h,cpp} # Browser automation (NEW)
-│   │   └── agent_tool.{h,cpp}   # Agent discovery (NEW)
+│   │   ├── browser_tool.{h,cpp} # Browser automation
+│   │   └── agent_tool.{h,cpp}   # Agent discovery
+│   ├── hal/                   # Hardware Abstraction Layer (NEW)
+│   │   ├── motor_controller.h  # Motor controller interface
+│   │   ├── sensor.h            # Sensor interface
+│   │   ├── comm.h              # Communication interface
+│   │   ├── hal_exception.h     # Hardware exceptions
+│   │   ├── hardware_config.{h,cpp} # Configuration manager
+│   │   └── drivers/            # Hardware drivers
+│   │       ├── serial_comm.{h,cpp} # Serial communication
+│   │       ├── roboclaw_driver.cpp  # RoboClaw driver (TODO)
+│   │       └── mpu6050_driver.cpp   # MPU6050 driver (TODO)
+│   ├── skills/                # Robot control skills (NEW)
+│   │   ├── robot/
+│   │   │   ├── motion_skill.{h,cpp}  # Motion control
+│   │   │   └── sensor_skill.{h,cpp}  # Sensor reading
+│   │   └── embedded/          # Embedded development skills (TODO)
 │   ├── agent/
 │   │   ├── agent.h/.cpp       # Core Agent class
-│   │   ├── tool_executor.h/.cpp # Tool executor (now with 7 tools)
+│   │   ├── tool_executor.h/.cpp # Tool executor (now with 8 tools)
 │   │   └── prompt_builder.h/.cpp # Prompt builder
 │   ├── llm/                   # LLM provider interface
 │   ├── session/                # Session management
 │   ├── optimization/           # Token optimization
 │   └── utils/                 # Utility classes
+├── docs/
+│   ├── embedded-quickstart.md # Embedded robotics guide (NEW)
+│   └── plans/                 # Design documents
 └── tests/
     ├── unit/                  # Unit tests
     ├── integration/           # Integration tests
@@ -364,6 +437,24 @@ RoboPartner/
 │                                                 │    Agent    │  │
 │                                                 │    Tool     │  │
 │                                                 └─────────────┘  │
+│                                                 ┌─────────────┐  │
+│                                                 │  Hardware   │  │
+│                                                 │    Tool     │  │ (NEW)
+│                                                 └─────┬───────┘  │
+│                                                       │         │
+│                              ┌────────────────────────┘         │
+│                              ▼                                  │
+│                   ┌─────────────────────┐                      │
+│                   │   HAL & Skills      │                      │
+│                   │ ┌─────────────────┐ │                      │
+│                   │ │ Motor/Sensor    │ │                      │
+│                   │ │ Interfaces      │ │                      │
+│                   │ └─────────────────┘ │                      │
+│                   │ ┌─────────────────┐ │                      │
+│                   │ │ Motion/Sensor   │ │                      │
+│                   │ │ Skills          │ │                      │
+│                   │ └─────────────────┘ │                      │
+│                   └─────────────────────┘                      │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐  │
 │  │              Thread Pool (Multithreading)              │  │
@@ -432,10 +523,38 @@ toolExecutor->execute("browser", {{"action", "navigate"}, {"url", "https://githu
 toolExecutor->execute("read", {{"file", "README.md"}});
 ```
 
+### Example 4: Robot Control / 机器人控制（新增）
+
+```cpp
+// Hardware control using HAL / 使用 HAL 进行硬件控制
+#include "skills/robot/motion_skill.h"
+#include "hal/drivers/serial_comm.h"
+
+using namespace roboclaw::skills;
+using namespace roboclaw::hal::drivers;
+
+// Create motor controller / 创建电机控制器
+auto motorController = std::make_shared<RoboClawDriver>();
+motorController->initialize({
+    {"port", "/dev/ttyUSB0"},
+    {"address", 128}
+});
+
+// Create motion skill / 创建运动技能
+MotionSkill motion(motorController);
+
+// Control robot / 控制机器人
+motion.forward(50, 2.0);  // Forward at 50% speed for 2 seconds / 前进 50% 速度 2 秒
+motion.turn(90, 50);      // Turn right 90 degrees / 右转 90 度
+motion.stop();            // Emergency stop / 紧急停止
+```
+
 ---
 
 ## Documentation / 文档
 
+- [Embedded Robotics Quick Start](docs/embedded-quickstart.md) - 嵌入式机器人快速入门指南（新增）
+- [Hardware Configuration Guide](configs/hardware.json.example) - 硬件配置示例
 - [Design Document](docs/plans/2025-02-20-roboclaw-design.md) - 设计文档
 - [Extension Design](docs/plans/2025-02-20-extensions-design.md) - 扩展设计
 - [Test Documentation](tests/README.md) - 测试文档
