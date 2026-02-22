@@ -6,6 +6,10 @@ build/
 *.dylib
 *.exe
 
+# Git Worktrees
+.worktrees/
+worktrees/
+
 # IDE配置
 .vscode/
 .idea/
