@@ -61,6 +61,7 @@ RoboPartner 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了�
 | **Browser** | Browser automation (OpenClaw-style visual control) | 浏览器自动化（OpenClaw 风格可视化控制） |
 | **Agent** | Discover and manage local AI assistants | Agent 发现和管理 |
 | **Hardware** | Motor controllers, sensors, and embedded robotics | **硬件控制、传感器和嵌入式机器人（新增）** |
+| **Social** | Connect to Telegram, DingTalk, Feishu for remote control | **社交软件连接（新增）** |
 
 ### New in v0.2.0 / v0.2.0 新功能
 
@@ -181,6 +182,65 @@ robopartner
 ```
 
 **Documentation / 文档**: [Embedded Quick Start Guide](docs/embedded-quickstart.md)
+
+---
+
+### Social Platform Integration / 社交平台集成 (NEW)
+
+**[English]**
+
+RoboPartner now supports connection to social platforms for remote control:
+
+- **Telegram Bot API** - Control RoboPartner via Telegram
+- **DingTalk / Feishu** - Enterprise platform integration
+- **/link command** - Easy setup wizard for platform connection
+
+**[中文]**
+
+RoboPartner 现在支持连接社交平台进行远程控制：
+
+- **Telegram Bot API** - 通过 Telegram 控制 RoboPartner
+- **钉钉 / 飞书** - 企业平台集成
+- **/link 命令** - 简单的连接设置向导
+
+**Quick Start / 快速开始**:
+
+```bash
+# Link to Telegram / 连接到 Telegram
+robopartner
+>>> /link
+选择平台: Telegram
+输入 Bot Token: <your_bot_token>
+
+# Or use CLI / 或使用命令行
+robopartner social --platform telegram --token <your_bot_token>
+```
+
+**Documentation / 文档**: [Social Link Guide](docs/social-link-guide.md)
+
+---
+
+### Agent Collaboration / Agent 协作 (NEW)
+
+**[English]**
+
+RoboPartner can intelligently delegate tasks to specialized agents:
+
+- **Claude Code** - Expert in C++ embedded development
+- **Cursor** - General purpose coding assistant
+- **OpenClaw** - Visual interaction specialist
+
+Use RoboPartner as your central coordinator, leveraging the strengths of each AI agent.
+
+**[中文]**
+
+RoboPartner 可以智能地将任务委派给专门的 Agents：
+
+- **Claude Code** - C++ 嵌入式开发专家
+- **Cursor** - 通用编码助手
+- **OpenClaw** - 可视化交互专家
+
+将 RoboPartner 作为您的中央协调器，利用每个 AI Agent 的优势。
 
 ---
 
@@ -554,6 +614,7 @@ motion.stop();            // Emergency stop / 紧急停止
 ## Documentation / 文档
 
 - [Embedded Robotics Quick Start](docs/embedded-quickstart.md) - 嵌入式机器人快速入门指南（新增）
+- [Social Link Guide](docs/social-link-guide.md) - 社交软件连接指南（新增）
 - [Hardware Configuration Guide](configs/hardware.json.example) - 硬件配置示例
 - [Design Document](docs/plans/2025-02-20-roboclaw-design.md) - 设计文档
 - [Extension Design](docs/plans/2025-02-20-extensions-design.md) - 扩展设计
