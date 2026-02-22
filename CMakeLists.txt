@@ -90,6 +90,9 @@ set(SOURCES
     src/hal/drivers/serial_comm.cpp
     src/hal/hardware_config.cpp
 
+    # Social模块
+    src/social/telegram_adapter.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )
