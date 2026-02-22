@@ -85,6 +85,16 @@ private:
     // 显示横幅
     void showBanner();
 
+    // 处理斜杠命令
+    bool handleSlashCommand(const std::string& command);
+
+    // 斜杠命令处理函数
+    bool cmdHelp();
+    bool cmdConfig();
+    bool cmdClear();
+    bool cmdAgent(const std::string& args);
+    bool cmdBrowser(const std::string& args);
+
     // 保存当前会话
     void saveCurrentSession();
 
