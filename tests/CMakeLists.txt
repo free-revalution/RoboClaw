@@ -42,6 +42,7 @@ set(TEST_SOURCES
     unit/test_motor_controller_interface.cpp
     unit/test_sensor_interface.cpp
     unit/test_comm_interface.cpp
+    unit/test_hal_exception.cpp
 )
 
 # 主项目源文件（用于链接）
