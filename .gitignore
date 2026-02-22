@@ -22,8 +22,8 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# RoboClaw运行时数据
-.roboclaw/
+# RoboPartner运行时数据
+.robopartner/
 
 # 日志
 *.log
