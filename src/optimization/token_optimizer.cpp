@@ -224,7 +224,7 @@ TokenOptimizer::CompressionLayers TokenOptimizer::createCompressionLayers(
         layers.recent.insert(layers.recent.end(), start, history.end());
     }
 
-    // 中期消息（简化版：保留用户消息，压缩助手回复）
+    // 中期消息（简化版：保留用户消息和工具消息，压缩助手回复）
     if (middle_count > 0 && total > recent_count) {
         size_t middle_start = std::max(static_cast<size_t>(0), total - recent_count - middle_count);
         for (size_t i = middle_start; i < total - recent_count; ++i) {
@@ -233,6 +233,9 @@ TokenOptimizer::CompressionLayers TokenOptimizer::createCompressionLayers(
 
             if (msg.role == MessageRole::USER) {
                 // 用户消息保留完整
+                compressed_msg = msg;
+            } else if (msg.role == MessageRole::TOOL) {
+                // 工具消息必须保留完整（包含 tool_call_id），否则API会报错
                 compressed_msg = msg;
             } else {
                 // 助手消息只保留关键信息
