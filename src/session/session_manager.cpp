@@ -10,8 +10,8 @@
 namespace roboclaw {
 
 SessionManager::SessionManager() {
-    // 默认会话目录：.roboclaw/conversations/
-    sessions_dir_ = ".roboclaw/conversations";
+    // 默认会话目录：.robopartner/conversations/
+    sessions_dir_ = ".robopartner/conversations";
 }
 
 void SessionManager::setSessionsDir(const std::string& dir) {

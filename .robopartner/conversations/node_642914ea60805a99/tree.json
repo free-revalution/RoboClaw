@@ -1,0 +1,19 @@
+{
+  "conversation_id": "node_642914ea60805a99",
+  "current_node_id": "node_65764ce010308d1a",
+  "nodes": {
+    "node_65764ce010308d1a": {
+      "assistant_message": {
+        "content": "",
+        "tool_calls": []
+      },
+      "branch_name": "",
+      "children": [],
+      "id": "node_65764ce010308d1a",
+      "is_active": false,
+      "parent_id": "",
+      "timestamp": 1771722090,
+      "user_message": ""
+    }
+  }
+}

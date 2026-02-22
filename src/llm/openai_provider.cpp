@@ -1,6 +1,7 @@
 // OpenAIProvider实现
 
 #include "openai_provider.h"
+#include "../utils/logger.h"
 #include <random>
 #include <sstream>
 #include <iomanip>
@@ -34,10 +35,35 @@ LLMResponse OpenAIProvider::chat(const std::vector<ChatMessage>& messages,
         std::map<std::string, std::string> headers;
         headers["Authorization"] = "Bearer " + api_key_;
 
+        // Debug logging
+        Logger::getInstance().debug("Sending request to: " + url, "openai_provider.cpp", __LINE__);
+        Logger::getInstance().debug("Request body: " + requestBody.dump(), "openai_provider.cpp", __LINE__);
+
         HttpResponse httpResponse = http_client_.postJson(url, requestBody, headers);
 
+        Logger::getInstance().debug("Response status: " + std::to_string(httpResponse.status_code), "openai_provider.cpp", __LINE__);
+        Logger::getInstance().debug("Response body: " + httpResponse.body, "openai_provider.cpp", __LINE__);
+
         if (!httpResponse.success) {
-            response.error = "HTTP请求失败: " + std::to_string(httpResponse.status_code);
+            // Parse the error response body for detailed error message
+            std::string errorMsg = "HTTP请求失败: " + std::to_string(httpResponse.status_code);
+            try {
+                json errorJson = json::parse(httpResponse.body);
+                if (errorJson.contains("error")) {
+                    auto& err = errorJson["error"];
+                    if (err.is_object() && err.contains("message")) {
+                        errorMsg += " - " + err["message"].get<std::string>();
+                    } else if (err.is_string()) {
+                        errorMsg += " - " + err.get<std::string>();
+                    }
+                }
+            } catch (...) {
+                // If parsing fails, append the response body
+                if (!httpResponse.body.empty()) {
+                    errorMsg += " - " + httpResponse.body;
+                }
+            }
+            response.error = errorMsg;
             return response;
         }
 

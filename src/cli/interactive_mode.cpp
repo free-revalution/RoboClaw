@@ -31,7 +31,7 @@ void InteractiveMode::run() {
     showBanner();
 
     // 设置会话目录
-    session_manager_->setSessionsDir(".roboclaw/conversations");
+    session_manager_->setSessionsDir(".robopartner/conversations");
 
     // 获取或创建会话
     auto session = session_manager_->getOrCreateLatestSession();
@@ -152,6 +152,7 @@ bool InteractiveMode::handleSlashCommand(const std::string& command) {
     if (cmd == "help") return cmdHelp();
     if (cmd == "config") return cmdConfig();
     if (cmd == "clear") return cmdClear();
+    if (cmd == "model") return cmdModel(args);
     if (cmd == "agent") return cmdAgent(args);
     if (cmd == "browser") return cmdBrowser(args);
 
@@ -215,6 +216,92 @@ bool InteractiveMode::cmdBrowser(const std::string& args) {
     }
 
     std::cout << YELLOW << "Browser commands: open, screenshot, navigate <url>" << RESET << std::endl;
+    return true;
+}
+
+bool InteractiveMode::cmdModel(const std::string& args) {
+    using namespace Color;
+
+    if (args.empty()) {
+        // 显示当前模型信息和帮助
+        const auto& config = config_manager_.getConfig();
+        std::string currentModel = config.default_config.model;
+        std::string currentProvider = ConfigManager::providerToString(config.default_config.provider);
+
+        std::cout << CYAN << "当前模型配置 / Current Model:" << RESET << "\n";
+        std::cout << "  模型 / Model:   " << YELLOW << currentModel << RESET << "\n";
+        std::cout << "  提供商 / Provider: " << CYAN << currentProvider << RESET << "\n\n";
+
+        std::cout << GRAY << "用法 / Usage:" << RESET << "\n";
+        std::cout << "  " << GREEN << "/model list" << RESET << "                     列出所有可用模型 / List all models\n";
+        std::cout << "  " << GREEN << "/model switch <model>" << RESET << "            切换模型 / Switch model\n";
+        std::cout << "  " << GREEN << "/model add <name> <url> <key>" << RESET << "  添加新模型 / Add new model\n";
+        std::cout << "\n";
+        std::cout << "示例 / Examples:\n";
+        std::cout << "  /model switch claude-3-5-sonnet-20241022\n";
+        std::cout << "  /model add gpt-4 https://api.openai.com/v1 sk-xxx\n";
+        return true;
+    }
+
+    std::istringstream iss(args);
+    std::string action;
+    iss >> action;
+
+    if (action == "list") {
+        // 列出所有已配置的提供商和模型
+        const auto& config = config_manager_.getConfig();
+
+        std::cout << CYAN << "已配置的模型 / Configured Models:" << RESET << "\n\n";
+
+        for (const auto& pair : config.providers) {
+            const auto& provider = pair.second;
+            std::cout << "  [" << CYAN << provider.name << RESET << "] ";
+            if (!provider.api_key.empty()) {
+                std::cout << GREEN << "✓ 已配置 / Configured" << RESET;
+            } else {
+                std::cout << RED << "✗ 未配置 / Not configured" << RESET;
+            }
+            std::cout << "\n";
+        }
+        std::cout << "\n";
+        return true;
+    }
+
+    if (action == "switch") {
+        std::string modelName;
+        iss >> modelName;
+
+        if (modelName.empty()) {
+            std::cout << RED << "错误 / Error: 请指定模型名称 / Please specify model name" << RESET << "\n";
+            std::cout << "示例 / Example: /model switch claude-3-5-sonnet-20241022\n";
+            return true;
+        }
+
+        std::cout << YELLOW << "模型切换功能需要配置文件持久化，即将推出！" << RESET << "\n";
+        std::cout << "Model switching requires config persistence, coming soon!\n";
+        std::cout << "当前会话可使用: /model add 添加新模型配置\n";
+        return true;
+    }
+
+    if (action == "add") {
+        std::string modelName, apiUrl, apiKey;
+        iss >> modelName >> apiUrl >> apiKey;
+
+        if (modelName.empty() || apiUrl.empty() || apiKey.empty()) {
+            std::cout << RED << "错误 / Error: 参数不完整 / Incomplete parameters" << RESET << "\n";
+            std::cout << "格式 / Format: /model add <name> <url> <key>\n";
+            std::cout << "示例 / Example: /model add gpt-4 https://api.openai.com/v1 sk-xxx\n";
+            return true;
+        }
+
+        std::cout << YELLOW << "添加模型功能需要配置文件持久化，即将推出！" << RESET << "\n";
+        std::cout << "Add model feature requires config persistence, coming soon!\n";
+        std::cout << "临时方案 / Temporary: 请使用 /config 编辑配置文件手动添加\n";
+        return true;
+    }
+
+    std::cout << RED << "未知命令 / Unknown command: " << action << RESET << "\n";
+    std::cout << "使用 /model 查看帮助 / Use /model for help\n";
     return true;
 }
 
@@ -375,6 +462,7 @@ Direct input to start conversation / 直接输入开始对话
 Slash Commands / 斜杠命令:
   /help       Show this help / 显示帮助
   /config     Edit configuration / 编辑配置
+  /model      Switch or add models / 切换或添加模型
   /clear      Clear conversation / 清空对话
   /agent      Manage AI Agents / 管理 AI Agents
   /browser    Browser automation / 浏览器自动化

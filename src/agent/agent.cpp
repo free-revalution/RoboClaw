@@ -117,40 +117,101 @@ bool Agent::processStream(const std::string& userMessage,
         ToolDefinition tool;
         tool.name = desc.name;
         tool.description = desc.description;
-        // 手动构建 parameters JSON
-        json paramsJson = json::array();
+
+        // 构建 JSON Schema 格式的 parameters
+        json paramsSchema;
+        paramsSchema["type"] = "object";
+
+        // 构建 properties
+        json properties = json::object();
+        std::vector<std::string> required;
         for (const auto& param : desc.parameters) {
-            paramsJson.push_back(param.toJson());
+            json paramSchema;
+            paramSchema["type"] = param.type;
+            paramSchema["description"] = param.description;
+
+            // 添加默认值（如果有）
+            if (!param.default_value.empty()) {
+                if (param.type == "string") {
+                    paramSchema["default"] = param.default_value;
+                } else if (param.type == "integer") {
+                    try {
+                        paramSchema["default"] = std::stoi(param.default_value);
+                    } catch (...) {
+                        // 保持默认为字符串
+                    }
+                }
+            }
+
+            properties[param.name] = paramSchema;
+
+            // 记录必需参数
+            if (param.required) {
+                required.push_back(param.name);
+            }
         }
-        tool.input_schema = paramsJson;
+        paramsSchema["properties"] = properties;
+
+        // 添加 required 数组（如果有必需参数）
+        if (!required.empty()) {
+            paramsSchema["required"] = required;
+        }
+
+        tool.input_schema = paramsSchema;
         tools.push_back(tool);
     }
 
     // 构建消息
     std::vector<ChatMessage> apiMessages = prompt_builder_.buildMessages(messages, tools);
 
-    // 流式请求
+    // 流式请求（注意：当前postStream实现实际返回完整JSON，不是真正的SSE流）
     std::stringstream contentStream;
+    std::vector<ChatMessage::ToolCall> accumulatedToolCalls;
     bool success = llm_provider_->chatStream(apiMessages, tools,
         [&](const std::string& chunk) {
-            // 解析SSE格式的数据
-            if (chunk.find("data: ") == 0) {
-                std::string data = chunk.substr(6);
-                if (data != "[DONE]") {
-                    try {
-                        json chunkJson = json::parse(data);
-                        if (chunkJson.contains("delta")) {
-                            auto delta = chunkJson["delta"];
-                            if (delta.contains("text")) {
-                                std::string text = delta["text"];
-                                contentStream << text;
-                                onChunk(text);
+            // 当前实现返回完整JSON响应，不是SSE格式
+            try {
+                json responseJson = json::parse(chunk);
+
+                // 检查是否有choices
+                if (responseJson.contains("choices") && !responseJson["choices"].empty()) {
+                    auto choice = responseJson["choices"][0];
+
+                    // 获取文本内容
+                    if (choice.contains("message")) {
+                        auto message = choice["message"];
+
+                        // 处理普通文本内容
+                        if (message.contains("content") && !message["content"].is_null()) {
+                            std::string text = message["content"];
+                            contentStream << text;
+                            onChunk(text);
+                        }
+
+                        // 处理工具调用
+                        if (message.contains("tool_calls")) {
+                            for (const auto& callJson : message["tool_calls"]) {
+                                ChatMessage::ToolCall call;
+                                call.id = callJson.value("id", "");
+
+                                if (callJson.contains("function")) {
+                                    call.name = callJson["function"].value("name", "");
+                                    std::string argsStr = callJson["function"].value("arguments", "{}");
+                                    try {
+                                        call.arguments = json::parse(argsStr);
+                                    } catch (...) {
+                                        call.arguments = json::object();
+                                    }
+                                }
+
+                                accumulatedToolCalls.push_back(call);
                             }
                         }
-                    } catch (...) {
-                        // 忽略解析错误
                     }
                 }
+            } catch (...) {
+                // JSON解析失败，可能是真正的SSE数据（未来实现）
+                // 暂时忽略
             }
         });
 
@@ -166,13 +227,20 @@ bool Agent::processStream(const std::string& userMessage,
     AgentResponse response;
     response.content = contentStream.str();
     response.success = true;
-    response.has_tool_calls = false;
+    response.has_tool_calls = !accumulatedToolCalls.empty();
+    response.tool_calls = accumulatedToolCalls;
 
-    // 添加助手消息到历史
+    // 添加助手消息到历史（包含工具调用）
     ChatMessage assistantMsg(MessageRole::ASSISTANT, response.content);
+    assistantMsg.tool_calls = accumulatedToolCalls;
     {
         std::unique_lock<std::shared_mutex> lock(history_mutex_);
         history_.push_back(assistantMsg);
+    }
+
+    // 如果有工具调用，执行工具
+    if (response.has_tool_calls) {
+        executeToolCalls(response.tool_calls);
     }
 
     onComplete(response);
@@ -189,12 +257,47 @@ AgentResponse Agent::performOneRound(const std::vector<ChatMessage>& messages) {
         ToolDefinition tool;
         tool.name = desc.name;
         tool.description = desc.description;
-        // 手动构建 parameters JSON
-        json paramsJson = json::array();
+
+        // 构建 JSON Schema 格式的 parameters
+        json paramsSchema;
+        paramsSchema["type"] = "object";
+
+        // 构建 properties
+        json properties = json::object();
+        std::vector<std::string> required;
         for (const auto& param : desc.parameters) {
-            paramsJson.push_back(param.toJson());
+            json paramSchema;
+            paramSchema["type"] = param.type;
+            paramSchema["description"] = param.description;
+
+            // 添加默认值（如果有）
+            if (!param.default_value.empty()) {
+                if (param.type == "string") {
+                    paramSchema["default"] = param.default_value;
+                } else if (param.type == "integer") {
+                    try {
+                        paramSchema["default"] = std::stoi(param.default_value);
+                    } catch (...) {
+                        // 保持默认为字符串
+                    }
+                }
+            }
+
+            properties[param.name] = paramSchema;
+
+            // 记录必需参数
+            if (param.required) {
+                required.push_back(param.name);
+            }
         }
-        tool.input_schema = paramsJson;
+        paramsSchema["properties"] = properties;
+
+        // 添加 required 数组（如果有必需参数）
+        if (!required.empty()) {
+            paramsSchema["required"] = required;
+        }
+
+        tool.input_schema = paramsSchema;
         tools.push_back(tool);
     }
 
@@ -315,13 +418,11 @@ bool Agent::executeToolCallsConcurrent(const std::vector<ChatMessage::ToolCall>&
 std::vector<ChatMessage> Agent::buildMessages(const std::string& userMessage) {
     std::vector<ChatMessage> messages;
 
-    // 获取历史消息（排除最后的用户消息）
+    // 获取所有历史消息（包含完整的对话历史）
     std::vector<ChatMessage> history;
     {
         std::shared_lock<std::shared_mutex> lock(history_mutex_);
-        for (size_t i = 0; i < history_.size() - 1; ++i) {
-            history.push_back(history_[i]);
-        }
+        history = history_;  // 复制全部历史
     }
 
     // 如果启用了Token优化，压缩历史

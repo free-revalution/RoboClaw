@@ -26,7 +26,7 @@ using DownloadProgressCallback = std::function<void(const std::string& skillName
 // 技能下载器
 class SkillDownloader {
 public:
-    SkillDownloader(const std::string& cacheDir = ".roboclaw/skills/cache");
+    SkillDownloader(const std::string& cacheDir = ".robopartner/skills/cache");
     ~SkillDownloader() = default;
 
     // 设置缓存目录

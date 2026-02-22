@@ -92,6 +92,7 @@ private:
     bool cmdHelp();
     bool cmdConfig();
     bool cmdClear();
+    bool cmdModel(const std::string& args);
     bool cmdAgent(const std::string& args);
     bool cmdBrowser(const std::string& args);
 

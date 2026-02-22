@@ -23,7 +23,7 @@ string getHomeDirectory() {
 
 // 获取配置目录
 string getConfigDirectory() {
-    return getHomeDirectory() + "\\.roboclaw";
+    return getHomeDirectory() + "\\.robopartner";
 }
 
 } // namespace platform
