@@ -47,6 +47,7 @@ set(TEST_SOURCES
     unit/test_motion_skill.cpp
     unit/test_sensor_skill.cpp
     unit/test_hardware_config.cpp
+    unit/test_social_message.cpp
     integration/test_hardware_cli.cpp
 )
 
