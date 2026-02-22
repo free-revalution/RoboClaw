@@ -53,6 +53,7 @@ set(TEST_SOURCES
     unit/test_claude_code_bridge.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
+    integration/test_social_manager.cpp
 )
 
 # 主项目源文件（用于链接）
@@ -75,6 +76,7 @@ set(MAIN_SOURCES
     ../src/skills/robot/sensor_skill.cpp
     ../src/cli/link_command.cpp
     ../src/social/telegram_adapter.cpp
+    ../src/social/social_manager.cpp
     ../src/agent/claude_code_bridge.cpp
 )
 

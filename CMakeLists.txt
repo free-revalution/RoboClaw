@@ -94,6 +94,7 @@ set(SOURCES
 
     # Social模块
     src/social/telegram_adapter.cpp
+    src/social/social_manager.cpp
 
     # Agent Bridge模块
     src/agent/claude_code_bridge.cpp
