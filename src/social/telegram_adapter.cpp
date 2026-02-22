@@ -127,7 +127,7 @@ bool TelegramAdapter::isValidBotToken(const std::string& token) {
     // Telegram Bot Token 格式: botid:hash
     // 格式: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
     // Bot ID: 1-10 digits, followed by colon, followed by 35 characters of [A-Za-z0-9_-]
-    std::regex pattern("^\\d{1,10}:[A-Za-z0-9_-]{35}$");
+    std::regex pattern("^\\d+:[A-Za-z0-9_-]{35}$");
     return std::regex_match(token, pattern);
 }
 
