@@ -46,6 +46,7 @@ set(TEST_SOURCES
     unit/test_serial_comm.cpp
     unit/test_motion_skill.cpp
     unit/test_sensor_skill.cpp
+    unit/test_hardware_config.cpp
 )
 
 # 主项目源文件（用于链接）
@@ -62,6 +63,7 @@ set(MAIN_SOURCES
     ../src/agent/tool_executor.cpp
     ../src/agent/prompt_builder.cpp
     ../src/hal/drivers/serial_comm.cpp
+    ../src/hal/hardware_config.cpp
     ../src/skills/robot/motion_skill.cpp
     ../src/skills/robot/sensor_skill.cpp
 )

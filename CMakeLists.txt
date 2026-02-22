@@ -88,6 +88,7 @@ set(SOURCES
 
     # HAL模块
     src/hal/drivers/serial_comm.cpp
+    src/hal/hardware_config.cpp
 
     # 平台相关
     ${PLATFORM_SOURCES}

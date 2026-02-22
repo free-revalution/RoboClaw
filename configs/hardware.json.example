@@ -1,0 +1,46 @@
+{
+  "motors": {
+    "motor_left": {
+      "type": "roboclaw",
+      "port": "/dev/ttyUSB0",
+      "address": 128,
+      "channel": 0,
+      "max_speed": 255
+    },
+    "motor_right": {
+      "type": "roboclaw",
+      "port": "/dev/ttyUSB0",
+      "address": 128,
+      "channel": 1,
+      "max_speed": 255
+    }
+  },
+  "sensors": {
+    "imu": {
+      "type": "mpu6050",
+      "bus": "i2c",
+      "address": 104
+    },
+    "lidar": {
+      "type": "rplidar_a1",
+      "port": "/dev/ttyUSB1"
+    },
+    "ultrasonic_front": {
+      "type": "hc_sr04",
+      "trigger_pin": 17,
+      "echo_pin": 27
+    },
+    "encoder_left": {
+      "type": "quadrature",
+      "pin_a": 5,
+      "pin_b": 6,
+      "ppr": 360
+    },
+    "encoder_right": {
+      "type": "quadrature",
+      "pin_a": 20,
+      "pin_b": 21,
+      "ppr": 360
+    }
+  }
+}
