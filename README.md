@@ -145,7 +145,7 @@ Or manually:
 ```bash
 git clone https://github.com/yourusername/RoboClaw.git
 cd RoboClaw
-./install
+./scripts/install
 ```
 
 **Windows / Windows 系统**
@@ -159,7 +159,7 @@ Or manually:
 ```powershell
 git clone https://github.com/yourusername/RoboClaw.git
 cd RoboClaw
-.\install.ps1
+.\scripts\install.ps1
 ```
 
 The installer will:

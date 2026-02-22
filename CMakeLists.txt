@@ -116,3 +116,7 @@ endif()
 
 # 安装规则
 install(TARGETS robopartner DESTINATION bin)
+
+# 安装技能文件
+install(DIRECTORY skills/builtin/ DESTINATION share/robopartner/skills/builtin OPTIONAL)
+install(DIRECTORY skills/user/ DESTINATION share/robopartner/skills/user OPTIONAL)

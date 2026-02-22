@@ -23,6 +23,43 @@
 using namespace std;
 using namespace roboclaw;
 
+// 获取内置技能目录路径
+string getBuiltinSkillsDir() {
+    // 首先尝试相对于可执行文件的路径
+    // 对于开发环境，可执行文件在 build/robopartner
+    // 技能文件在 skills/builtin
+    // 所以需要查找项目根目录
+
+    // 方法1: 检查相对路径
+    if (std::filesystem::exists("skills/builtin")) {
+        return "skills/builtin";
+    }
+
+    // 方法2: 检查上一级目录（从 build 目录运行）
+    if (std::filesystem::exists("../skills/builtin")) {
+        return "../skills/builtin";
+    }
+
+    // 方法3: 使用安装路径
+    string installPath = "/usr/local/share/robopartner/skills/builtin";
+    if (std::filesystem::exists(installPath)) {
+        return installPath;
+    }
+
+    // 方法4: 使用用户目录下的安装路径
+    const char* home = getenv("HOME");
+    if (home) {
+        string userInstallPath = string(home) + "/.local/share/robopartner/skills/builtin";
+        if (std::filesystem::exists(userInstallPath)) {
+            return userInstallPath;
+        }
+    }
+
+    // 默认返回当前目录下的 skills/builtin
+    // 如果不存在，会在加载时显示警告
+    return "skills/builtin";
+}
+
 // 版本信息
 const string ROBOPARTNER_VERSION = "0.2.0";
 const string ROBOPARTNER_NAME = "RoboPartner";
@@ -374,7 +411,7 @@ void startInteractiveMode(ConfigManager& config_mgr) {
 
     // 创建技能注册表并加载技能
     auto skillRegistry = std::make_shared<SkillRegistry>();
-    skillRegistry->loadSkillsFromDirectory("skills/builtin");
+    skillRegistry->loadSkillsFromDirectory(getBuiltinSkillsDir());
     skillRegistry->loadSkillsFromDirectory(config.skills.local_skills_dir);
     LOG_INFO("已加载 " + std::to_string(skillRegistry->getAllSkills().size()) + " 个技能");
 
