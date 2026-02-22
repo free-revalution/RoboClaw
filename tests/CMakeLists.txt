@@ -49,6 +49,7 @@ set(TEST_SOURCES
     unit/test_hardware_config.cpp
     unit/test_social_message.cpp
     unit/test_task_coordinator.cpp
+    unit/test_agent_bridge.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
 )
