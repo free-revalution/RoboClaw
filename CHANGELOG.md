@@ -164,6 +164,36 @@ Core Layer           → AI Engine, Task Parser, Code Generator, Session
 
 ---
 
+## [0.4.0] - 2025-02-22
+
+### 新增 - 社交软件连接 / Social Platform Connection
+
+#### 社交平台集成 / Social Platform Integration
+- **/link 命令** - 连接 Telegram、钉钉、飞书 / Connect Telegram, DingTalk, Feishu
+- **双向消息通信** / Bidirectional message communication
+- **远程控制终端功能** / Remote terminal control functionality
+
+#### Telegram 适配器 / Telegram Adapter
+- **Bot API 集成** / Bot API integration
+- **Long polling 消息接收** / Long polling message reception
+- **文件和消息发送** / File and message sending
+
+#### 任务协调器 / Task Coordinator
+- **智能任务分析** / Intelligent task analysis
+- **Agent 能力矩阵** / Agent capability matrix
+- **自动 Agent 选择** / Automatic agent selection
+
+#### Agent Bridge 系统 / Agent Bridge System
+- **Claude Code Bridge** / Claude Code Bridge
+- **统一 Agent 通信接口** / Unified agent communication interface
+- **任务委托和结果接收** / Task delegation and result reception
+
+### 文档 / Documentation
+- **社交软件连接指南** / Social platform connection guide
+- **Agent 协作架构文档** / Agent collaboration architecture documentation
+
+---
+
 ## [Unreleased]
 
 ### Added / 新增
