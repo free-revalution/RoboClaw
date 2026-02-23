@@ -2,684 +2,476 @@
 
 # RoboClaw
 
-### AI Agent Framework with Browser Automation / 带浏览器自动化的 AI Agent 框架
+### 🤖 AI-Powered Robotics Development Agent with Natural Language Interface
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![C++20](https://img.shields.io/badge/C++-20-00599C.svg)](https://en.cppreference.com/w/cpp/20)
+[![C++20](https://img.shes.io/badge/C++-20-00599C.svg)](https://en.cppreference.com/w/cpp/20)
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](README.md#installation)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#installation)
+[![GitHub Stars](https://img.shields.io/github/stars/free-revalution/RoboClaw?style=social)](https://github.com/free-revalution/RoboClaw)
 
-**"Your AI Development Partner" / "您的 AI 开发伙伴"**
+**Your Intelligent AI Partner for Robotics and Software Development**
 
+[English](#english) | [简体中文](#简体中文)
+
+---
+
+<a id="english"></a>
 </div>
 
----
+## What is RoboClaw?
 
-## Introduction / 简介
+**RoboClaw** is a cutting-edge AI Agent framework that revolutionizes how developers interact with their codebase and robotics hardware. By combining natural language understanding with powerful automation tools, RoboClaw acts as your intelligent development companion.
 
-**[English]**
+### 🌟 Key Highlights
 
-RoboClaw is an advanced AI Agent framework written in modern C++ that combines powerful code understanding with browser automation capabilities. Inspired by OpenClaw's visual interaction model and extending it with agent discovery and management, RoboClaw becomes your ultimate AI development companion:
-
-- **7 Core Tools**: Read, Write, Edit, Bash, Serial, **Browser (NEW)**, **Agent Manager (NEW)**
-- **Browser Automation**: Visual browser control similar to OpenClaw - navigate, click, type, screenshot
-- **Agent Discovery**: Automatically detect and manage local AI coding assistants (Claude Code, Cursor, Copilot, etc.)
-- **Minimal System Prompt**: The shortest possible Agent system prompt
-- **Self-Coding**: Agent writes its own code for new features instead of installing plugins
-- **Tree-Structured Conversations**: Support branching with bug fixes that don't pollute mainline
-- **High Performance**: Multithreaded with thread pool, read-write locks, and atomic operations
-- **Production Ready**: Token optimization, session persistence, cross-platform support
-- **Multilingual**: English and Simplified Chinese language support
-
-**[中文]**
-
-RoboClaw 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了强大的代码理解和浏览器自动化能力。灵感来源于 OpenClaw 的可视化交互模型，并扩展了 Agent 发现和管理功能，使其成为您的终极 AI 开发伙伴：
-
-- **7 个核心工具**：Read、Write、Edit、Bash、Serial、**Browser（浏览器自动化，新增）**、**Agent Manager（Agent 管理，新增）**
-- **浏览器自动化**：类似 OpenClaw 的可视化操作 - 导航、点击、输入、截图
-- **Agent 发现**：自动检测和管理本地 AI 编程助手（Claude Code、Cursor、Copilot 等）
-- **极简系统提示词**：最短的 Agent 系统提示词
-- **自编码能力**：需要新功能时让 Agent 自己写代码，而不是安装插件
-- **树状对话结构**：支持分支，修复 bug 不影响主线
-- **高性能**：多线程线程池、读写锁、原子操作
-- **生产就绪**：Token 优化、会话持久化、跨平台支持
-- **多语言支持**：支持简体中文和英文界面
+- **🧠 Natural Language Interface** - Control everything with plain English or Chinese commands
+- **🔌 Extensible Plugin System** - Modular architecture for vision, embedded, and simulation tools
+- **🤖 Robotics-First Design** - Built-in support for LiDAR, cameras, motor controllers, and sensors
+- **⚡ Lightning Fast** - C++20 powered with multithreading and zero-copy optimizations
+- **🌍 Cross-Platform** - Works seamlessly on macOS, Linux, and Windows
 
 ---
 
-## Features / 核心特性
+## Why RoboClaw?
 
-### Core Tools / 核心工具
+### 🎯 Unlike Traditional Tools
 
-| Tool | Description | 描述 |
-|------|-------------|------|
-| **Read** | Read file contents with pagination support | 读取文件内容，支持分页读取 |
-| **Write** | Create new files or overwrite existing files | 创建新文件或覆盖现有文件 |
-| **Edit** | Precise string replacement in files | 精确替换文件中的字符串 |
-| **Bash** | Execute shell commands with cross-platform support | 执行 shell 命令，跨平台支持 |
-| **Serial** | Serial port communication for embedded development | 串口通信工具，用于嵌入式开发 |
-| **Browser** | Browser automation (OpenClaw-style visual control) | 浏览器自动化（OpenClaw 风格可视化控制） |
-| **Agent** | Discover and manage local AI assistants | Agent 发现和管理 |
-| **Hardware** | Motor controllers, sensors, and embedded robotics | **硬件控制、传感器和嵌入式机器人（新增）** |
-| **Social** | Connect to Telegram, DingTalk, Feishu for remote control | **社交软件连接（新增）** |
+| Traditional IDE/Tools | RoboClaw Agent |
+|----------------------|----------------|
+| Manual code editing | Natural language commands |
+| Separate tools for each task | Unified AI-powered interface |
+| Hardware-specific SDKs | Generic plugin abstraction |
+| Complex build processes | One-command automation |
+| Static documentation | Interactive AI assistance |
 
-### New in v0.2.0 / v0.2.0 新功能
+### 💡 Powerful Capabilities
 
-#### Browser Automation / 浏览器自动化
+**For Software Developers:**
+- Read, write, and edit code files conversationally
+- Execute shell commands safely with AI oversight
+- Automate browser interactions for testing
+- Discover and coordinate with other AI agents
 
-**OpenClaw-Style Visual Control / OpenClaw 风格可视化控制**
-
-RoboClaw now includes powerful browser automation capabilities similar to OpenClaw:
-
-```
-# Open browser and navigate to URL / 打开浏览器并导航
-{"action": "open", "browser": "chrome"}
-{"action": "navigate", "url": "https://github.com"}
-
-# Take screenshot / 截图
-{"action": "screenshot"}
-
-# Click element / 点击元素
-{"action": "click", "selector_type": "css", "selector_value": "#submit-button"}
-
-# Type text / 输入文本
-{"action": "type", "selector_type": "css", "selector_value": "#search-input", "text": "search query"}
-
-# Execute JavaScript / 执行 JavaScript
-{"action": "execute", "script": "document.title='Hello from RoboClaw'"}
-
-# Scroll page / 滚动页面
-{"action": "scroll", "x": 0, "y": 500}
-```
-
-**Supported Browsers / 支持的浏览器**:
-- macOS: Safari, Chrome, Firefox
-- Linux: Chrome, Firefox
-- Windows: Edge, Chrome, Firefox
-
-#### Agent Discovery & Management / Agent 发现和管理
-
-Automatically discover and manage AI coding assistants installed on your system:
-
-```
-# List all installed agents / 列出所有已安装的 Agents
-roboclaw agent --list
-
-Output / 输出:
-ID: claude_code_vscode
-  Name: Claude Code VSCode Extension
-  Type: claude_code
-  Status: Enabled
-  Capabilities: code_completion, chat, code_explanation
-
-ID: cursor_app
-  Name: cursor
-  Type: cursor
-  Status: Enabled
-  Capabilities: ide, code_completion, chat, codebase_chat
-```
-
-**Supported Agents / 支持的 Agents**:
-- Claude Code (VSCode extension)
-- Cursor AI IDE
-- GitHub Copilot
-- OpenAI Codex
-- Tabnine
-- Blackbox AI
-- Sourcegraph Cody
-- Replit Ghostwriter
-- OpenClaw
-- And more...
+**For Robotics Engineers:**
+- Control hardware with natural language
+- Integrate vision sensors (LiDAR, depth cameras)
+- Automate embedded development workflows
+- Simulate and test in Gazebo/ROS 2
 
 ---
 
-### Embedded Robotics Platform / 嵌入式机器人平台 (v0.3.0 NEW)
+## Features
 
-**[English]**
+### 🛠️ Core AI Tools
 
-RoboClaw now supports embedded robotics development! Transform your Raspberry Pi or Jetson Nano into an intelligent robot controller with natural language commands.
+| Tool | Description |
+|------|-------------|
+| **Read** | Intelligently read and summarize files |
+| **Write** | Generate code from natural language descriptions |
+| **Edit** | Make precise code changes with context awareness |
+| **Bash** | Execute commands with safety validation |
+| **Serial** | Communicate with embedded hardware |
+| **Browser** | Automate web interactions and testing |
+| **Agent** | Coordinate with other AI assistants |
 
-**[中文]**
+### 🔬 Vision & Perception Module
 
-RoboClaw 现在支持嵌入式机器人开发！将您的 Raspberry Pi 或 Jetson Nano 变成支持自然语言命令的智能机器人控制器。
+> **NEW in v0.4.0** - Complete vision pipeline for robotics applications
 
-**Key Features / 核心功能**:
+- **Multi-Source Support**: RealSense cameras, RPLIDAR, industrial cameras
+- **Real-Time Processing**: SLAM, obstacle detection, navigation
+- **Data Recording**: Capture sensor data for offline analysis
+- **Plugin Architecture**: Easy integration of new vision devices
 
-- Hardware Abstraction Layer (HAL) / 硬件抽象层
-  - Motor Controllers: RoboClaw, Sabertooth, L298N, PWM drivers / 电机控制器：RoboClaw、Sabertooth、L298N、PWM 驱动
-  - Sensors: IMU (MPU6050), LiDAR, Ultrasonic, Encoders / 传感器：IMU (MPU6050)、LiDAR、超声波、编码器
-  - Communication: Serial/UART, I2C, SPI / 通信：Serial/UART、I2C、SPI
+```
+# Example: Start LiDAR scanning
+>>> /connect rplidar
+>>> Start scanning at 10Hz
+>>> Show obstacle distances
+Front: 1.2m | Right: 2.3m | Back: 0.8m | Left: 0.5m
+```
 
-- Robot Control Skills / 机器人控制技能
-  - Motion control: forward, backward, turn, stop / 运动控制：前进、后退、转向、停止
-  - Sensor reading: multi-sensor management / 传感器读取：多传感器管理
-  - Hardware configuration: JSON-based setup / 硬件配置：基于 JSON 的配置
+### 🔌 Plugin System
 
-**Supported Platforms / 支持的平台**:
-- Raspberry Pi 4, 3B+ (ARM64/ARM32)
-- Jetson Nano, Jetson Orin (ARM64)
-- BeagleBone Black (In Development / 开发中)
+RoboClaw's modular plugin architecture allows endless extensions:
 
-**Quick Start / 快速开始**:
+- **Vision Plugins**: Support for any camera or LiDAR
+- **Embedded Plugins**: STM32, ESP32, Arduino platforms
+- **Simulation Plugins**: Gazebo, Webots integration
+
+### 🤖 Hardware Control
+
+**Supported Hardware:**
+- Motor Controllers: RoboClaw, Sabertooth, L298N
+- Sensors: IMU (MPU6050), LiDAR, Ultrasonic, Encoders
+- Communication: UART, I2C, SPI
+
+### 🔗 Social Platform Integration
+
+Control your robots remotely through:
+- Telegram Bot API
+- DingTalk / Feishu (Enterprise)
+
+---
+
+## Quick Start
+
+### One-Line Installation
 
 ```bash
-# Configure hardware / 配置硬件
-cp configs/hardware.json.example ~/.roboclaw/hardware.json
-nano ~/.roboclaw/hardware.json
-
-# List hardware / 列出硬件
-roboclaw hardware list
-
-# Test connections / 测试连接
-roboclaw hardware test
-
-# Interactive robot control / 交互式机器人控制
-roboclaw
->>> 前进 50% 速度 2 秒
->>> 左转 90 度
->>> 读取 IMU 数据
->>> 停止
+curl -sSL https://raw.githubusercontent.com/free-revalution/RoboClaw/main/install.sh | bash
 ```
 
-**Documentation / 文档**: [Embedded Quick Start Guide](docs/embedded-quickstart.md)
-
----
-
-### Social Platform Integration / 社交平台集成 (NEW)
-
-**[English]**
-
-RoboClaw now supports connection to social platforms for remote control:
-
-- **Telegram Bot API** - Control RoboClaw via Telegram
-- **DingTalk / Feishu** - Enterprise platform integration
-- **/link command** - Easy setup wizard for platform connection
-
-**[中文]**
-
-RoboClaw 现在支持连接社交平台进行远程控制：
-
-- **Telegram Bot API** - 通过 Telegram 控制 RoboClaw
-- **钉钉 / 飞书** - 企业平台集成
-- **/link 命令** - 简单的连接设置向导
-
-**Quick Start / 快速开始**:
+### Manual Installation
 
 ```bash
-# Link to Telegram / 连接到 Telegram
-roboclaw
->>> /link
-选择平台: Telegram
-输入 Bot Token: <your_bot_token>
-
-# Or use CLI / 或使用命令行
-roboclaw social --platform telegram --token <your_bot_token>
-```
-
-**Documentation / 文档**: [Social Link Guide](docs/social-link-guide.md)
-
----
-
-### Agent Collaboration / Agent 协作 (NEW)
-
-**[English]**
-
-RoboClaw can intelligently delegate tasks to specialized agents:
-
-- **Claude Code** - Expert in C++ embedded development
-- **Cursor** - General purpose coding assistant
-- **OpenClaw** - Visual interaction specialist
-
-Use RoboClaw as your central coordinator, leveraging the strengths of each AI agent.
-
-**[中文]**
-
-RoboClaw 可以智能地将任务委派给专门的 Agents：
-
-- **Claude Code** - C++ 嵌入式开发专家
-- **Cursor** - 通用编码助手
-- **OpenClaw** - 可视化交互专家
-
-将 RoboClaw 作为您的中央协调器，利用每个 AI Agent 的优势。
-
----
-
-## Installation / 安装部署
-
-### Quick Install / 快速安装
-
-**Unix (macOS/Linux) / Unix 系统（macOS/Linux）**
-
-```bash
-curl -sSL https://raw.githubusercontent.com/yourusername/RoboClaw/main/install | bash
-```
-
-Or manually:
-```bash
-git clone https://github.com/yourusername/RoboClaw.git
+git clone https://github.com/free-revalution/RoboClaw.git
 cd RoboClaw
-./scripts/install
+./scripts/install.sh
 ```
 
-**Windows / Windows 系统**
-
-```powershell
-# Download and run the installer
-irm https://raw.githubusercontent.com/yourusername/RoboClaw/main/install.ps1 | iex
-```
-
-Or manually:
-```powershell
-git clone https://github.com/yourusername/RoboClaw.git
-cd RoboClaw
-.\scripts\install.ps1
-```
-
-The installer will:
-- 检测并安装依赖 / Detect and install dependencies
-- 自动配置构建系统 / Automatically configure build system
-- 编译并安装到 ~/.roboclaw / Compile and install to ~/.roboclaw
-- 创建命令行快捷方式 / Create command-line shortcut
-
-After installation, run:
-- After install: `roboclaw` or `~/bin/roboclaw`
-
----
-
-### Prerequisites / 前置要求
-
-| Dependency | Version | macOS | Linux | Windows |
-|------------|---------|--------|-------|---------|
-| CMake | 3.20+ | Homebrew | Package Manager | Installer |
-| C++ Compiler | C++20 | Xcode/Clang | GCC 10+ | MSVC 2019+ |
-| Ninja | Latest | Homebrew | Package Manager | Installer |
-| nlohmann/json | 3.11+ | Homebrew | Package Manager | vcpkg |
-
-### macOS Installation / macOS 安装
+### Build from Source
 
 ```bash
-# Install Xcode Command Line Tools
-xcode-select --install
-
-# Install dependencies via Homebrew
+# Install dependencies (macOS)
 brew install cmake ninja nlohmann-json
 
-# Clone repository
-git clone https://github.com/yourusername/RoboClaw.git RoboClaw
-cd RoboClaw
-
-# Configure with preset
-cmake --preset=release
-
-# Build
-cmake --build build --config Release
-
-# Run
-./build/roboclaw --help
-```
-
-### Linux Installation / Linux 安装
-
-```bash
-# Install dependencies (Ubuntu/Debian)
-sudo apt update
-sudo apt install -y cmake ninja-build nlohmann-json3-dev \
-    build-essential g++ git
-
-# Clone and build
-git clone https://github.com/yourusername/RoboClaw.git RoboClaw
-cd RoboClaw
+# Configure and build
 cmake --preset=release
 cmake --build build --config Release
-./build/roboclaw --help
-```
 
-### Windows Installation / Windows 安装
-
-```powershell
-# Install vcpkg
-git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
-.\vcpkg\bootstrap-vcpkg.bat
-
-# Install dependencies
-.\vcpkg\vcpkg install nlohmann-json:x64-windows cmake ninja
-
-# Clone and build
-git clone https://github.com/yourusername/RoboClaw.git RoboClaw
-cd RoboClaw
-cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -B build
-cmake --build build --config Release
-.\build\roboclaw.exe --help
-```
-
----
-
-## Quick Start / 快速开始
-
-### Basic Usage / 基本用法
-
-```bash
-# Start interactive mode / 启动交互模式
+# Run RoboClaw
 ./build/roboclaw
-
-# Show help / 显示帮助
-./build/roboclaw --help
-
-# List discovered agents / 列出发现的 Agents
-./build/roboclaw agent --list
-
-# Open browser / 打开浏览器
-./build/roboclaw browser --open
-```
-
-### Browser Automation Examples / 浏览器自动化示例
-
-```bash
-# Navigate to a website / 导航到网站
-./build/roboclaw browser --navigate https://github.com
-
-# Take a screenshot / 截图
-./build/roboclaw browser --screenshot
-
-# Interactively control browser / 交互式控制浏览器
-./build/roboclaw browser
-```
-
-### Agent Management Examples / Agent 管理示例
-
-```bash
-# List all installed AI agents / 列出所有已安装的 AI agents
-./build/roboclaw agent --list
-
-# Show specific agent details / 显示特定 Agent 详情
-./build/roboclaw agent --show claude_code_vscode
-
-# Launch an agent / 启动 Agent
-./build/roboclaw agent --launch cursor_app
 ```
 
 ---
 
-## Project Structure / 项目结构
+## Usage Examples
+
+### Example 1: Natural Language Code Editing
+
+```bash
+roboclaw
+
+>>> Read the MotionSkill class and add a rotateInPlace function
+[RoboClaw reads the file and generates the function]
+
+>>> Add error handling for the serial communication
+[RoboClaw adds try-catch blocks with appropriate logging]
+```
+
+### Example 2: Hardware Control
+
+```bash
+roboclaw
+
+>>> Connect to the motor controller on /dev/ttyUSB0
+Connected to RoboClaw motor controller
+
+>>> Move forward at 60% speed for 3 seconds
+[Motors running... Done]
+
+>>> Stop immediately
+[Emergency stop activated]
+```
+
+### Example 3: Vision System
+
+```bash
+roboclaw
+
+>>> Start the RealSense camera
+RealSense D435 connected at 640x480@30fps
+
+>>> Enable obstacle detection and alert when closer than 0.5m
+Obstacle detection enabled - Threshold: 0.5m
+
+>>> Record point cloud data to maps/room_scan.pcd
+Recording... [10000 frames captured]
+```
+
+---
+
+## Architecture
+
+RoboClaw's layered architecture ensures modularity and extensibility:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Natural Language Interface                │
+│                  "Start SLAM" | "Tune PID" | "Flash"         │
+├─────────────────────────────────────────────────────────────┤
+│                      Application Layer                       │
+│  ┌─────────────┐ ┌──────────────┐ ┌─────────────────────┐ │
+│  │    Vision   │ │   Embedded   │ │   Simulation &      │ │
+│  │    Module   │ │   Dev Auto   │ │   Verification      │ │
+│  └─────────────┘ └──────────────┘ └─────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│                       Plugin Layer                           │
+│  Vision Devices | MCU Platforms | Sim Tools | Optimizers   │
+├─────────────────────────────────────────────────────────────┤
+│                        HAL Layer                             │
+│  Device Abstraction | Communication | Data Pipeline         │
+├─────────────────────────────────────────────────────────────┤
+│                         Core Layer                           │
+│  AI Engine | Task Parser | Code Generator | Session Manager │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
 
 ```
 RoboClaw/
-├── CMakeLists.txt              # CMake configuration
-├── README.md                   # This file
-├── LICENSE                     # MIT License
-├── configs/
-│   └── hardware.json.example  # Hardware configuration example (NEW)
 ├── src/
-│   ├── main.cpp               # Entry point
-│   ├── cli/                   # CLI module
-│   │   ├── config_wizard.cpp   # Configuration wizard with language selection
-│   │   ├── interactive_mode.cpp # Interactive mode
-│   │   └── agent_commands.cpp  # Agent management commands
-│   ├── tools/                 # Tools implementation
-│   │   ├── tool_base.{h,cpp}   # Base tool class
-│   │   ├── read_tool.{h,cpp}   # Read tool
-│   │   ├── write_tool.{h,cpp}  # Write tool
-│   │   ├── edit_tool.{h,cpp}   # Edit tool
-│   │   ├── bash_tool.{h,cpp}   # Bash tool
-│   │   ├── serial_tool.{h,cpp}  # Serial port tool
-│   │   ├── browser_tool.{h,cpp} # Browser automation
-│   │   └── agent_tool.{h,cpp}   # Agent discovery
-│   ├── hal/                   # Hardware Abstraction Layer (NEW)
-│   │   ├── motor_controller.h  # Motor controller interface
-│   │   ├── sensor.h            # Sensor interface
-│   │   ├── comm.h              # Communication interface
-│   │   ├── hal_exception.h     # Hardware exceptions
-│   │   ├── hardware_config.{h,cpp} # Configuration manager
-│   │   └── drivers/            # Hardware drivers
-│   │       ├── serial_comm.{h,cpp} # Serial communication
-│   │       ├── roboclaw_driver.cpp  # RoboClaw driver (TODO)
-│   │       └── mpu6050_driver.cpp   # MPU6050 driver (TODO)
-│   ├── skills/                # Robot control skills (NEW)
-│   │   ├── robot/
-│   │   │   ├── motion_skill.{h,cpp}  # Motion control
-│   │   │   └── sensor_skill.{h,cpp}  # Sensor reading
-│   │   └── embedded/          # Embedded development skills (TODO)
-│   ├── agent/
-│   │   ├── agent.h/.cpp       # Core Agent class
-│   │   ├── tool_executor.h/.cpp # Tool executor (now with 8 tools)
-│   │   └── prompt_builder.h/.cpp # Prompt builder
-│   ├── llm/                   # LLM provider interface
-│   ├── session/                # Session management
-│   ├── optimization/           # Token optimization
-│   └── utils/                 # Utility classes
-├── docs/
-│   ├── embedded-quickstart.md # Embedded robotics guide (NEW)
-│   └── plans/                 # Design documents
-└── tests/
-    ├── unit/                  # Unit tests
-    ├── integration/           # Integration tests
-    └── e2e/                   # End-to-end tests
+│   ├── agent/              # Core AI Agent engine
+│   ├── vision/             # Vision perception pipeline
+│   ├── plugins/            # Plugin system & interfaces
+│   ├── tools/              # AI-powered tools
+│   ├── hal/                # Hardware Abstraction Layer
+│   ├── skills/             # Robot control skills
+│   └── llm/                # LLM provider interface
+├── plugins/
+│   ├── vision/             # Vision device plugins
+│   │   ├── realsense2/
+│   │   └── rplidar/
+│   ├── embedded/           # Embedded platform plugins
+│   └── simulation/         # Simulation tool plugins
+├── docs/                   # Comprehensive documentation
+└── tests/                  # Unit, integration, E2E tests
 ```
 
 ---
 
-## Architecture / 架构设计
+## Documentation
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     RoboClaw Framework                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────┐    ┌───────────┐    ┌────────────────┐   │
-│  │   CLI       │    │   Agent   │    │  Browser       │   │
-│  │   Module    │◄──►│   Engine   │◄──►│  Automation   │   │
-│  └─────────────┘    └─────┬─────┘    └────────────────┘   │
-│                          │                                  │
-│                   ┌──────▼───────┐                          │
-│                   │  Tool        │                          │
-│                   │  Executor    │                          │
-│                   └──────┬───────┘                          │
-│                          │                                  │
-│         ┌─────────────┼─────────────┐                       │
-│         ▼             ▼             ▼                       │
-│   ┌─────────┐ ┌──────────┐ ┌──────────┐                    │
-│   │   Read   │ │  Write   │ │   Edit   │                │
-│   │   Tool   │ │   Tool   │ │   Tool   │                │
-│   └─────────┘ └──────────┘ └──────────┘                    │
-│                                                        ┌──────────┐  │
-│                                                        │  Bash    │  │
-│                                                        │  Tool    │  │
-│                                                        └──────────┘  │
-│                                                 ┌────────────┐   │
-│                                                 │    Serial  │   │
-│                                                 │    Tool    │   │
-│                                                 └────────────┘   │
-│                                                 ┌─────────────┐  │
-│                                                 │   Browser   │  │
-││                                                 │   Tool     │  │
-│                                                 └─────────────┘  │
-│                                                 ┌─────────────┐  │
-│                                                 │    Agent    │  │
-│                                                 │    Tool     │  │
-│                                                 └─────────────┘  │
-│                                                 ┌─────────────┐  │
-│                                                 │  Hardware   │  │
-│                                                 │    Tool     │  │ (NEW)
-│                                                 └─────┬───────┘  │
-│                                                       │         │
-│                              ┌────────────────────────┘         │
-│                              ▼                                  │
-│                   ┌─────────────────────┐                      │
-│                   │   HAL & Skills      │                      │
-│                   │ ┌─────────────────┐ │                      │
-│                   │ │ Motor/Sensor    │ │                      │
-│                   │ │ Interfaces      │ │                      │
-│                   │ └─────────────────┘ │                      │
-│                   │ ┌─────────────────┐ │                      │
-│                   │ │ Motion/Sensor   │ │                      │
-│                   │ │ Skills          │ │                      │
-│                   │ └─────────────────┘ │                      │
-│                   └─────────────────────┘                      │
-│                                                                  │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │              Thread Pool (Multithreading)              │  │
-│  └──────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────────┐       │
-│  │   Session   │  │ Token        │  │    Agent       │       │
-│  │  Manager    │  │  Optimizer   │  │  Discovery     │       │
-│  └─────────────┘  └──────────────┘  └────────────────┘       │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-```
+- [Quick Start Guide](docs/quickstart.md)
+- [Vision Module Guide](docs/vision-guide.md)
+- [Hardware Integration](docs/hardware-integration.md)
+- [Plugin Development](docs/plugin-development.md)
+- [API Reference](docs/api-reference.md)
 
 ---
 
-## Usage Examples / 使用示例
+## Contributing
 
-### Example 1: Browser Automation / 浏览器自动化
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-```cpp
-// Open browser and navigate / 打开浏览器并导航
-ToolResult result = toolExecutor->execute("browser", {
-    {"action", "open"},
-    {"browser", "chrome"}
-});
-
-result = toolExecutor->execute("browser", {
-    {"action", "navigate"},
-    {"url", "https://github.com"}
-});
-
-// Take screenshot / 截图
-result = toolExecutor->execute("browser", {
-    {"action", "screenshot"}
-});
-```
-
-### Example 2: Agent Discovery / Agent 发现
-
-```cpp
-// List all agents / 列出所有 Agents
-ToolResult result = toolExecutor->execute("agent", {
-    {"action", "list"}
-});
-
-// Get agent capabilities / 获取 Agent 能力
-result = toolExecutor->execute("agent", {
-    {"action", "capabilities"},
-    {"agent_id", "claude_code_vscode"}
-});
-```
-
-### Example 3: Combined Workflow / 组合工作流
-
-```cpp
-// 1. Discover agents / 发现 Agents
-auto agents = toolExecutor->execute("agent", {{"action", "list"}});
-
-// 2. Open browser / 打开浏览器
-toolExecutor->execute("browser", {{"action", "open"}});
-
-// 3. Navigate to repository / 导航到仓库
-toolExecutor->execute("browser", {{"action", "navigate"}, {"url", "https://github.com/user/repo"}});
-
-// 4. Read README / 读取 README
-toolExecutor->execute("read", {{"file", "README.md"}});
-```
-
-### Example 4: Robot Control / 机器人控制（新增）
-
-```cpp
-// Hardware control using HAL / 使用 HAL 进行硬件控制
-#include "skills/robot/motion_skill.h"
-#include "hal/drivers/serial_comm.h"
-
-using namespace roboclaw::skills;
-using namespace roboclaw::hal::drivers;
-
-// Create motor controller / 创建电机控制器
-auto motorController = std::make_shared<RoboClawDriver>();
-motorController->initialize({
-    {"port", "/dev/ttyUSB0"},
-    {"address", 128}
-});
-
-// Create motion skill / 创建运动技能
-MotionSkill motion(motorController);
-
-// Control robot / 控制机器人
-motion.forward(50, 2.0);  // Forward at 50% speed for 2 seconds / 前进 50% 速度 2 秒
-motion.turn(90, 50);      // Turn right 90 degrees / 右转 90 度
-motion.stop();            // Emergency stop / 紧急停止
-```
+**Areas needing help:**
+- Additional vision sensor plugins
+- More embedded platform support
+- Simulation tool integrations
+- Documentation improvements
+- Bug fixes and performance optimizations
 
 ---
 
-## Documentation / 文档
+## Roadmap
 
-- [Embedded Robotics Quick Start](docs/embedded-quickstart.md) - 嵌入式机器人快速入门指南（新增）
-- [Social Link Guide](docs/social-link-guide.md) - 社交软件连接指南（新增）
-- [Hardware Configuration Guide](configs/hardware.json.example) - 硬件配置示例
-- [Design Document](docs/plans/2025-02-20-roboclaw-design.md) - 设计文档
-- [Extension Design](docs/plans/2025-02-20-extensions-design.md) - 扩展设计
-- [Test Documentation](tests/README.md) - 测试文档
-
----
-
-## License / 许可证
-
-```
-MIT License
-
-Copyright (c) 2025 RoboClaw Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+- [x] **v0.1** - Core AI Agent framework
+- [x] **v0.2** - Browser automation & Agent discovery
+- [x] **v0.3** - Hardware control & Social platform integration
+- [x] **v0.4** - Vision perception module & Plugin system
+- [ ] **v0.5** - Embedded development automation
+- [ ] **v0.6** - ROS/Gazebo simulation integration
+- [ ] **v0.7** - Complete robotics development platform
 
 ---
 
-## Contributing / 贡献指南
+## License
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## Acknowledgments / 致谢
+## Acknowledgments
 
-**[English]**
-- [OpenClaw](https://github.com/OpenClaw) - Original inspiration for visual browser control / 可视化浏览器控制的原始灵感
-- [CPR](https://github.com/libcpr/cpr) - HTTP library / HTTP 库
-- [nlohmann/json](https://github.com/nlohmann/json) - JSON library / JSON 库
-- All contributors / 所有贡献者
-
-**[中文]**
-- [OpenClaw](https://github.com/OpenClaw) - 浏览器可视化控制的灵感来源
-- [CPR](https://github.com/libcpr/cpr) - HTTP 库
-- [nlohmann/json](https://github.com/nlohmann/json) - JSON 库
-- 所有开源贡献者
+- [OpenClaw](https://github.com/OpenClaw) - Inspiration for visual browser control
+- [nlohmann/json](https://github.com/nlohmann/json) - Excellent JSON library
+- [CPR](https://github.com/libcpr/cpr) - Modern C++ HTTP library
+- All contributors and supporters
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by the RoboClaw Community**
+**Built with ❤️ by the Robotics and AI Community**
 
-**用 ❤️ 构建 | RoboClaw 社区**
+[⭐ Star](https://github.com/free-revalution/RoboClaw) &nbsp;&nbsp;
+[🍴 Fork](https://github.com/free-revalution/RoboClaw/fork) &nbsp;&nbsp;
+[📖 Docs](https://github.com/free-revalution/RoboClaw/wiki) &nbsp;&nbsp;
+[🐛 Issues](https://github.com/free-revalution/RoboClaw/issues)
 
-[⭐ Star](https://github.com/yourusername/RoboClaw) &nbsp;&nbsp;
-[🍴 Fork](https://github.com/yourusername/RoboClaw/fork) &nbsp;&nbsp;
-[📖 Documentation](https://github.com/yourusername/RoboClaw/wiki)
+**Join our community and help build the future of robotics development!**
+
+</div>
+
+---
+
+<a id="简体中文"></a>
+
+<div align="center">
+
+# RoboClaw
+
+### 🤖 基于自然语言接口的AI驱动机器人开发Agent
+
+[![许可协议: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![C++20](https://img.shields.io/badge/C++-20-00599C.svg)](https://en.cppreference.com/w/cpp/20)
+[![CMake](https://img.shields.io/badge/CMake-3.20%2B-blue.svg)](https://cmake.org/)
+[![平台支持](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#installation)
+[![GitHub Stars](https://img.shields.io/github/stars/free-revalution/RoboClaw?style=social)](https://github.com/free-revalution/RoboClaw)
+
+**您的智能AI伙伴，用于机器人开发和软件开发**
+
+</div>
+
+## RoboClaw是什么？
+
+**RoboClaw**是一个革命性的AI Agent框架，它彻底改变了开发者与代码库和机器人硬件的交互方式。通过将自然语言理解与强大的自动化工具相结合，RoboClaw成为您智能开发的伙伴。
+
+### 🌟 核心亮点
+
+- **🧠 自然语言接口** - 使用纯中文或英文命令控制一切
+- **🔌 可扩展插件系统** - 支持视觉、嵌入式和仿真工具的模块化架构
+- **🤖 机器人优先设计** - 内置LiDAR、摄像头、电机控制器和传感器支持
+- **⚡ 极速性能** - C++20驱动，多线程和零拷贝优化
+- **🌍 跨平台支持** - 在macOS、Linux和Windows上无缝工作
+
+---
+
+## 为什么选择RoboClaw？
+
+### 🎯 与传统工具的区别
+
+| 传统IDE/工具 | RoboClaw Agent |
+|-------------|---------------|
+| 手动代码编辑 | 自然语言命令 |
+| 每个任务单独的工具 | 统一的AI驱动接口 |
+| 硬件特定的SDK | 通用插件抽象 |
+| 复杂的构建流程 | 一键自动化 |
+| 静态文档 | 交互式AI辅助 |
+
+### 💡 强大功能
+
+**面向软件开发者：**
+- 通过对话方式读取、编写和编辑代码文件
+- 在AI监督下安全执行shell命令
+- 自动化浏览器交互进行测试
+- 发现并协调其他AI助手
+
+**面向机器人工程师：**
+- 使用自然语言控制硬件
+- 集成视觉传感器（LiDAR、深度摄像头）
+- 自动化嵌入式开发工作流
+- 在Gazebo/ROS 2中仿真和测试
+
+---
+
+## 核心功能
+
+### 🛠️ AI核心工具
+
+| 工具 | 描述 |
+|------|------|
+| **Read** | 智能读取和总结文件 |
+| **Write** | 根据自然语言描述生成代码 |
+| **Edit** | 带上下文感知的精确代码更改 |
+| **Bash** | 带安全验证的命令执行 |
+| **Serial** | 与嵌入式硬件通信 |
+| **Browser** | 自动化Web交互和测试 |
+| **Agent** | 协调其他AI助手 |
+
+### 🔬 视觉感知模块
+
+> **v0.4.0新增** - 用于机器人应用的完整视觉管道
+
+- **多源支持**：RealSense摄像头、RPLIDAR、工业摄像头
+- **实时处理**：SLAM、障碍物检测、导航
+- **数据录制**：捕获传感器数据用于离线分析
+- **插件架构**：轻松集成新的视觉设备
+
+```
+# 示例：启动LiDAR扫描
+>>> /connect rplidar
+>>> 开始10Hz扫描
+>>> 显示障碍物距离
+前方: 1.2m | 右侧: 2.3m | 后方: 0.8m | 左侧: 0.5m
+```
+
+---
+
+## 快速开始
+
+### 一键安装
+
+```bash
+curl -sSL https://raw.githubusercontent.com/free-revalution/RoboClaw/main/install.sh | bash
+```
+
+### 从源码构建
+
+```bash
+# 安装依赖 (macOS)
+brew install cmake ninja nlohmann-json
+
+# 配置并构建
+cmake --preset=release
+cmake --build build --config Release
+
+# 运行RoboClaw
+./build/roboclaw
+```
+
+---
+
+## 使用示例
+
+### 示例1：自然语言代码编辑
+
+```bash
+roboclaw
+
+>>> 读取MotionSkill类并添加rotateInPlace函数
+[RoboClaw读取文件并生成函数]
+
+>>> 为串口通信添加错误处理
+[RoboClaw添加try-catch块和适当的日志]
+```
+
+### 示例2：硬件控制
+
+```bash
+roboclaw
+
+>>> 连接/dev/ttyUSB0上的电机控制器
+已连接到RoboClaw电机控制器
+
+>>> 以60%速度前进3秒
+[电机运行中... 完成]
+
+>>> 立即停止
+[紧急停止已激活]
+```
+
+---
+
+## 许可证
+
+MIT License - 详见 [LICENSE](LICENSE)
+
+---
+
+<div align="center">
+
+**用 ❤️ 构建 | 机器人和AI社区**
+
+[⭐ Star](https://github.com/free-revalution/RoboClaw) &nbsp;&nbsp;
+[🍴 Fork](https://github.com/free-revalution/RoboClaw/fork) &nbsp;&nbsp;
+[📖 文档](https://github.com/free-revalution/RoboClaw/wiki)
+
+**加入我们的社区，共同构建机器人开发的未来！**
 
 </div>
