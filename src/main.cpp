@@ -63,7 +63,7 @@ string getBuiltinSkillsDir() {
 }
 
 // 版本信息
-const string ROBOCLAW_VERSION = "0.2.0";
+const string ROBOCLAW_VERSION = "0.4.1";
 const string ROBOCLAW_NAME = "RoboClaw";
 const string ROBOCLAW_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
 
