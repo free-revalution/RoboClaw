@@ -82,33 +82,45 @@ void InteractiveMode::displayResponse(const AgentResponse& response) {
     using namespace Color;
 
     if (!response.success) {
-        std::cout << RED << "Error: " << response.error << RESET << std::endl;
+        // 使用统一的错误样式盒子
+        UI::drawError(response.error);
         return;
     }
 
     if (!response.content.empty()) {
-        std::cout << WHITE << response.content << RESET << std::endl;
+        // 使用圆角盒子展示助手回复，提升可读性与美观度
+        UI::drawBox(
+            "Assistant / 助手",
+            response.content,
+            0,
+            UI::BoxStyle::ROUNDED,
+            UI::Alignment::LEFT
+        );
     }
 
     if (config_.show_tool_calls && !response.tool_calls.empty()) {
-        std::cout << GRAY;
-        UI::drawSeparator("single");
-        std::cout << RESET;
-
+        // 将工具调用信息放入单独盒子中
+        std::vector<std::string> toolLines;
         for (const auto& call : response.tool_calls) {
-            std::cout << YELLOW << "[Tool: " << call.name << "]" << RESET << " ";
-            std::cout << GRAY << call.arguments.dump() << RESET << std::endl;
+            std::ostringstream oss;
+            oss << "[Tool: " << call.name << "] " << call.arguments.dump();
+            toolLines.push_back(oss.str());
         }
 
-        std::cout << GRAY;
-        UI::drawSeparator("single");
-        std::cout << RESET << std::endl;
+        UI::drawBox(
+            "Tool Calls / 工具调用",
+            toolLines,
+            0,
+            UI::BoxStyle::ASCII,
+            UI::Alignment::LEFT
+        );
     }
 
     if (response.total_input_tokens > 0 || response.total_output_tokens > 0) {
-        std::cout << GRAY << "Tokens: " << response.total_input_tokens
-                  << " input, " << response.total_output_tokens << " output"
-                  << RESET << std::endl;
+        std::ostringstream oss;
+        oss << "Tokens: " << response.total_input_tokens
+            << " input, " << response.total_output_tokens << " output";
+        UI::drawInfo(oss.str());
     }
 }
 
@@ -489,40 +501,31 @@ void InteractiveMode::showBanner() {
     if (!session) {
         return;
     }
-
     const auto& config = config_manager_.getConfig();
     std::string provider = ConfigManager::providerToString(config.default_config.provider);
     std::string model = config.default_config.model;
 
-    // 获取终端宽度
-    #ifdef PLATFORM_WINDOWS
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    #else
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    int width = w.ws_col;
-    #endif
+    std::string sessionTitle = session->getTitle().empty()
+        ? "Untitled Session"
+        : session->getTitle();
 
-    if (width > 80) width = 80;
-
-    std::string separator(width - 1, '-');
-
-    std::cout << "\033[90m" << separator << "\033[0m" << std::endl;
-    std::cout << "\033[90m  \033[0m";
-    std::cout << "RoboClaw v0.1.0";
-    std::cout << " | " << provider << " " << model;
-
-    auto currentSession = session_manager_->getCurrentSession();
-    if (currentSession) {
-        auto currentNode = currentSession->getCurrentNode();
-        if (currentNode && !currentNode->getBranchName().empty()) {
-            std::cout << " | 分支: \033[33m" << currentNode->getBranchName() << "\033[0m";
-        }
+    std::string branchName;
+    auto currentNode = session->getCurrentNode();
+    if (currentNode && !currentNode->getBranchName().empty()) {
+        branchName = currentNode->getBranchName();
     }
 
-    std::cout << "\n\033[90m" << separator << "\033[0m" << std::endl;
+    std::ostringstream header;
+    header << "RoboClaw Interactive  "
+           << "| Provider: " << provider
+           << " | Model: " << model
+           << " | Session: " << sessionTitle;
+
+    if (!branchName.empty()) {
+        header << " | Branch: " << branchName;
+    }
+
+    UI::drawRule(header.str());
 }
 
 void InteractiveMode::showPrompt() {
