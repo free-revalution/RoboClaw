@@ -22,12 +22,12 @@
 
 ```bash
 #!/usr/bin/env bash
-# RoboPartner Installation Script
+# RoboClaw Installation Script
 # Supports: macOS, Linux
 
 set -e
 
-INSTALL_DIR="${INSTALL_DIR:-$HOME/.robopartner}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.roboclaw}"
 BIN_DIR="$HOME/bin"
 REPO_URL="https://github.com/xxx/RoboClaw.git"
 ```

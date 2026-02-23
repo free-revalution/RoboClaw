@@ -1,14 +1,14 @@
-# RoboPartner Embedded Robotics Platform - Quick Start
+# RoboClaw Embedded Robotics Platform - Quick Start
 
 ## Overview / 概述
 
 **[English]**
 
-RoboPartner Embedded Robotics Platform extends RoboPartner with hardware control capabilities for robotics development. It provides a hardware abstraction layer (HAL) for controlling motors, reading sensors, and managing communication protocols on embedded Linux systems like Raspberry Pi and Jetson Nano.
+RoboClaw Embedded Robotics Platform extends RoboClaw with hardware control capabilities for robotics development. It provides a hardware abstraction layer (HAL) for controlling motors, reading sensors, and managing communication protocols on embedded Linux systems like Raspberry Pi and Jetson Nano.
 
 **[中文]**
 
-RoboPartner 嵌入式机器人平台扩展了 RoboPartner 的硬件控制能力，为机器人开发提供硬件抽象层（HAL）。它支持在 Raspberry Pi 和 Jetson Nano 等嵌入式 Linux 系统上控制电机、读取传感器和管理通信协议。
+RoboClaw 嵌入式机器人平台扩展了 RoboClaw 的硬件控制能力，为机器人开发提供硬件抽象层（HAL）。它支持在 Raspberry Pi 和 Jetson Nano 等嵌入式 Linux 系统上控制电机、读取传感器和管理通信协议。
 
 ---
 
@@ -91,7 +91,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/arm-linux-gnueabihf.cmake -B build
 cmake --build build --config Release
 
 # Transfer to target device / 传输到目标设备
-scp build/robopartner pi@raspberrypi.local:~/
+scp build/roboclaw pi@raspberrypi.local:~/
 ```
 
 ---
@@ -132,11 +132,11 @@ Raspberry Pi          MPU6050 IMU
 
 ```bash
 # Copy example configuration / 复制示例配置
-mkdir -p ~/.robopartner
-cp configs/hardware.json.example ~/.robopartner/hardware.json
+mkdir -p ~/.roboclaw
+cp configs/hardware.json.example ~/.roboclaw/hardware.json
 
 # Edit configuration / 编辑配置
-nano ~/.robopartner/hardware.json
+nano ~/.roboclaw/hardware.json
 ```
 
 **Configuration Example / 配置示例**:
@@ -181,7 +181,7 @@ nano ~/.robopartner/hardware.json
 
 ```bash
 # List all configured hardware / 列出所有配置的硬件
-robopartner hardware list
+roboclaw hardware list
 
 # Output / 输出:
 # Motors / 电机:
@@ -197,7 +197,7 @@ robopartner hardware list
 
 ```bash
 # Test hardware connections / 测试硬件连接
-robopartner hardware test
+roboclaw hardware test
 
 # Output / 输出:
 # [OK] motor_left: Connected
@@ -210,14 +210,14 @@ robopartner hardware test
 
 ```bash
 # Launch robot control agent / 启动机器人控制 Agent
-robopartner agent --launch robot-controller
+roboclaw agent --launch robot-controller
 ```
 
 ### 4. Interactive Control / 交互式控制
 
 ```bash
 # Enter interactive mode / 进入交互模式
-robopartner
+roboclaw
 
 # Natural language commands / 自然语言命令:
 >>> 前进 50% 速度 2 秒
@@ -486,7 +486,7 @@ def generate_launch_description():
             arguments=['/path/to/robot.model'],
         ),
         Node(
-            package='robopartner',
+            package='roboclaw',
             executable='robot_controller',
             output='screen',
         ),
@@ -519,6 +519,6 @@ MIT 许可证 - 详情见 [LICENSE](LICENSE)。
 
 ---
 
-**Made with ❤️ by the RoboPartner Community**
+**Made with ❤️ by the RoboClaw Community**
 
-**用 ❤️ 构建 | RoboPartner 社区**
+**用 ❤️ 构建 | RoboClaw 社区**

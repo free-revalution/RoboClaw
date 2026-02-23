@@ -1,4 +1,4 @@
-# RoboPartner Embedded Robotics Architecture Design
+# RoboClaw Embedded Robotics Architecture Design
 
 **Date**: 2025-02-22
 **Status**: Design Validated
@@ -6,7 +6,7 @@
 
 ## Overview
 
-RoboPartner is evolving from a general-purpose AI agent into an embedded robotics development platform targeting Raspberry Pi, Jetson Nano, and similar Linux-based embedded systems. The system provides natural language control of robot hardware, embedded development assistance, and integration with ROS.
+RoboClaw is evolving from a general-purpose AI agent into an embedded robotics development platform targeting Raspberry Pi, Jetson Nano, and similar Linux-based embedded systems. The system provides natural language control of robot hardware, embedded development assistance, and integration with ROS.
 
 ## Design Goals
 

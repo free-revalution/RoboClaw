@@ -2,7 +2,7 @@
 
 ## 支持的平台
 
-RoboPartner 支持连接以下社交平台：
+RoboClaw 支持连接以下社交平台：
 
 - **Telegram** (推荐) - 全球广泛使用的即时通讯应用
 - **钉钉** - 企业级协作平台
@@ -12,7 +12,7 @@ RoboPartner 支持连接以下社交平台：
 
 ### 方式一：使用交互式连接向导（推荐）
 
-在 RoboPartner 中执行:
+在 RoboClaw 中执行:
 ```
 /link
 ```
@@ -23,19 +23,19 @@ RoboPartner 支持连接以下社交平台：
 
 ```bash
 # 连接 Telegram
-robopartner social --platform telegram --token <your_bot_token>
+roboclaw social --platform telegram --token <your_bot_token>
 
 # 连接钉钉
-robopartner social --platform dingtalk --app-key <app_key> --app-secret <app_secret>
+roboclaw social --platform dingtalk --app-key <app_key> --app-secret <app_secret>
 
 # 连接飞书
-robopartner social --platform feishu --app-id <app_id> --app-secret <app_secret>
+roboclaw social --platform feishu --app-id <app_id> --app-secret <app_secret>
 
 # 列出已连接的平台
-robopartner social --list
+roboclaw social --list
 
 # 断开连接
-robopartner social --disconnect <platform_name>
+roboclaw social --disconnect <platform_name>
 ```
 
 ## 平台配置详解
@@ -52,8 +52,8 @@ robopartner social --disconnect <platform_name>
 #### 1.2 配置步骤
 
 ```bash
-# 启动 RoboPartner
-robopartner
+# 启动 RoboClaw
+roboclaw
 
 # 使用连接命令
 >>> /link
@@ -63,12 +63,12 @@ robopartner
 
 或使用命令行：
 ```bash
-robopartner social --platform telegram --token 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
+roboclaw social --platform telegram --token 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 ```
 
 #### 1.3 使用示例
 
-连接成功后，您可以通过 Telegram 发送指令给 RoboPartner：
+连接成功后，您可以通过 Telegram 发送指令给 RoboClaw：
 
 ```
 # 基础指令
@@ -102,7 +102,7 @@ robopartner social --platform telegram --token 1234567890:ABCdefGHIjklMNOpqrsTUV
 #### 2.2 配置步骤
 
 ```bash
-robopartner social --platform dingtalk --app-key <your_app_key> --app-secret <your_app_secret>
+roboclaw social --platform dingtalk --app-key <your_app_key> --app-secret <your_app_secret>
 ```
 
 #### 2.3 使用方式
@@ -123,14 +123,14 @@ robopartner social --platform dingtalk --app-key <your_app_key> --app-secret <yo
 #### 3.2 配置步骤
 
 ```bash
-robopartner social --platform feishu --app-id <your_app_id> --app-secret <your_app_secret>
+roboclaw social --platform feishu --app-id <your_app_id> --app-secret <your_app_secret>
 ```
 
 ## 配置文件
 
 连接信息会保存在配置文件中：
 
-- **位置**: `~/.robopartner/social.json`
+- **位置**: `~/.roboclaw/social.json`
 - **格式**: JSON
 
 示例：
@@ -175,7 +175,7 @@ A: 请确保：
 
 ### Q: 支持哪些指令？
 
-A: 支持 RoboPartner 的所有核心功能：
+A: 支持 RoboClaw 的所有核心功能：
 - 文件操作（Read, Write, Edit）
 - Shell 命令执行
 - 代码分析和生成
@@ -195,23 +195,23 @@ A: 支持 RoboPartner 的所有核心功能：
 
 ```bash
 # 设置环境变量
-export ROBOPARTNER_DEBUG=1
+export ROBOCLAW_DEBUG=1
 
 # 查看详细日志
-robopartner --verbose
+roboclaw --verbose
 ```
 
 ### 测试连接
 
 ```bash
 # 测试 Telegram 连接
-robopartner social --test telegram
+roboclaw social --test telegram
 
 # 测试钉钉连接
-robopartner social --test dingtalk
+roboclaw social --test dingtalk
 
 # 测试飞书连接
-robopartner social --test feishu
+roboclaw social --test feishu
 ```
 
 ## 高级配置
@@ -235,20 +235,20 @@ robopartner social --test feishu
 对于生产环境，建议使用 Webhook 而非轮询：
 
 ```bash
-robopartner social --webhook --url https://your-domain.com/webhook
+roboclaw social --webhook --url https://your-domain.com/webhook
 ```
 
 ## 卸载和断开
 
 ```bash
 # 断开特定平台
-robopartner social --disconnect telegram
+roboclaw social --disconnect telegram
 
 # 清除所有社交平台连接
-robopartner social --clear
+roboclaw social --clear
 
 # 删除配置文件
-rm ~/.robopartner/social.json
+rm ~/.roboclaw/social.json
 ```
 
 ## 更多资源
@@ -256,4 +256,4 @@ rm ~/.robopartner/social.json
 - [Telegram Bot API 文档](https://core.telegram.org/bots/api)
 - [钉钉开放平台文档](https://open.dingtalk.com/document/)
 - [飞书开放平台文档](https://open.feishu.cn/document/)
-- [RoboPartner 主文档](../README.md)
+- [RoboClaw 主文档](../README.md)

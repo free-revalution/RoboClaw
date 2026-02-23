@@ -1,8 +1,8 @@
-# RoboPartner 测试文档 / Test Documentation
+# RoboClaw 测试文档 / Test Documentation
 
 ## 测试概述 / Test Overview
 
-RoboPartner 项目包含三种类型的测试：
+RoboClaw 项目包含三种类型的测试：
 
 ### 1. 单元测试 (Unit Tests)
 位置：`tests/unit/`
@@ -143,7 +143,7 @@ ctest --output-on-failure
 #include <gtest/gtest.h>
 #include "../../src/your_module.h"
 
-using namespace robopartner;
+using namespace roboclaw;
 
 class YourModuleTest : public ::testing::Test {
 protected:
