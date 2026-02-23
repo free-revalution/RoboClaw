@@ -31,7 +31,7 @@ void InteractiveMode::run() {
     showBanner();
 
     // 设置会话目录
-    session_manager_->setSessionsDir(".robopartner/conversations");
+    session_manager_->setSessionsDir(".roboclaw/conversations");
 
     // 获取或创建会话
     auto session = session_manager_->getOrCreateLatestSession();

@@ -81,7 +81,7 @@ void SocialManager::disconnectPlatform(const std::string& platform_id) {
             LOG_ERROR("Error disconnecting platform " + platform_id + ": " + e.what());
         }
     } else {
-        LOG_WARN("Cannot disconnect unknown platform: " + platform_id);
+        LOG_WARNING("Cannot disconnect unknown platform: " + platform_id);
     }
 }
 
@@ -130,7 +130,7 @@ bool SocialManager::processMessage(const SocialMessage& message) {
                 LOG_INFO("Task successfully delegated to agent: " + best_agent);
                 return true;
             } else {
-                LOG_WARN("Delegation to agent " + best_agent + " failed, processing locally");
+                LOG_WARNING("Delegation to agent " + best_agent + " failed, processing locally");
                 // Fall through to local processing
             }
         }
@@ -155,7 +155,7 @@ bool SocialManager::processMessage(const SocialMessage& message) {
 
 void SocialManager::startMessageLoop() {
     if (message_loop_running_) {
-        LOG_WARN("Message loop is already running");
+        LOG_WARNING("Message loop is already running");
         return;
     }
 

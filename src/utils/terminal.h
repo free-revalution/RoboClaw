@@ -50,7 +50,7 @@ namespace Color {
     const char* const BG_CYAN      = "\033[46m";
     const char* const BG_WHITE     = "\033[47m";
 
-    // Tech blue for RoboPartner branding
+    // Tech blue for RoboClaw branding
     const char* const TECH_BLUE    = "\033[38;5;33m";     // Deep tech blue
     const char* const TECH_CYAN    = "\033[38;5;39m";     // Bright cyan
     const char* const TECH_PURPLE  = "\033[38;5;57m";     // Purple accent
@@ -162,7 +162,7 @@ public:
     // style: "single", "double", "dashed", "dotted", "bold"
     static void drawSeparator(const std::string& style = "single");
 
-    // Draw the RoboPartner ASCII art logo - 绘制RoboPartner ASCII艺术标志
+    // Draw the RoboClaw ASCII art logo - 绘制RoboClaw ASCII艺术标志
     static void drawLogo();
 
     // Draw model information box - 绘制模型信息框

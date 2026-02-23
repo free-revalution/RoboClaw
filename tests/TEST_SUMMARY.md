@@ -1,10 +1,10 @@
-# RoboPartner 功能实现验证报告
+# RoboClaw 功能实现验证报告
 
 ## 编译状态 / Build Status
 
 ```
 ✅ 编译成功 / Build Successful
-✅ 可执行文件: build/robopartner (4.1 MB)
+✅ 可执行文件: build/roboclaw (4.1 MB)
 ✅ 无编译错误 / No compilation errors
 ```
 
@@ -171,7 +171,7 @@ language = "chinese"  # 或 "english"
 ## 文件结构 / File Structure
 
 ```
-RoboPartner/
+RoboClaw/
 ├── src/
 │   ├── tools/
 │   │   ├── tool_base.{h,cpp}
@@ -195,7 +195,7 @@ RoboPartner/
 │   ├── integration/                   ← 1 个集成测试
 │   └── e2e/
 ├── build/
-│   └── robopartner                    ← 可执行文件 (4.1 MB)
+│   └── roboclaw                       ← 可执行文件 (4.1 MB)
 ├── README.md                          ← 更新文档
 ├── CHANGELOG.md                       ← 更新日志
 └── CMakeLists.txt                     ← 添加新工具
@@ -237,6 +237,5 @@ v0.1.1 新增功能:
 v0.2.0 新增功能:
 - 浏览器自动化（OpenClaw 风格）
 - Agent 发现和管理
-- 从 RoboClaw 更名为 RoboPartner
 
 项目已准备好进行进一步测试和部署。

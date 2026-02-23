@@ -1,4 +1,4 @@
-// SessionManager实现
+// SessionManager实现 - Improved error handling
 
 #include "session_manager.h"
 #include "../utils/logger.h"
@@ -6,12 +6,16 @@
 #include <algorithm>
 #include <shared_mutex>
 #include <mutex>
+#include <system_error>
 
 namespace roboclaw {
 
+// Constants for JSON formatting
+constexpr int JSON_INDENT_WIDTH = 2;
+
 SessionManager::SessionManager() {
-    // 默认会话目录：.robopartner/conversations/
-    sessions_dir_ = ".robopartner/conversations";
+    // 默认会话目录：.roboclaw/conversations/
+    sessions_dir_ = ".roboclaw/conversations";
 }
 
 void SessionManager::setSessionsDir(const std::string& dir) {
@@ -22,8 +26,12 @@ void SessionManager::setSessionsDir(const std::string& dir) {
     // 创建目录
     try {
         std::filesystem::create_directories(sessions_dir_);
-    } catch (...) {
-        LOG_ERROR("无法创建会话目录: " + sessions_dir_);
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("无法创建会话目录: " + sessions_dir_ + " - " + std::string(e.what()));
+    } catch (const std::system_error& e) {
+        LOG_ERROR("系统错误创建会话目录: " + sessions_dir_ + " - " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        LOG_ERROR("无法创建会话目录: " + sessions_dir_ + " - " + std::string(e.what()));
     }
 
     // 扫描现有会话
@@ -108,8 +116,12 @@ std::shared_ptr<ConversationTree> SessionManager::loadSession(const std::string&
             return session;
         }
 
+    } catch (const json::parse_error& e) {
+        LOG_ERROR("解析会话文件JSON失败: " + sessionId + " - " + std::string(e.what()));
+    } catch (const std::ifstream::failure& e) {
+        LOG_ERROR("读取会话文件失败: " + sessionId + " - " + std::string(e.what()));
     } catch (const std::exception& e) {
-        LOG_ERROR("解析会话文件失败: " + std::string(e.what()));
+        LOG_ERROR("加载会话失败: " + sessionId + " - " + std::string(e.what()));
     }
 
     return nullptr;
@@ -135,7 +147,7 @@ bool SessionManager::saveSession(std::shared_ptr<ConversationTree> session) {
         }
 
         json sessionJson = session->toJson();
-        file << sessionJson.dump(2);
+        file << sessionJson.dump(JSON_INDENT_WIDTH);
         file.close();
 
         // 更新元数据
@@ -150,6 +162,12 @@ bool SessionManager::saveSession(std::shared_ptr<ConversationTree> session) {
         LOG_DEBUG("保存会话: " + session->getConversationId());
         return true;
 
+    } catch (const std::ofstream::failure& e) {
+        LOG_ERROR("保存会话文件失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("创建会话目录失败: " + std::string(e.what()));
+        return false;
     } catch (const std::exception& e) {
         LOG_ERROR("保存会话失败: " + std::string(e.what()));
         return false;
@@ -179,6 +197,9 @@ bool SessionManager::deleteSession(const std::string& sessionId) {
         LOG_INFO("删除会话: " + sessionId);
         return true;
 
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("删除会话目录失败: " + std::string(e.what()));
+        return false;
     } catch (const std::exception& e) {
         LOG_ERROR("删除会话失败: " + std::string(e.what()));
         return false;
@@ -279,7 +300,14 @@ bool SessionManager::loadMetadata(const std::string& sessionId, SessionMetadata&
 
         return true;
 
-    } catch (...) {
+    } catch (const json::parse_error& e) {
+        LOG_ERROR("解析元数据JSON失败: " + metadataPath + " - " + std::string(e.what()));
+        return false;
+    } catch (const std::ifstream::failure& e) {
+        LOG_ERROR("读取元数据文件失败: " + metadataPath + " - " + std::string(e.what()));
+        return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("加载元数据失败: " + metadataPath + " - " + std::string(e.what()));
         return false;
     }
 }
@@ -299,12 +327,19 @@ bool SessionManager::saveMetadata(const SessionMetadata& metadata) const {
         }
 
         json metadataJson = metadata.toJson();
-        file << metadataJson.dump(2);
+        file << metadataJson.dump(JSON_INDENT_WIDTH);
         file.close();
 
         return true;
 
-    } catch (...) {
+    } catch (const std::ofstream::failure& e) {
+        LOG_ERROR("保存元数据文件失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("创建元数据目录失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("保存元数据失败: " + std::string(e.what()));
         return false;
     }
 }
@@ -327,6 +362,8 @@ void SessionManager::scanSessionsDir() {
             }
         }
 
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("扫描会话目录失败: " + std::string(e.what()));
     } catch (const std::exception& e) {
         LOG_ERROR("扫描会话目录失败: " + std::string(e.what()));
     }

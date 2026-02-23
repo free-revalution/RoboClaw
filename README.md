@@ -1,6 +1,6 @@
 <div align="center">
 
-# RoboPartner
+# RoboClaw
 
 ### AI Agent Framework with Browser Automation / 带浏览器自动化的 AI Agent 框架
 
@@ -19,7 +19,7 @@
 
 **[English]**
 
-RoboPartner is an advanced AI Agent framework written in modern C++ that combines powerful code understanding with browser automation capabilities. Inspired by OpenClaw's visual interaction model and extending it with agent discovery and management, RoboPartner becomes your ultimate AI development companion:
+RoboClaw is an advanced AI Agent framework written in modern C++ that combines powerful code understanding with browser automation capabilities. Inspired by OpenClaw's visual interaction model and extending it with agent discovery and management, RoboClaw becomes your ultimate AI development companion:
 
 - **7 Core Tools**: Read, Write, Edit, Bash, Serial, **Browser (NEW)**, **Agent Manager (NEW)**
 - **Browser Automation**: Visual browser control similar to OpenClaw - navigate, click, type, screenshot
@@ -33,7 +33,7 @@ RoboPartner is an advanced AI Agent framework written in modern C++ that combine
 
 **[中文]**
 
-RoboPartner 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了强大的代码理解和浏览器自动化能力。灵感来源于 OpenClaw 的可视化交互模型，并扩展了 Agent 发现和管理功能，使其成为您的终极 AI 开发伙伴：
+RoboClaw 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了强大的代码理解和浏览器自动化能力。灵感来源于 OpenClaw 的可视化交互模型，并扩展了 Agent 发现和管理功能，使其成为您的终极 AI 开发伙伴：
 
 - **7 个核心工具**：Read、Write、Edit、Bash、Serial、**Browser（浏览器自动化，新增）**、**Agent Manager（Agent 管理，新增）**
 - **浏览器自动化**：类似 OpenClaw 的可视化操作 - 导航、点击、输入、截图
@@ -69,7 +69,7 @@ RoboPartner 是一个用现代 C++ 编写的高级 AI Agent 框架，结合了�
 
 **OpenClaw-Style Visual Control / OpenClaw 风格可视化控制**
 
-RoboPartner now includes powerful browser automation capabilities similar to OpenClaw:
+RoboClaw now includes powerful browser automation capabilities similar to OpenClaw:
 
 ```
 # Open browser and navigate to URL / 打开浏览器并导航
@@ -86,7 +86,7 @@ RoboPartner now includes powerful browser automation capabilities similar to Ope
 {"action": "type", "selector_type": "css", "selector_value": "#search-input", "text": "search query"}
 
 # Execute JavaScript / 执行 JavaScript
-{"action": "execute", "script": "document.title='Hello from RoboPartner'"}
+{"action": "execute", "script": "document.title='Hello from RoboClaw'"}
 
 # Scroll page / 滚动页面
 {"action": "scroll", "x": 0, "y": 500}
@@ -103,7 +103,7 @@ Automatically discover and manage AI coding assistants installed on your system:
 
 ```
 # List all installed agents / 列出所有已安装的 Agents
-robopartner agent --list
+roboclaw agent --list
 
 Output / 输出:
 ID: claude_code_vscode
@@ -137,11 +137,11 @@ ID: cursor_app
 
 **[English]**
 
-RoboPartner now supports embedded robotics development! Transform your Raspberry Pi or Jetson Nano into an intelligent robot controller with natural language commands.
+RoboClaw now supports embedded robotics development! Transform your Raspberry Pi or Jetson Nano into an intelligent robot controller with natural language commands.
 
 **[中文]**
 
-RoboPartner 现在支持嵌入式机器人开发！将您的 Raspberry Pi 或 Jetson Nano 变成支持自然语言命令的智能机器人控制器。
+RoboClaw 现在支持嵌入式机器人开发！将您的 Raspberry Pi 或 Jetson Nano 变成支持自然语言命令的智能机器人控制器。
 
 **Key Features / 核心功能**:
 
@@ -164,17 +164,17 @@ RoboPartner 现在支持嵌入式机器人开发！将您的 Raspberry Pi 或 Je
 
 ```bash
 # Configure hardware / 配置硬件
-cp configs/hardware.json.example ~/.robopartner/hardware.json
-nano ~/.robopartner/hardware.json
+cp configs/hardware.json.example ~/.roboclaw/hardware.json
+nano ~/.roboclaw/hardware.json
 
 # List hardware / 列出硬件
-robopartner hardware list
+roboclaw hardware list
 
 # Test connections / 测试连接
-robopartner hardware test
+roboclaw hardware test
 
 # Interactive robot control / 交互式机器人控制
-robopartner
+roboclaw
 >>> 前进 50% 速度 2 秒
 >>> 左转 90 度
 >>> 读取 IMU 数据
@@ -189,17 +189,17 @@ robopartner
 
 **[English]**
 
-RoboPartner now supports connection to social platforms for remote control:
+RoboClaw now supports connection to social platforms for remote control:
 
-- **Telegram Bot API** - Control RoboPartner via Telegram
+- **Telegram Bot API** - Control RoboClaw via Telegram
 - **DingTalk / Feishu** - Enterprise platform integration
 - **/link command** - Easy setup wizard for platform connection
 
 **[中文]**
 
-RoboPartner 现在支持连接社交平台进行远程控制：
+RoboClaw 现在支持连接社交平台进行远程控制：
 
-- **Telegram Bot API** - 通过 Telegram 控制 RoboPartner
+- **Telegram Bot API** - 通过 Telegram 控制 RoboClaw
 - **钉钉 / 飞书** - 企业平台集成
 - **/link 命令** - 简单的连接设置向导
 
@@ -207,13 +207,13 @@ RoboPartner 现在支持连接社交平台进行远程控制：
 
 ```bash
 # Link to Telegram / 连接到 Telegram
-robopartner
+roboclaw
 >>> /link
 选择平台: Telegram
 输入 Bot Token: <your_bot_token>
 
 # Or use CLI / 或使用命令行
-robopartner social --platform telegram --token <your_bot_token>
+roboclaw social --platform telegram --token <your_bot_token>
 ```
 
 **Documentation / 文档**: [Social Link Guide](docs/social-link-guide.md)
@@ -224,23 +224,23 @@ robopartner social --platform telegram --token <your_bot_token>
 
 **[English]**
 
-RoboPartner can intelligently delegate tasks to specialized agents:
+RoboClaw can intelligently delegate tasks to specialized agents:
 
 - **Claude Code** - Expert in C++ embedded development
 - **Cursor** - General purpose coding assistant
 - **OpenClaw** - Visual interaction specialist
 
-Use RoboPartner as your central coordinator, leveraging the strengths of each AI agent.
+Use RoboClaw as your central coordinator, leveraging the strengths of each AI agent.
 
 **[中文]**
 
-RoboPartner 可以智能地将任务委派给专门的 Agents：
+RoboClaw 可以智能地将任务委派给专门的 Agents：
 
 - **Claude Code** - C++ 嵌入式开发专家
 - **Cursor** - 通用编码助手
 - **OpenClaw** - 可视化交互专家
 
-将 RoboPartner 作为您的中央协调器，利用每个 AI Agent 的优势。
+将 RoboClaw 作为您的中央协调器，利用每个 AI Agent 的优势。
 
 ---
 
@@ -278,11 +278,11 @@ cd RoboClaw
 The installer will:
 - 检测并安装依赖 / Detect and install dependencies
 - 自动配置构建系统 / Automatically configure build system
-- 编译并安装到 ~/.robopartner / Compile and install to ~/.robopartner
+- 编译并安装到 ~/.roboclaw / Compile and install to ~/.roboclaw
 - 创建命令行快捷方式 / Create command-line shortcut
 
 After installation, run:
-- After install: `robopartner` or `~/bin/robopartner`
+- After install: `roboclaw` or `~/bin/roboclaw`
 
 ---
 
@@ -305,8 +305,8 @@ xcode-select --install
 brew install cmake ninja nlohmann-json
 
 # Clone repository
-git clone https://github.com/yourusername/RoboClaw.git RoboPartner
-cd RoboPartner
+git clone https://github.com/yourusername/RoboClaw.git RoboClaw
+cd RoboClaw
 
 # Configure with preset
 cmake --preset=release
@@ -315,7 +315,7 @@ cmake --preset=release
 cmake --build build --config Release
 
 # Run
-./build/robopartner --help
+./build/roboclaw --help
 ```
 
 ### Linux Installation / Linux 安装
@@ -327,11 +327,11 @@ sudo apt install -y cmake ninja-build nlohmann-json3-dev \
     build-essential g++ git
 
 # Clone and build
-git clone https://github.com/yourusername/RoboClaw.git RoboPartner
-cd RoboPartner
+git clone https://github.com/yourusername/RoboClaw.git RoboClaw
+cd RoboClaw
 cmake --preset=release
 cmake --build build --config Release
-./build/robopartner --help
+./build/roboclaw --help
 ```
 
 ### Windows Installation / Windows 安装
@@ -345,11 +345,11 @@ git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
 .\vcpkg\vcpkg install nlohmann-json:x64-windows cmake ninja
 
 # Clone and build
-git clone https://github.com/yourusername/RoboClaw.git RoboPartner
-cd RoboPartner
+git clone https://github.com/yourusername/RoboClaw.git RoboClaw
+cd RoboClaw
 cmake -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -B build
 cmake --build build --config Release
-.\build\robopartner.exe --help
+.\build\roboclaw.exe --help
 ```
 
 ---
@@ -360,42 +360,42 @@ cmake --build build --config Release
 
 ```bash
 # Start interactive mode / 启动交互模式
-./build/robopartner
+./build/roboclaw
 
 # Show help / 显示帮助
-./build/robopartner --help
+./build/roboclaw --help
 
 # List discovered agents / 列出发现的 Agents
-./build/robopartner agent --list
+./build/roboclaw agent --list
 
 # Open browser / 打开浏览器
-./build/robopartner browser --open
+./build/roboclaw browser --open
 ```
 
 ### Browser Automation Examples / 浏览器自动化示例
 
 ```bash
 # Navigate to a website / 导航到网站
-./build/robopartner browser --navigate https://github.com
+./build/roboclaw browser --navigate https://github.com
 
 # Take a screenshot / 截图
-./build/robopartner browser --screenshot
+./build/roboclaw browser --screenshot
 
 # Interactively control browser / 交互式控制浏览器
-./build/robopartner browser
+./build/roboclaw browser
 ```
 
 ### Agent Management Examples / Agent 管理示例
 
 ```bash
 # List all installed AI agents / 列出所有已安装的 AI agents
-./build/robopartner agent --list
+./build/roboclaw agent --list
 
 # Show specific agent details / 显示特定 Agent 详情
-./build/robopartner agent --show claude_code_vscode
+./build/roboclaw agent --show claude_code_vscode
 
 # Launch an agent / 启动 Agent
-./build/robopartner agent --launch cursor_app
+./build/roboclaw agent --launch cursor_app
 ```
 
 ---
@@ -403,7 +403,7 @@ cmake --build build --config Release
 ## Project Structure / 项目结构
 
 ```
-RoboPartner/
+RoboClaw/
 ├── CMakeLists.txt              # CMake configuration
 ├── README.md                   # This file
 ├── LICENSE                     # MIT License
@@ -462,7 +462,7 @@ RoboPartner/
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     RoboPartner Framework                     │
+│                     RoboClaw Framework                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌─────────────┐    ┌───────────┐    ┌────────────────┐   │
@@ -627,7 +627,7 @@ motion.stop();            // Emergency stop / 紧急停止
 ```
 MIT License
 
-Copyright (c) 2025 RoboPartner Contributors
+Copyright (c) 2025 RoboClaw Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -674,12 +674,12 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 <div align="center">
 
-**Made with ❤️ by the RoboPartner Community**
+**Made with ❤️ by the RoboClaw Community**
 
-**用 ❤️ 构建 | RoboPartner 社区**
+**用 ❤️ 构建 | RoboClaw 社区**
 
-[⭐ Star](https://github.com/yourusername/RoboPartner) &nbsp;&nbsp;
-[🍴 Fork](https://github.com/yourusername/RoboPartner/fork) &nbsp;&nbsp;
-[📖 Documentation](https://github.com/yourusername/RoboPartner/wiki)
+[⭐ Star](https://github.com/yourusername/RoboClaw) &nbsp;&nbsp;
+[🍴 Fork](https://github.com/yourusername/RoboClaw/fork) &nbsp;&nbsp;
+[📖 Documentation](https://github.com/yourusername/RoboClaw/wiki)
 
 </div>

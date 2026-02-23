@@ -1,5 +1,5 @@
 #include "sensor_skill.h"
-#include "../hal/hal_exception.h"
+#include "hal/hal_exception.h"
 
 namespace roboclaw::skills {
 
@@ -10,11 +10,11 @@ void SensorSkill::registerSensor(const std::string& name, std::shared_ptr<hal::I
 nlohmann::json SensorSkill::readSensor(const std::string& name) {
     auto it = sensors_.find(name);
     if (it == sensors_.end()) {
-        throw SensorException(name, "Sensor not registered");
+        throw hal::SensorException(name, "Sensor not registered");
     }
 
     if (!it->second->isAvailable()) {
-        throw SensorException(name, "Sensor not available");
+        throw hal::SensorException(name, "Sensor not available");
     }
 
     return it->second->readData();

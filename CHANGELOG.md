@@ -1,7 +1,7 @@
 # Changelog / 更新日志
 
-All notable changes to RoboPartner will be documented in this file.
-RoboPartner 的所有重要更改都将记录在此文件中。
+All notable changes to RoboClaw will be documented in this file.
+RoboClaw 的所有重要更改都将记录在此文件中。
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -10,12 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.1] - 2026-02-23
+
+### Changed / 更改
+- **Project renamed** from "RoboPartner" back to "RoboClaw" / 项目从 "RoboPartner" 更名为 "RoboClaw"
+- **Executable renamed** from `robopartner` to `roboclaw` / 可执行文件从 `robopartner` 更名为 `roboclaw`
+- **Config directory** changed from `.robopartner` to `.roboclaw` / 配置目录从 `.robopartner` 改为 `.roboclaw`
+- **Log file** changed from `robopartner.log` to `roboclaw.log` / 日志文件从 `robopartner.log` 改为 `roboclaw.log`
+
+---
+
 ## [0.2.0] - 2025-02-21
 
 ### Project Rename / 项目更名
-- **Project renamed** from "RoboClaw" to "RoboPartner" / 项目从 "RoboClaw" 更名为 "RoboPartner"
-- **Executable renamed** from `roboclaw` to `robopartner` / 可执行文件从 `roboclaw` 更名为 `robopartner`
-- **Config directory** changed from `.roboclaw` to `.robopartner` / 配置目录从 `.roboclaw` 改为 `.robopartner`
+- **Project renamed** from "RoboClaw" to "RoboPartner" (later reverted in v0.4.1) / 项目从 "RoboClaw" 更名为 "RoboPartner"（在 v0.4.1 中恢复）
+- **Executable renamed** from `roboclaw` to `robopartner` (later reverted in v0.4.1) / 可执行文件从 `roboclaw` 更名为 `robopartner`（在 v0.4.1 中恢复）
+- **Config directory** changed from `.roboclaw` to `.robopartner` (later reverted in v0.4.1) / 配置目录从 `.roboclaw` 改为 `.robopartner`（在 v0.4.1 中恢复）
 
 ### Added / 新增
 - **Browser Automation Tool**: OpenClaw-style visual browser control / 浏览器自动化工具：OpenClaw 风格可视化浏览器控制
@@ -39,8 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed / 更改
 - **Tool count increased**: From 5 tools to 7 tools / 工具数量增加：从 5 个工具增加到 7 个工具
 - **Core tools now include**: Read, Write, Edit, Bash, Serial, Browser, Agent / 核心工具现在包括：Read、Write、Edit、Bash、Serial、Browser、Agent
-- **Session directory**: `.roboclaw/conversations` → `.robopartner/conversations` / 会话目录更改
-- **Log file**: `roboclaw.log` → `robopartner.log` / 日志文件更改
+- **Session directory**: `.roboclaw/conversations` → `.robopartner/conversations` (later reverted in v0.4.1) / 会话目录更改（在 v0.4.1 中恢复）
+- **Log file**: `roboclaw.log` → `robopartner.log` (later reverted in v0.4.1) / 日志文件更改（在 v0.4.1 中恢复）
 
 ### Technical Details / 技术细节
 - **Browser implementation**:
@@ -61,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **One-Command Installation**: Cross-platform automated installation / 一键安装：跨平台自动化安装
   - Unix (macOS/Linux) installer script with dependency detection / Unix 安装脚本，支持依赖检测
   - Windows PowerShell installer with Visual Studio detection / Windows PowerShell 安装脚本，支持 VS 检测
-  - Automatic build and installation to ~/.robopartner / 自动编译并安装到 ~/.robopartner
+  - Automatic build and installation to ~/.roboclaw / 自动编译并安装到 ~/.roboclaw
   - PATH setup with ~/bin symlink / PATH 配置，通过 ~/bin 符号链接
 - **Terminal UI Module**: Professional terminal interface utilities / 终端 UI 模块：专业终端界面工具
   - Terminal class: width/height detection, screen clearing, cursor control / Terminal 类：宽高检测、清屏、光标控制
@@ -70,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cross-platform: Windows (Console API), Unix (ioctl) / 跨平台：Windows 控制台 API、Unix ioctl
   - Multiple box styles: single, double, rounded, ASCII, bold / 多种边框样式
 - **Claude Code-Style Welcome Screen**: ASCII art logo with colored borders / Claude Code 风格欢迎界面：ASCII 艺术字 Logo 彩色边框
-  - "RoboPartner v0.2.0" ASCII art logo / "RoboPartner v0.2.0" ASCII 艺术 Logo
+  - "RoboClaw v0.2.0" ASCII art logo / "RoboClaw v0.2.0" ASCII 艺术 Logo
   - Current model and provider display / 当前模型和提供商显示
   - Usage tips section / 使用提示部分
   - Adaptive width based on terminal size / 根据终端大小自适应宽度
@@ -137,8 +147,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Example configuration** / 示例配置：`configs/hardware.json.example`
 
 #### CLI Enhancements / CLI 增强
-- `robopartner hardware list` - 列出所有已配置硬件 / List all configured hardware
-- `robopartner hardware test` - 测试硬件连接 / Test hardware connections
+- `roboclaw hardware list` - 列出所有已配置硬件 / List all configured hardware
+- `roboclaw hardware test` - 测试硬件连接 / Test hardware connections
 
 #### Documentation / 文档
 - **Embedded quickstart guide** / 嵌入式快速入门指南：`docs/embedded-quickstart.md`

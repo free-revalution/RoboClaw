@@ -6,7 +6,7 @@
 namespace roboclaw::cli {
 
 LinkCommand::LinkCommand()
-    : config_file_path_(".robopartner/social_config.json") {}
+    : config_file_path_(".roboclaw/social_config.json") {}
 
 std::vector<PlatformInfo> LinkCommand::getAvailablePlatforms() const {
     std::vector<PlatformInfo> platforms;
@@ -61,7 +61,7 @@ std::string LinkCommand::getConnectionStatus() const {
 
 bool LinkCommand::saveConfig(const std::string& platform_id,
                             const nlohmann::json& config) {
-    // TODO: Implement config saving to .robopartner/social_config.json
+    // TODO: Implement config saving to .roboclaw/social_config.json
     return true;
 }
 

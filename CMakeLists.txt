@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(RoboPartner VERSION 0.2.0 LANGUAGES CXX)
+project(RoboClaw VERSION 0.4.1 LANGUAGES CXX)
 
 # C++标准
 set(CMAKE_CXX_STANDARD 20)
@@ -109,29 +109,29 @@ include_directories(
 )
 
 # 可执行文件
-add_executable(robopartner ${SOURCES})
+add_executable(roboclaw ${SOURCES})
 
 # 链接库
-target_link_libraries(robopartner
+target_link_libraries(roboclaw
     cpr::cpr
     nlohmann_json::nlohmann_json
 )
 
 # Windows 串口支持库
 if(WIN32)
-    target_link_libraries(robopartner setupapi)
+    target_link_libraries(roboclaw setupapi)
 endif()
 
 # 编译选项
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(robopartner PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(roboclaw PRIVATE -Wall -Wextra -Wpedantic)
 elseif(MSVC)
-    target_compile_options(robopartner PRIVATE /W4)
+    target_compile_options(roboclaw PRIVATE /W4)
 endif()
 
 # 安装规则
-install(TARGETS robopartner DESTINATION bin)
+install(TARGETS roboclaw DESTINATION bin)
 
 # 安装技能文件
-install(DIRECTORY skills/builtin/ DESTINATION share/robopartner/skills/builtin OPTIONAL)
-install(DIRECTORY skills/user/ DESTINATION share/robopartner/skills/user OPTIONAL)
+install(DIRECTORY skills/builtin/ DESTINATION share/roboclaw/skills/builtin OPTIONAL)
+install(DIRECTORY skills/user/ DESTINATION share/roboclaw/skills/user OPTIONAL)

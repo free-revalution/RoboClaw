@@ -1,7 +1,9 @@
 #include "telegram_adapter.h"
 #include "utils/logger.h"
+#include "../utils/code_quality_constants.h"
 #include <stdexcept>
 #include <regex>
+#include <nlohmann/json.hpp>
 
 namespace roboclaw::social {
 
@@ -14,12 +16,19 @@ TelegramAdapter::~TelegramAdapter() {
 
 bool TelegramAdapter::connect(const nlohmann::json& config) {
     if (!config.contains("bot_token")) {
+        LOG_ERROR("Telegram config missing bot_token");
         return false;
     }
 
-    bot_token_ = config["bot_token"];
+    try {
+        bot_token_ = config["bot_token"];
+    } catch (const nlohmann::json::type_error& e) {
+        LOG_ERROR("Invalid bot_token type in config: " + std::string(e.what()));
+        return false;
+    }
 
     if (!isValidBotToken(bot_token_)) {
+        LOG_ERROR("Invalid Telegram bot token format");
         return false;
     }
 
@@ -28,23 +37,26 @@ bool TelegramAdapter::connect(const nlohmann::json& config) {
         nlohmann::json response = getMe();
         if (response.contains("ok") && response["ok"]) {
             connected_ = true;
+            LOG_INFO("Telegram bot connected successfully");
             return true;
+        } else {
+            LOG_ERROR("Telegram bot authentication failed");
+            return false;
         }
-    } catch (const std::exception& e) {
-        LOG_ERROR("Telegram operation failed: " + std::string(e.what()));
+    } catch (const nlohmann::json::exception& e) {
+        LOG_ERROR("Telegram JSON error during connection: " + std::string(e.what()));
         return false;
-    } catch (...) {
-        LOG_ERROR("Telegram operation failed: unknown error");
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram connection error: " + std::string(e.what()));
         return false;
     }
-
-    return false;
 }
 
 void TelegramAdapter::disconnect() {
     connected_ = false;
     bot_token_.clear();
     last_update_id_ = 0;
+    LOG_INFO("Telegram adapter disconnected");
 }
 
 bool TelegramAdapter::isConnected() const {
@@ -55,13 +67,18 @@ std::vector<SocialMessage> TelegramAdapter::receiveMessages() const {
     std::vector<SocialMessage> messages;
 
     if (!connected_) {
+        LOG_WARNING("Cannot receive messages: Telegram adapter not connected");
         return messages;
     }
 
     try {
         std::string url = buildApiUrl("getUpdates");
         url += "?offset=" + std::to_string(last_update_id_ + 1);
-        url += "&timeout=30";  // Long polling
+        url += "&timeout=" + std::to_string(
+            std::chrono::duration_cast<std::chrono::seconds>(
+                constants::LONG_POLL_TIMEOUT_MS
+            ).count()
+        );
 
         nlohmann::json response = httpGet(url);
 
@@ -72,24 +89,33 @@ std::vector<SocialMessage> TelegramAdapter::receiveMessages() const {
                     nlohmann::json msg = update["message"];
                     SocialMessage social_msg;
                     social_msg.platform_id = "telegram";
-                    social_msg.chat_id = std::to_string(msg["chat"]["id"].get<int64_t>());
-                    social_msg.user_id = std::to_string(msg["from"]["id"].get<int64_t>());
-                    social_msg.content = msg.value("text", "");
-                    social_msg.message_id = std::to_string(msg["message_id"].get<int64_t>());
-                    social_msg.timestamp = msg.value("date", 0);
+                    
+                    try {
+                        social_msg.chat_id = std::to_string(msg["chat"]["id"].get<int64_t>());
+                        social_msg.user_id = std::to_string(msg["from"]["id"].get<int64_t>());
+                        social_msg.content = msg.value("text", "");
+                        social_msg.message_id = std::to_string(msg["message_id"].get<int64_t>());
+                        social_msg.timestamp = msg.value("date", 0);
 
-                    // Store raw update in metadata
-                    social_msg.metadata = update;
+                        // Store raw update in metadata
+                        social_msg.metadata = update;
 
-                    last_update_id_ = update["update_id"];
-                    messages.push_back(social_msg);
+                        last_update_id_ = update["update_id"];
+                        messages.push_back(social_msg);
+                    } catch (const nlohmann::json::exception& e) {
+                        LOG_ERROR("Error parsing Telegram message: " + std::string(e.what()));
+                        // Skip this message and continue with others
+                        continue;
+                    }
                 }
             }
+        } else if (response.contains("description")) {
+            LOG_ERROR("Telegram API error: " + response["description"].get<std::string>());
         }
+    } catch (const nlohmann::json::exception& e) {
+        LOG_ERROR("Telegram JSON parse error in receiveMessages: " + std::string(e.what()));
     } catch (const std::exception& e) {
-        LOG_ERROR("Telegram receiveMessages failed: " + std::string(e.what()));
-    } catch (...) {
-        LOG_ERROR("Telegram receiveMessages failed: unknown error");
+        LOG_ERROR("Telegram receiveMessages error: " + std::string(e.what()));
     }
 
     return messages;
@@ -97,6 +123,17 @@ std::vector<SocialMessage> TelegramAdapter::receiveMessages() const {
 
 bool TelegramAdapter::sendMessage(const std::string& chat_id, const std::string& content) {
     if (!connected_) {
+        LOG_ERROR("Cannot send message: Telegram adapter not connected");
+        return false;
+    }
+
+    if (chat_id.empty()) {
+        LOG_ERROR("Cannot send message: chat_id is empty");
+        return false;
+    }
+
+    if (content.empty()) {
+        LOG_WARNING("Attempted to send empty message to chat_id: " + chat_id);
         return false;
     }
 
@@ -108,42 +145,46 @@ bool TelegramAdapter::sendMessage(const std::string& chat_id, const std::string&
         };
 
         nlohmann::json response = httpPost(url, payload);
-        return response.contains("ok") && response["ok"];
-    } catch (const std::exception& e) {
-        LOG_ERROR("Telegram sendMessage failed: " + std::string(e.what()));
+        
+        if (response.contains("ok") && response["ok"]) {
+            return true;
+        } else if (response.contains("description")) {
+            LOG_ERROR("Telegram send message failed: " + response["description"].get<std::string>());
+            return false;
+        }
         return false;
-    } catch (...) {
-        LOG_ERROR("Telegram sendMessage failed: unknown error");
+    } catch (const nlohmann::json::exception& e) {
+        LOG_ERROR("Telegram JSON error in sendMessage: " + std::string(e.what()));
+        return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("Telegram sendMessage error: " + std::string(e.what()));
         return false;
     }
 }
 
 bool TelegramAdapter::sendFile(const std::string& chat_id, const std::string& file_path) {
     if (!connected_) {
+        LOG_ERROR("Cannot send file: Telegram adapter not connected");
         return false;
     }
 
     // TODO: 实现文件发送（需要 multipart/form-data）
     // This requires cpr's Multipart support
-    try {
-        std::string url = buildApiUrl("sendDocument");
-        // Placeholder implementation
-        return false;
-    } catch (const std::exception& e) {
-        LOG_ERROR("Telegram sendFile failed: " + std::string(e.what()));
-        return false;
-    } catch (...) {
-        LOG_ERROR("Telegram sendFile failed: unknown error");
-        return false;
-    }
+    LOG_WARNING("Telegram sendFile not yet implemented for file: " + file_path);
+    return false;
 }
 
 bool TelegramAdapter::isValidBotToken(const std::string& token) {
     // Telegram Bot Token 格式: botid:hash
     // 格式: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
     // Bot ID: 1-10 digits, followed by colon, followed by 35 characters of [A-Za-z0-9_-]
-    std::regex pattern("^\\d+:[A-Za-z0-9_-]{35}$");
-    return std::regex_match(token, pattern);
+    try {
+        std::regex pattern("^\\d+:[A-Za-z0-9_-]{35}$");
+        return std::regex_match(token, pattern);
+    } catch (const std::regex_error& e) {
+        LOG_ERROR("Regex error validating bot token: " + std::string(e.what()));
+        return false;
+    }
 }
 
 nlohmann::json TelegramAdapter::getMe() {

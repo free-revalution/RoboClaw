@@ -28,7 +28,7 @@ using namespace roboclaw;
 // 获取内置技能目录路径
 string getBuiltinSkillsDir() {
     // 首先尝试相对于可执行文件的路径
-    // 对于开发环境，可执行文件在 build/robopartner
+    // 对于开发环境，可执行文件在 build/roboclaw
     // 技能文件在 skills/builtin
     // 所以需要查找项目根目录
 
@@ -43,7 +43,7 @@ string getBuiltinSkillsDir() {
     }
 
     // 方法3: 使用安装路径
-    string installPath = "/usr/local/share/robopartner/skills/builtin";
+    string installPath = "/usr/local/share/roboclaw/skills/builtin";
     if (std::filesystem::exists(installPath)) {
         return installPath;
     }
@@ -51,7 +51,7 @@ string getBuiltinSkillsDir() {
     // 方法4: 使用用户目录下的安装路径
     const char* home = getenv("HOME");
     if (home) {
-        string userInstallPath = string(home) + "/.local/share/robopartner/skills/builtin";
+        string userInstallPath = string(home) + "/.local/share/roboclaw/skills/builtin";
         if (std::filesystem::exists(userInstallPath)) {
             return userInstallPath;
         }
@@ -63,9 +63,9 @@ string getBuiltinSkillsDir() {
 }
 
 // 版本信息
-const string ROBOPARTNER_VERSION = "0.2.0";
-const string ROBOPARTNER_NAME = "RoboPartner";
-const string ROBOPARTNER_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
+const string ROBOCLAW_VERSION = "0.2.0";
+const string ROBOCLAW_NAME = "RoboClaw";
+const string ROBOCLAW_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
 
 // CLI命令枚举
 enum class Command {
@@ -98,15 +98,15 @@ struct CLIOptions {
 // 显示横幅
 void showBanner() {
     cout << "==================================================" << endl;
-    cout << "  " << ROBOPARTNER_NAME << " v" << ROBOPARTNER_VERSION << endl;
-    cout << "  " << ROBOPARTNER_DESCRIPTION << endl;
+    cout << "  " << ROBOCLAW_NAME << " v" << ROBOCLAW_VERSION << endl;
+    cout << "  " << ROBOCLAW_DESCRIPTION << endl;
     cout << "==================================================" << endl;
 }
 
 // 显示帮助信息
 void showHelp() {
     showBanner();
-    cout << "\n用法: robopartner [命令] [选项]\n";
+    cout << "\n用法: roboclaw [命令] [选项]\n";
     cout << "\n命令:\n";
     cout << "  (无)              启动交互式对话\n";
     cout << "  chat             启动交互式对话（显式）\n";
@@ -125,60 +125,60 @@ void showHelp() {
     cout << "  --verbose        显示详细日志\n\n";
 
     cout << "分支命令:\n";
-    cout << "  robopartner branch --list              列出所有分支\n";
-    cout << "  robopartner branch --new <name>        创建新分支\n";
-    cout << "  robopartner branch --switch <name>     切换分支\n\n";
+    cout << "  roboclaw branch --list              列出所有分支\n";
+    cout << "  roboclaw branch --new <name>        创建新分支\n";
+    cout << "  roboclaw branch --switch <name>     切换分支\n\n";
 
     cout << "配置命令:\n";
-    cout << "  robopartner config --show              显示当前配置\n";
-    cout << "  robopartner config --edit              编辑配置文件\n";
-    cout << "  robopartner config --reset             重置配置\n\n";
+    cout << "  roboclaw config --show              显示当前配置\n";
+    cout << "  roboclaw config --edit              编辑配置文件\n";
+    cout << "  roboclaw config --reset             重置配置\n\n";
 
     cout << "对话命令:\n";
-    cout << "  robopartner conversation --list        列出所有对话\n";
-    cout << "  robopartner conversation --show <id>   显示对话详情\n";
-    cout << "  robopartner conversation --delete <id> 删除对话\n\n";
+    cout << "  roboclaw conversation --list        列出所有对话\n";
+    cout << "  roboclaw conversation --show <id>   显示对话详情\n";
+    cout << "  roboclaw conversation --delete <id> 删除对话\n\n";
 
     cout << "技能命令:\n";
-    cout << "  robopartner skill --list              列出所有技能\n";
-    cout << "  robopartner skill --show <name>       显示技能详情\n";
-    cout << "  robopartner skill --install <file>    安装技能\n";
-    cout << "  robopartner skill --uninstall <name>  卸载技能\n";
-    cout << "  robopartner skill --create <name>     创建新技能\n\n";
+    cout << "  roboclaw skill --list              列出所有技能\n";
+    cout << "  roboclaw skill --show <name>       显示技能详情\n";
+    cout << "  roboclaw skill --install <file>    安装技能\n";
+    cout << "  roboclaw skill --uninstall <name>  卸载技能\n";
+    cout << "  roboclaw skill --create <name>     创建新技能\n\n";
 
     cout << "Agent命令 (新增):\n";
-    cout << "  robopartner agent --list             列出本地已安装的Agents\n";
-    cout << "  robopartner agent --show <name>      显示Agent详情\n";
-    cout << "  robopartner agent --launch <name>     启动指定Agent\n\n";
+    cout << "  roboclaw agent --list             列出本地已安装的Agents\n";
+    cout << "  roboclaw agent --show <name>      显示Agent详情\n";
+    cout << "  roboclaw agent --launch <name>     启动指定Agent\n\n";
 
     cout << "浏览器命令 (新增):\n";
-    cout << "  robopartner browser --open           打开浏览器\n";
-    cout << "  robopartner browser --screenshot     截图\n";
-    cout << "  robopartner browser --navigate <url> 导航到URL\n";
-    cout << "  robopartner browser --click <selector> 点击元素\n";
-    cout << "  robopartner browser --type <text>     输入文本\n\n";
+    cout << "  roboclaw browser --open           打开浏览器\n";
+    cout << "  roboclaw browser --screenshot     截图\n";
+    cout << "  roboclaw browser --navigate <url> 导航到URL\n";
+    cout << "  roboclaw browser --click <selector> 点击元素\n";
+    cout << "  roboclaw browser --type <text>     输入文本\n\n";
 
     cout << "硬件命令:\n";
-    cout << "  robopartner hardware --list          列出所有硬件\n";
-    cout << "  robopartner hardware --test          测试硬件连接\n\n";
+    cout << "  roboclaw hardware --list          列出所有硬件\n";
+    cout << "  roboclaw hardware --test          测试硬件连接\n\n";
 
     cout << "连接命令:\n";
-    cout << "  robopartner link --list             列出可用平台\n";
-    cout << "  robopartner link --connect <platform> 连接到平台\n";
-    cout << "  robopartner link --status           显示连接状态\n\n";
+    cout << "  roboclaw link --list             列出可用平台\n";
+    cout << "  roboclaw link --connect <platform> 连接到平台\n";
+    cout << "  roboclaw link --status           显示连接状态\n\n";
 
     cout << "示例:\n";
-    cout << "  robopartner              # 启动对话\n";
-    cout << "  robopartner chat         # 启动对话\n";
-    cout << "  robopartner --new        # 创建新对话\n";
-    cout << "  robopartner config --show # 显示配置\n";
-    cout << "  robopartner agent --list # 列出Agents\n\n";
+    cout << "  roboclaw              # 启动对话\n";
+    cout << "  roboclaw chat         # 启动对话\n";
+    cout << "  roboclaw --new        # 创建新对话\n";
+    cout << "  roboclaw config --show # 显示配置\n";
+    cout << "  roboclaw agent --list # 列出Agents\n\n";
 }
 
 // 显示版本信息
 void showVersion() {
-    cout << ROBOPARTNER_NAME << " version " << ROBOPARTNER_VERSION << endl;
-    cout << "Copyright (c) 2025 RoboPartner Contributors\n\n";
+    cout << ROBOCLAW_NAME << " version " << ROBOCLAW_VERSION << endl;
+    cout << "Copyright (c) 2025 RoboClaw Contributors\n\n";
 
     cout << "构建信息:\n";
     cout << "  C++标准: C++" << __cplusplus << "\n";
@@ -297,7 +297,7 @@ void showConfig(ConfigManager& config_mgr) {
     const auto& config = config_mgr.getConfig();
 
     cout << "\n==================================================\n";
-    cout << "  RoboPartner 配置\n";
+    cout << "  RoboClaw 配置\n";
     cout << "==================================================\n\n";
 
     cout << "默认设置:\n";
@@ -357,11 +357,11 @@ void editConfig() {
 // 显示硬件帮助信息
 void showHardwareHelp() {
     cout << "\n硬件命令:\n\n";
-    cout << "  robopartner hardware --list          列出所有已配置的硬件\n";
-    cout << "  robopartner hardware --test          测试硬件连接状态\n";
+    cout << "  roboclaw hardware --list          列出所有已配置的硬件\n";
+    cout << "  roboclaw hardware --test          测试硬件连接状态\n";
     cout << "\n示例:\n";
-    cout << "  robopartner hardware --list          # 显示所有硬件\n";
-    cout << "  robopartner hardware --test          # 测试硬件连接\n\n";
+    cout << "  roboclaw hardware --list          # 显示所有硬件\n";
+    cout << "  roboclaw hardware --test          # 测试硬件连接\n\n";
 }
 
 // 处理硬件命令
@@ -375,8 +375,8 @@ int handleHardwareCommand(const std::string& action, const std::string& argument
     if (!std::filesystem::exists(configPath)) {
         if (std::filesystem::exists("../config/hardware.json")) {
             configPath = "../config/hardware.json";
-        } else if (std::filesystem::exists("/usr/local/etc/robopartner/hardware.json")) {
-            configPath = "/usr/local/etc/robopartner/hardware.json";
+        } else if (std::filesystem::exists("/usr/local/etc/roboclaw/hardware.json")) {
+            configPath = "/usr/local/etc/roboclaw/hardware.json";
         }
     }
 
@@ -427,7 +427,7 @@ int handleHardwareCommand(const std::string& action, const std::string& argument
             cout << "未找到硬件配置文件。\n\n";
             cout << "预期位置:\n";
             cout << "  - " << "config/hardware.json\n";
-            cout << "  - " << "/usr/local/etc/robopartner/hardware.json\n\n";
+            cout << "  - " << "/usr/local/etc/roboclaw/hardware.json\n\n";
             cout << "请创建硬件配置文件以继续。\n\n";
             return 1;
         }
@@ -495,7 +495,7 @@ int handleHardwareCommand(const std::string& action, const std::string& argument
 
 // 列出对话
 void listConversations(SessionManager& session_mgr) {
-    session_mgr.setSessionsDir(".robopartner/conversations");
+    session_mgr.setSessionsDir(".roboclaw/conversations");
     auto sessions = session_mgr.listSessions();
 
     if (sessions.empty()) {
@@ -523,7 +523,7 @@ std::unique_ptr<LLMProvider> createLLMProvider(const ConfigManager& config_mgr) 
 
     // 检查API密钥是否已设置
     if (apiKey.empty()) {
-        cerr << "错误: API密钥未设置。请运行 'robopartner config --edit' 配置API密钥。" << endl;
+        cerr << "错误: API密钥未设置。请运行 'roboclaw config --edit' 配置API密钥。" << endl;
         cerr << "当前提供商: " << ConfigManager::providerToString(providerType) << endl;
         return nullptr;
     }
@@ -624,10 +624,10 @@ int main(int argc, char* argv[]) {
         }
 
         // 设置日志文件
-        Logger::getInstance().setLogFile(ConfigManager::getConfigDir() + "/robopartner.log");
+        Logger::getInstance().setLogFile(ConfigManager::getConfigDir() + "/roboclaw.log");
         Logger::getInstance().setFileOutput(true);
 
-        LOG_INFO("RoboPartner 启动");
+        LOG_INFO("RoboClaw 启动");
     }
 
     // 处理命令
@@ -730,8 +730,8 @@ int main(int argc, char* argv[]) {
                     }
                     cout << "\n";
                 }
-                cout << "\n使用 'robopartner link --connect <platform_id>' 连接到平台\n";
-                cout << "使用 'robopartner link --status' 查看连接状态\n\n";
+                cout << "\n使用 'roboclaw link --connect <platform_id>' 连接到平台\n";
+                cout << "使用 'roboclaw link --status' 查看连接状态\n\n";
                 return 0;
             } else if (options.link_action == "status") {
                 cout << "\n" << linkCmd.getConnectionStatus() << "\n\n";
@@ -740,7 +740,7 @@ int main(int argc, char* argv[]) {
                 string platform_id = options.argument;
                 if (platform_id.empty()) {
                     cout << "请指定平台ID (例如: telegram)\n";
-                    cout << "使用 'robopartner link --list' 查看可用平台\n\n";
+                    cout << "使用 'roboclaw link --list' 查看可用平台\n\n";
                     return 1;
                 }
 
@@ -759,17 +759,17 @@ int main(int argc, char* argv[]) {
                 }
             } else if (options.link_action == "help" || options.link_action == "--help" || options.link_action == "-h") {
                 cout << "\n连接命令:\n\n";
-                cout << "  robopartner link --list             列出可用平台\n";
-                cout << "  robopartner link --connect <platform> 连接到平台\n";
-                cout << "  robopartner link --status           显示连接状态\n\n";
+                cout << "  roboclaw link --list             列出可用平台\n";
+                cout << "  roboclaw link --connect <platform> 连接到平台\n";
+                cout << "  roboclaw link --status           显示连接状态\n\n";
                 cout << "示例:\n";
-                cout << "  robopartner link --list             # 显示所有平台\n";
-                cout << "  robopartner link --connect telegram # 连接到Telegram\n";
-                cout << "  robopartner link --status           # 查看连接状态\n\n";
+                cout << "  roboclaw link --list             # 显示所有平台\n";
+                cout << "  roboclaw link --connect telegram # 连接到Telegram\n";
+                cout << "  roboclaw link --status           # 查看连接状态\n\n";
                 return 0;
             } else {
                 cout << "未知连接命令: " << options.link_action << "\n";
-                cout << "使用 'robopartner link --help' 查看帮助\n\n";
+                cout << "使用 'roboclaw link --help' 查看帮助\n\n";
                 return 1;
             }
         }

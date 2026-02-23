@@ -367,7 +367,7 @@ void UI::drawLogo() {
     const char* reset = useColor ? Color::RESET : "";
     const char* accentColor = useColor ? Color::TECH_CYAN : "";
 
-    // ASCII Art Logo for RoboPartner
+    // ASCII Art Logo for RoboClaw
     std::vector<std::string> logoArt = {
         "",
         std::string(logoColor) + "     _      _            __    __      " + reset,
@@ -376,7 +376,7 @@ void UI::drawLogo() {
         std::string(logoColor) + "  / ___ \\  | | |_____| |  _| |  _|     " + reset,
         std::string(logoColor) + " /_/   \\_\\ |_|          |_|   |_|      " + reset,
         "",
-        std::string(accentColor) + "     R  O  B  O     P     A     R   T  N  E  R" + reset,
+        std::string(accentColor) + "     R  O  B  O     C  L     A  W" + reset,
         "",
         std::string(Color::GRAY) + "             v 0 . 2 . 0" + reset,
         ""
