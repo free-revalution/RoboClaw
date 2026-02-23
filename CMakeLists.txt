@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(RoboClaw VERSION 0.4.1 LANGUAGES CXX)
+project(RoboClaw VERSION 1.0.0 LANGUAGES CXX)
 
 # C++标准
 set(CMAKE_CXX_STANDARD 20)
@@ -105,6 +105,7 @@ set(SOURCES
 
     # Vision模块
     src/vision/vision_pipeline.cpp
+    src/vision/frame_processor.cpp
 
     # Embedded模块
     src/embedded/workflow_controller.cpp

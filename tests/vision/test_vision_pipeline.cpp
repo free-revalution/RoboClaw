@@ -1,10 +1,39 @@
 // tests/vision/test_vision_pipeline.cpp
 #include <catch2/catch.hpp>
 #include "vision/vision_pipeline.h"
+#include "vision/frame_processor.h"
 #include "plugins/interfaces/ivision_device.h"
 
 using namespace roboclaw::vision;
 using namespace roboclaw::plugins;
+
+// Mock frame processor for testing
+class MockFrameProcessor : public FrameProcessor {
+public:
+    MockFrameProcessor() : callCount(0), modifyWidth(false), newWidth(0) {}
+
+    FrameData process(const FrameData& frame) override {
+        callCount++;
+        FrameData result = frame;
+        if (modifyWidth) {
+            result.width = newWidth;
+        }
+        return result;
+    }
+
+    void reset() override {
+        callCount = 0;
+        modifyWidth = false;
+    }
+
+    std::string getName() const override {
+        return "MockFrameProcessor";
+    }
+
+    int callCount;
+    bool modifyWidth;
+    int newWidth;
+};
 
 // Mock vision device for testing
 class MockVisionDevice : public IVisionDevice {
@@ -180,17 +209,17 @@ TEST_CASE("Pipeline modes", "[pipeline]") {
     VisionPipeline pipeline;
 
     SECTION("Default mode is REALTIME") {
-        REQUIRE(pipeline.getMode() == PipelineMode::REALTIME);
+        REQUIRE(pipeline.getPipelineMode() == PipelineMode::REALTIME);
     }
 
     SECTION("Set mode to DETECTION") {
-        pipeline.setMode(PipelineMode::DETECTION);
-        REQUIRE(pipeline.getMode() == PipelineMode::DETECTION);
+        pipeline.setPipelineMode(PipelineMode::DETECTION);
+        REQUIRE(pipeline.getPipelineMode() == PipelineMode::DETECTION);
     }
 
     SECTION("Set mode to RECORDING") {
-        pipeline.setMode(PipelineMode::RECORDING);
-        REQUIRE(pipeline.getMode() == PipelineMode::RECORDING);
+        pipeline.setPipelineMode(PipelineMode::RECORDING);
+        REQUIRE(pipeline.getPipelineMode() == PipelineMode::RECORDING);
     }
 }
 
@@ -203,31 +232,44 @@ TEST_CASE("Frame processor management", "[pipeline]") {
     pipeline.addSource(source);
 
     SECTION("Add processor") {
-        int callCount = 0;
-        PipelineProcessor processor = [&callCount](const FrameData& frame) {
-            callCount++;
-            return frame;
-        };
-
+        auto processor = std::make_shared<MockFrameProcessor>();
         pipeline.addProcessor(processor);
         REQUIRE(pipeline.getProcessorCount() == 1);
     }
 
+    SECTION("Remove processor") {
+        auto processor = std::make_shared<MockFrameProcessor>();
+        pipeline.addProcessor(processor);
+        REQUIRE(pipeline.getProcessorCount() == 1);
+
+        pipeline.removeProcessor(processor);
+        REQUIRE(pipeline.getProcessorCount() == 0);
+    }
+
     SECTION("Processors are called during capture") {
-        int callCount = 0;
-        PipelineProcessor processor = [&callCount](const FrameData& frame) {
-            callCount++;
-            FrameData result = frame;
-            result.width = 800; // Modify to show processing occurred
-            return result;
-        };
+        auto processor = std::make_shared<MockFrameProcessor>();
+        processor->modifyWidth = true;
+        processor->newWidth = 800;
 
         pipeline.addProcessor(processor);
         pipeline.start();
 
         auto frame = pipeline.captureFrame();
-        REQUIRE(callCount == 1);
+        REQUIRE(processor->callCount == 1);
         REQUIRE(frame.width == 800); // Should be modified by processor
+    }
+
+    SECTION("Multiple processors are called in order") {
+        auto processor1 = std::make_shared<MockFrameProcessor>();
+        auto processor2 = std::make_shared<MockFrameProcessor>();
+
+        pipeline.addProcessor(processor1);
+        pipeline.addProcessor(processor2);
+        pipeline.start();
+
+        auto frame = pipeline.captureFrame();
+        REQUIRE(processor1->callCount == 1);
+        REQUIRE(processor2->callCount == 1);
     }
 }
 

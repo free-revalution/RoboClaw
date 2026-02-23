@@ -8,6 +8,7 @@
 #include <atomic>
 #include <chrono>
 #include "plugins/interfaces/ivision_device.h"
+#include "frame_processor.h"
 
 namespace roboclaw::vision {
 
