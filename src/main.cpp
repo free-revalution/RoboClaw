@@ -63,9 +63,9 @@ string getBuiltinSkillsDir() {
 }
 
 // 版本信息
-const string ROBOPARTNER_VERSION = "0.2.0";
-const string ROBOPARTNER_NAME = "RoboClaw";
-const string ROBOPARTNER_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
+const string ROBOCLAW_VERSION = "0.2.0";
+const string ROBOCLAW_NAME = "RoboClaw";
+const string ROBOCLAW_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
 
 // CLI命令枚举
 enum class Command {
@@ -98,8 +98,8 @@ struct CLIOptions {
 // 显示横幅
 void showBanner() {
     cout << "==================================================" << endl;
-    cout << "  " << ROBOPARTNER_NAME << " v" << ROBOPARTNER_VERSION << endl;
-    cout << "  " << ROBOPARTNER_DESCRIPTION << endl;
+    cout << "  " << ROBOCLAW_NAME << " v" << ROBOCLAW_VERSION << endl;
+    cout << "  " << ROBOCLAW_DESCRIPTION << endl;
     cout << "==================================================" << endl;
 }
 
@@ -177,7 +177,7 @@ void showHelp() {
 
 // 显示版本信息
 void showVersion() {
-    cout << ROBOPARTNER_NAME << " version " << ROBOPARTNER_VERSION << endl;
+    cout << ROBOCLAW_NAME << " version " << ROBOCLAW_VERSION << endl;
     cout << "Copyright (c) 2025 RoboClaw Contributors\n\n";
 
     cout << "构建信息:\n";
