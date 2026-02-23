@@ -111,6 +111,10 @@ set(SOURCES
     src/embedded/programmer_detector.cpp
     src/embedded/optimizers/parameter_optimizer.cpp
 
+    # Simulation模块
+    src/simulation/simulation_controller.cpp
+    src/simulation/sim2real_transfer.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )
