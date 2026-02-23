@@ -5,6 +5,7 @@ build/
 *.so
 *.dylib
 *.exe
+roboclaw
 
 # Git Worktrees
 .worktrees/
