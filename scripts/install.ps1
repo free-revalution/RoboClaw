@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# RoboPartner Installation Script for Windows
+# RoboClaw Installation Script for Windows
 # Supports: Windows 10, Windows 11
 
 #Requires -Version 7.0
@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 # Script parameters
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
-    [string]$InstallDir = "$env:USERPROFILE\.robopartner",
+    [string]$InstallDir = "$env:USERPROFILE\.roboclaw",
     [string]$RepoUrl = "",
     [string]$CommitHash = "",
     [switch]$SkipPathCheck = $false
@@ -239,7 +239,7 @@ function Get-SourceDirectory {
         throw "Invalid repository URL"
     }
 
-    $tempDir = Join-Path $env:TEMP "robopartner-build"
+    $tempDir = Join-Path $env:TEMP "roboclaw-build"
 
     try {
         if (Test-Path $tempDir) {
@@ -251,11 +251,11 @@ function Get-SourceDirectory {
         Write-Info "Repository: $RepoUrl"
 
         Push-Location $tempDir
-        git clone $RepoUrl robopartner 2>$null
+        git clone $RepoUrl roboclaw 2>$null
         if ($LASTEXITCODE -ne 0) {
             throw "git clone failed"
         }
-        Set-Location robopartner
+        Set-Location roboclaw
 
         # Verify commit hash if provided
         if ($CommitHash) {
@@ -278,7 +278,7 @@ function Get-SourceDirectory {
         Pop-Location
 
         Write-Success "源码下载完成 / Source code downloaded"
-        return Join-Path $tempDir "robopartner"
+        return Join-Path $tempDir "roboclaw"
     } catch {
         Pop-Location -ErrorAction SilentlyContinue
         Write-Error "无法下载源码: $_"
@@ -287,8 +287,8 @@ function Get-SourceDirectory {
     }
 }
 
-# Build RoboPartner
-function Build-RoboPartner {
+# Build RoboClaw
+function Build-RoboClaw {
     param([string]$SourceDir)
 
     $buildDir = Join-Path $SourceDir "build"
@@ -329,10 +329,10 @@ function Build-RoboPartner {
 
         # Verify build succeeded
         $exePaths = @(
-            (Join-Path $buildDir "Release\robopartner.exe"),
-            (Join-Path $buildDir "Debug\robopartner.exe"),
-            (Join-Path $buildDir "robopartner.exe"),
-            (Join-Path $SourceDir "robopartner.exe")
+            (Join-Path $buildDir "Release\roboclaw.exe"),
+            (Join-Path $buildDir "Debug\roboclaw.exe"),
+            (Join-Path $buildDir "roboclaw.exe"),
+            (Join-Path $SourceDir "roboclaw.exe")
         )
 
         $exePath = $null
@@ -356,8 +356,8 @@ function Build-RoboPartner {
     }
 }
 
-# Install RoboPartner
-function Install-RoboPartner {
+# Install RoboClaw
+function Install-RoboClaw {
     param([string]$ExecutablePath)
 
     try {
@@ -370,7 +370,7 @@ function Install-RoboPartner {
         Write-Info "Installing to $InstallDir ..."
 
         # Copy executable
-        $destPath = Join-Path $InstallDir "robopartner.exe"
+        $destPath = Join-Path $InstallDir "roboclaw.exe"
         Copy-Item $ExecutablePath -Destination $destPath -Force
 
         Write-Success "安装完成 / Installation complete"
@@ -393,8 +393,8 @@ function Setup-Path {
     }
 
     # Create symlink/shortcut in bin directory
-    $exePath = Join-Path $InstallDir "robopartner.exe"
-    $linkPath = Join-Path $binDir "robopartner.exe"
+    $exePath = Join-Path $InstallDir "roboclaw.exe"
+    $linkPath = Join-Path $binDir "roboclaw.exe"
 
     try {
         # Remove existing link if present
@@ -443,8 +443,8 @@ function Setup-Path {
 # Main installation function
 function Start-Installation {
     Write-Info "=========================================="
-    Write-Info "   RoboPartner 安装程序"
-    Write-Info "   RoboPartner Installer"
+    Write-Info "   RoboClaw 安装程序"
+    Write-Info "   RoboClaw Installer"
     Write-Info "=========================================="
     Write-Info ""
 
@@ -463,14 +463,14 @@ function Start-Installation {
     }
 
     # WhatIf mode support
-    if ($PSCmdlet.ShouldProcess($InstallDir, "Install RoboPartner")) {
+    if ($PSCmdlet.ShouldProcess($InstallDir, "Install RoboClaw")) {
         $sourceDir = $null
         $exePath = $null
 
         try {
             $sourceDir = Get-SourceDirectory
-            $exePath = Build-RoboPartner -SourceDir $sourceDir
-            $installedPath = Install-RoboPartner -ExecutablePath $exePath
+            $exePath = Build-RoboClaw -SourceDir $sourceDir
+            $installedPath = Install-RoboClaw -ExecutablePath $exePath
 
             Write-Info ""
             Write-Success "安装成功！/ Installation successful!"
@@ -484,8 +484,8 @@ function Start-Installation {
             }
 
             Write-Info ""
-            Write-Info "运行命令: robopartner"
-            Write-Info "Run command: robopartner"
+            Write-Info "运行命令: roboclaw"
+            Write-Info "Run command: roboclaw"
             Write-Info ""
 
             return $true
@@ -499,7 +499,7 @@ function Start-Installation {
 
         } finally {
             # Clean up temp directory if we created it
-            if ($sourceDir -and ($sourceDir -like "*\Temp\robopartner-build*")) {
+            if ($sourceDir -and ($sourceDir -like "*\Temp\roboclaw-build*")) {
                 try {
                     Write-Info "清理临时文件... / Cleaning up temporary files..."
                     Remove-Item -Recurse -Force $sourceDir -ErrorAction SilentlyContinue

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# RoboPartner Installation Script
+# RoboClaw Installation Script
 # Supports: macOS, Linux
 
 set -euo pipefail
 
-INSTALL_DIR="${INSTALL_DIR:-$HOME/.robopartner}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.roboclaw}"
 BIN_DIR="$HOME/bin"
 REPO_URL="https://github.com/xxx/RoboClaw.git"
 
@@ -36,7 +36,7 @@ check_dependencies() {
     fi
 }
 
-build_robopartner() {
+build_roboclaw() {
     # Check if we're already in a git repository
     if [ -d .git ] || git rev-parse --git-dir >/dev/null 2>&1; then
         echo ">>> 检测到本地仓库，直接使用..."
@@ -73,7 +73,7 @@ build_robopartner() {
     make -j"$JOBS"
 
     # Verify build succeeded
-    if [ ! -f "robopartner" ] && [ ! -f "src/robopartner" ] && [ ! -f "../robopartner" ]; then
+    if [ ! -f "roboclaw" ] && [ ! -f "src/roboclaw" ] && [ ! -f "../roboclaw" ]; then
         echo ">>> 错误: 编译失败，找不到可执行文件"
         exit 1
     fi
@@ -81,26 +81,26 @@ build_robopartner() {
     echo ">>> 正在安装..."
     mkdir -p "$INSTALL_DIR"
 
-    # Find and copy the robopartner executable
-    if [ -f robopartner ]; then
-        cp robopartner "$INSTALL_DIR/"
-    elif [ -f src/robopartner ]; then
-        cp src/robopartner "$INSTALL_DIR/"
-    elif [ -f build/robopartner ]; then
-        cp build/robopartner "$INSTALL_DIR/"
+    # Find and copy the roboclaw executable
+    if [ -f roboclaw ]; then
+        cp roboclaw "$INSTALL_DIR/"
+    elif [ -f src/roboclaw ]; then
+        cp src/roboclaw "$INSTALL_DIR/"
+    elif [ -f build/roboclaw ]; then
+        cp build/roboclaw "$INSTALL_DIR/"
     else
-        echo ">>> 警告: 无法找到 robopartner 可执行文件"
+        echo ">>> 警告: 无法找到 roboclaw 可执行文件"
         echo ">>> 请手动编译并安装"
         return 1
     fi
 
-    chmod +x "$INSTALL_DIR/robopartner"
+    chmod +x "$INSTALL_DIR/roboclaw"
 
     # Create symlink - verify ~/bin exists and is usable
     if ! echo "$PATH" | grep -q "$BIN_DIR"; then
         mkdir -p "$BIN_DIR"
     fi
-    ln -sf "$INSTALL_DIR/robopartner" "$BIN_DIR/robopartner"
+    ln -sf "$INSTALL_DIR/roboclaw" "$BIN_DIR/roboclaw"
 
     # Clean up temp directory if we created one
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
@@ -111,19 +111,19 @@ build_robopartner() {
 
 main() {
     echo "=========================================="
-    echo "   RoboPartner 安装程序"
+    echo "   RoboClaw 安装程序"
     echo "=========================================="
     echo ""
 
     if ! check_dependencies; then
         exit 1
     fi
-    build_robopartner
+    build_roboclaw
 
     echo ""
     echo ">>> 安装完成！"
     echo ""
-    echo "运行: robopartner"
+    echo "运行: roboclaw"
     echo ""
 
     # Setup PATH
