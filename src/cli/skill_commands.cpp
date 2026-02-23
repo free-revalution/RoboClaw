@@ -17,7 +17,7 @@ SkillCommands::SkillCommands(std::shared_ptr<SkillRegistry> registry,
 
 std::string SkillCommands::getSkillsDir() const {
     // 从配置读取，如果没有则使用默认值
-    std::string skillsDir = config_.get("skills.local_skills_dir", "~/.robopartner/skills");
+    std::string skillsDir = config_.get("skills.local_skills_dir", "~/.roboclaw/skills");
 
     // 展开波浪号
     if (skillsDir[0] == '~') {

@@ -26,8 +26,8 @@ worktrees/
 ehthumbs.db
 Thumbs.db
 
-# RoboPartner运行时数据
-.robopartner/
+# RoboClaw运行时数据
+.roboclaw/
 
 # 日志
 *.log

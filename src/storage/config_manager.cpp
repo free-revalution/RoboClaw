@@ -102,15 +102,15 @@ std::string ConfigManager::getConfigPath() {
 std::string ConfigManager::getConfigDir() {
 #ifdef PLATFORM_WINDOWS
     const char* home = getenv("USERPROFILE");
-    if (home) return std::string(home) + "\\.robopartner";
+    if (home) return std::string(home) + "\\.roboclaw";
     const char* drive = getenv("HOMEDRIVE");
     const char* path = getenv("HOMEPATH");
-    if (drive && path) return std::string(drive) + std::string(path) + "\\.robopartner";
-    return "C:\\.robopartner";
+    if (drive && path) return std::string(drive) + std::string(path) + "\\.roboclaw";
+    return "C:\\.roboclaw";
 #else
     const char* home = getenv("HOME");
-    if (home) return std::string(home) + "/.robopartner";
-    return "/tmp/.robopartner";
+    if (home) return std::string(home) + "/.roboclaw";
+    return "/tmp/.roboclaw";
 #endif
 }
 
@@ -140,7 +140,7 @@ void ConfigManager::initializeDefaults() {
     config_.tools.max_read_size = 10;
 
     // 技能设置
-    config_.skills.local_skills_dir = "~/.robopartner/skills";
+    config_.skills.local_skills_dir = "~/.roboclaw/skills";
     config_.skills.auto_update = true;
     config_.skills.update_interval_hours = 24;
 
@@ -155,7 +155,7 @@ void ConfigManager::initializeDefaults() {
     config_.optimization.stats_update_interval = 1;
 
     // 缓存设置
-    config_.cache.skills_cache_dir = ".robopartner/skills/cache";
+    config_.cache.skills_cache_dir = ".roboclaw/skills/cache";
     config_.cache.skill_cache_ttl = 168;
     config_.cache.prompt_cache_size = 100;
 

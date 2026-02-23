@@ -18,7 +18,7 @@ string getHomeDirectory() {
 
 // 获取配置目录
 string getConfigDirectory() {
-    return getHomeDirectory() + "/.robopartner";
+    return getHomeDirectory() + "/.roboclaw";
 }
 
 } // namespace platform
