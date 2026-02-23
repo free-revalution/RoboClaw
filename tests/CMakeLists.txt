@@ -63,6 +63,7 @@ set(TEST_SOURCES
     plugins/test_plugin_registry.cpp
     plugins/test_plugin_manager.cpp
     vision/test_vision_pipeline.cpp
+    e2e/test_full_robotics_development.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
     integration/test_social_manager.cpp
@@ -94,6 +95,11 @@ set(MAIN_SOURCES
     ../src/plugins/plugin_registry.cpp
     ../src/plugins/plugin_manager.cpp
     ../src/vision/vision_pipeline.cpp
+    ../src/embedded/workflow_controller.cpp
+    ../src/embedded/programmer_detector.cpp
+    ../src/embedded/optimizers/parameter_optimizer.cpp
+    ../src/simulation/simulation_controller.cpp
+    ../src/simulation/sim2real_transfer.cpp
 )
 
 # 链接CPR（如果需要）
