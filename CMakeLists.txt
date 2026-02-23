@@ -101,6 +101,7 @@ set(SOURCES
 
     # Plugin模块
     src/plugins/plugin_registry.cpp
+    src/plugins/plugin_manager.cpp
 
     # 平台相关
     ${PLATFORM_SOURCES}

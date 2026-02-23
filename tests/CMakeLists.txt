@@ -61,6 +61,7 @@ set(TEST_SOURCES
     unit/test_claude_code_bridge.cpp
     plugins/test_plugin_interface.cpp
     plugins/test_plugin_registry.cpp
+    plugins/test_plugin_manager.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
     integration/test_social_manager.cpp
@@ -90,6 +91,7 @@ set(MAIN_SOURCES
     ../src/social/social_manager.cpp
     ../src/agent/claude_code_bridge.cpp
     ../src/plugins/plugin_registry.cpp
+    ../src/plugins/plugin_manager.cpp
 )
 
 # 链接CPR（如果需要）
