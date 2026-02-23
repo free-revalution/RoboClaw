@@ -1,6 +1,7 @@
 // InteractiveMode实现
 
 #include "interactive_mode.h"
+#include "link_command.h"
 #include "../utils/logger.h"
 #include "../utils/terminal.h"  // NEW
 #include "../storage/config_manager.h"
@@ -155,6 +156,7 @@ bool InteractiveMode::handleSlashCommand(const std::string& command) {
     if (cmd == "model") return cmdModel(args);
     if (cmd == "agent") return cmdAgent(args);
     if (cmd == "browser") return cmdBrowser(args);
+    if (cmd == "link") return cmdLink(args);
 
     std::cout << Color::RED << "Unknown command: " << cmd << Color::RESET << std::endl;
     std::cout << "Type /help for available commands" << std::endl;
@@ -216,6 +218,88 @@ bool InteractiveMode::cmdBrowser(const std::string& args) {
     }
 
     std::cout << YELLOW << "Browser commands: open, screenshot, navigate <url>" << RESET << std::endl;
+    return true;
+}
+
+bool InteractiveMode::cmdLink(const std::string& args) {
+    using namespace Color;
+    using namespace cli;
+
+    LinkCommand linkCmd;
+
+    if (args.empty() || args == "list") {
+        // 列出可用平台
+        auto platforms = linkCmd.getAvailablePlatforms();
+        std::cout << CYAN << "可用社交平台 / Available Platforms:" << RESET << "\n\n";
+
+        for (const auto& platform : platforms) {
+            std::cout << "  " << YELLOW << platform.id << RESET << " - "
+                      << platform.name << " (" << platform.description << ")\n";
+            if (platform.enabled) {
+                std::cout << "    " << GREEN << "✓ 已启用 / Enabled" << RESET << "\n";
+            } else {
+                std::cout << "    " << GRAY << "✗ 未启用 / Disabled" << RESET << "\n";
+            }
+            std::cout << "\n";
+        }
+
+        std::cout << GRAY << "用法 / Usage:\n";
+        std::cout << "  /link connect <platform>  连接平台\n";
+        std::cout << "  /link disconnect <platform> 断开连接\n";
+        std::cout << RESET;
+        return true;
+    }
+
+    std::istringstream iss(args);
+    std::string action;
+    iss >> action;
+
+    if (action == "connect") {
+        std::string platform;
+        iss >> platform;
+
+        if (platform.empty()) {
+            std::cout << RED << "请指定平台 / Please specify platform" << RESET << "\n";
+            std::cout << "用法: /link connect <platform>" << "\n";
+            return true;
+        }
+
+        std::cout << YELLOW << "正在连接 / Connecting to " << platform << "..." << RESET << "\n";
+
+        if (platform == "telegram") {
+            std::cout << CYAN << "请输入 Telegram Bot Token:" << RESET << "\n";
+            std::cout << GRAY << "(从 @BotFather 获取)" << RESET << "\n";
+            std::cout << ">>> ";
+
+            std::string token;
+            std::getline(std::cin, token);
+
+            nlohmann::json config;
+            config["bot_token"] = token;
+
+            if (linkCmd.connectToPlatform(platform, config)) {
+                std::cout << GREEN << "✓ 连接成功 / Connected successfully!" << RESET << "\n";
+            } else {
+                std::cout << RED << "✗ 连接失败 / Connection failed" << RESET << "\n";
+            }
+        } else {
+            std::cout << YELLOW << "平台 " << platform << " 尚未实现 / Not implemented yet" << RESET << "\n";
+        }
+        return true;
+    }
+
+    if (action == "disconnect") {
+        std::string platform;
+        iss >> platform;
+
+        std::cout << YELLOW << "正在断开 / Disconnecting from " << platform << "..." << RESET << "\n";
+        // TODO: 实现断开连接
+        std::cout << GRAY << "断开连接功能即将推出 / Disconnect feature coming soon" << RESET << "\n";
+        return true;
+    }
+
+    std::cout << RED << "未知操作 / Unknown action: " << action << RESET << "\n";
+    std::cout << "可用操作 / Available actions: list, connect, disconnect\n";
     return true;
 }
 
