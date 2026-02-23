@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.4.1] - 2025-02-23
+## [0.4.1] - 2026-02-23
 
 ### Changed / 更改
 - **Project renamed** from "RoboPartner" back to "RoboClaw" / 项目从 "RoboPartner" 更名为 "RoboClaw"
