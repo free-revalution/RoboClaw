@@ -1,8 +1,10 @@
-// ToolBase实现
+// ToolBase实现 - Improved error handling
 
 #include "tool_base.h"
 #include <stdexcept>
 #include <shared_mutex>
+#include <json/json.h>
+#include <typeinfo>
 
 namespace roboclaw {
 
@@ -23,7 +25,11 @@ std::string ToolBase::getStringParam(const json& params, const std::string& name
     }
     try {
         return params[name].get<std::string>();
-    } catch (...) {
+    } catch (const json::type_error& e) {
+        LOG_WARNING("Parameter '" + name + "' type error: " + std::string(e.what()));
+        return defaultVal;
+    } catch (const std::exception& e) {
+        LOG_WARNING("Parameter '" + name + "' access error: " + std::string(e.what()));
         return defaultVal;
     }
 }
@@ -35,14 +41,24 @@ int ToolBase::getIntParam(const json& params, const std::string& name,
     }
     try {
         return params[name].get<int>();
-    } catch (...) {
+    } catch (const json::type_error& e) {
+        // Try converting from string
         try {
-            // 尝试从字符串转换
             std::string strVal = params[name].get<std::string>();
             return std::stoi(strVal);
-        } catch (...) {
+        } catch (const json::type_error& e2) {
+            LOG_WARNING("Parameter '" + name + "' type error: " + std::string(e2.what()));
+            return defaultVal;
+        } catch (const std::invalid_argument& e2) {
+            LOG_WARNING("Parameter '" + name + "' invalid integer: " + std::string(e2.what()));
+            return defaultVal;
+        } catch (const std::out_of_range& e2) {
+            LOG_WARNING("Parameter '" + name + "' out of range: " + std::string(e2.what()));
             return defaultVal;
         }
+    } catch (const std::exception& e) {
+        LOG_WARNING("Parameter '" + name + "' access error: " + std::string(e.what()));
+        return defaultVal;
     }
 }
 
@@ -53,14 +69,21 @@ bool ToolBase::getBoolParam(const json& params, const std::string& name,
     }
     try {
         return params[name].get<bool>();
-    } catch (...) {
+    } catch (const json::type_error& e) {
+        // Try converting from string
         try {
-            // 尝试从字符串转换
             std::string strVal = params[name].get<std::string>();
             return (strVal == "true" || strVal == "1" || strVal == "yes");
-        } catch (...) {
+        } catch (const json::type_error& e2) {
+            LOG_WARNING("Parameter '" + name + "' type error: " + std::string(e2.what()));
+            return defaultVal;
+        } catch (const std::exception& e2) {
+            LOG_WARNING("Parameter '" + name + "' bool conversion error: " + std::string(e2.what()));
             return defaultVal;
         }
+    } catch (const std::exception& e) {
+        LOG_WARNING("Parameter '" + name + "' access error: " + std::string(e.what()));
+        return defaultVal;
     }
 }
 

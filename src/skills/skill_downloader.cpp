@@ -1,13 +1,15 @@
-// SkillDownloader实现
+// SkillDownloader实现 - Improved error handling
 
 #include "skill_downloader.h"
 #include "../utils/logger.h"
+#include "../utils/code_quality_constants.h"
 #include <fstream>
 #include <filesystem>
 #include <sstream>
 #include <regex>
 #include <algorithm>
 #include <chrono>
+#include <system_error>
 
 namespace roboclaw {
 
@@ -18,8 +20,12 @@ SkillDownloader::SkillDownloader(const std::string& cacheDir)
     // 创建缓存目录
     try {
         std::filesystem::create_directories(cache_dir_);
-    } catch (...) {
-        LOG_WARNING("无法创建缓存目录: " + cache_dir_);
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_WARNING("无法创建缓存目录: " + cacheDir + " - " + std::string(e.what()));
+    } catch (const std::system_error& e) {
+        LOG_WARNING("系统错误创建缓存目录: " + cacheDir + " - " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        LOG_WARNING("无法创建缓存目录: " + cacheDir + " - " + std::string(e.what()));
     }
 }
 
@@ -28,8 +34,12 @@ void SkillDownloader::setCacheDir(const std::string& dir) {
 
     try {
         std::filesystem::create_directories(cache_dir_);
-    } catch (...) {
-        LOG_WARNING("无法创建缓存目录: " + cache_dir_);
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_WARNING("无法创建缓存目录: " + dir + " - " + std::string(e.what()));
+    } catch (const std::system_error& e) {
+        LOG_WARNING("系统错误创建缓存目录: " + dir + " - " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        LOG_WARNING("无法创建缓存目录: " + dir + " - " + std::string(e.what()));
     }
 }
 
@@ -86,6 +96,12 @@ bool SkillDownloader::downloadSkill(const std::string& url,
         LOG_INFO("技能已下载: " + destPath);
         return true;
 
+    } catch (const std::ofstream::failure& e) {
+        LOG_ERROR("写入文件失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("创建目录失败: " + std::string(e.what()));
+        return false;
     } catch (const std::exception& e) {
         LOG_ERROR("写入文件失败: " + std::string(e.what()));
         return false;
@@ -173,6 +189,8 @@ void SkillDownloader::clearCache() {
             }
             LOG_INFO("已清理缓存: " + std::to_string(count) + " 个文件");
         }
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("清理缓存失败: " + std::string(e.what()));
     } catch (const std::exception& e) {
         LOG_ERROR("清理缓存失败: " + std::string(e.what()));
     }
@@ -189,8 +207,10 @@ size_t SkillDownloader::getCacheSize() const {
                 }
             }
         }
-    } catch (...) {
-        // 忽略错误
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("获取缓存大小失败: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        LOG_ERROR("获取缓存大小失败: " + std::string(e.what()));
     }
 
     return totalSize;
@@ -204,14 +224,18 @@ bool SkillDownloader::parseGitHubUrl(const std::string& url,
     // github.com/owner/repo
     // github.com/owner/repo/path/to/skills
 
-    std::regex pattern(R"(github\.com/([^/]+)/([^/]+)(/(.*))?)");
-    std::smatch match;
+    try {
+        std::regex pattern(R"(github\.com/([^/]+)/([^/]+)(/(.*))?)");
+        std::smatch match;
 
-    if (std::regex_search(url, match, pattern)) {
-        owner = match[1].str();
-        repo = match[2].str();
-        path = match[4].str();
-        return true;
+        if (std::regex_search(url, match, pattern)) {
+            owner = match[1].str();
+            repo = match[2].str();
+            path = match[4].str();
+            return true;
+        }
+    } catch (const std::regex_error& e) {
+        LOG_ERROR("GitHub URL解析正则表达式错误: " + std::string(e.what()));
     }
 
     return false;
@@ -247,7 +271,11 @@ bool SkillDownloader::isCacheValid(const std::string& cacheKey,
 
         return ageHours < maxAgeHours;
 
-    } catch (...) {
+    } catch (const std::filesystem::filesystem_error& e) {
+        LOG_ERROR("检查缓存有效性失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("检查缓存有效性失败: " + std::string(e.what()));
         return false;
     }
 }
@@ -269,7 +297,11 @@ bool SkillDownloader::loadFromCache(const std::string& cacheKey,
         content = str;
         return true;
 
-    } catch (...) {
+    } catch (const std::ifstream::failure& e) {
+        LOG_ERROR("从缓存加载失败: " + std::string(e.what()));
+        return false;
+    } catch (const std::exception& e) {
+        LOG_ERROR("从缓存加载失败: " + std::string(e.what()));
         return false;
     }
 }
@@ -288,6 +320,8 @@ void SkillDownloader::saveToCache(const std::string& cacheKey,
         file << content;
         file.close();
 
+    } catch (const std::ofstream::failure& e) {
+        LOG_WARNING("保存缓存失败: " + std::string(e.what()));
     } catch (const std::exception& e) {
         LOG_WARNING("保存缓存失败: " + std::string(e.what()));
     }

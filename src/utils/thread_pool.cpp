@@ -1,4 +1,4 @@
-// ThreadPool实现
+// ThreadPool实现 - Improved memory safety
 
 #include "thread_pool.h"
 #include "../utils/logger.h"
@@ -9,6 +9,13 @@
 #include <mutex>
 
 namespace roboclaw {
+
+// Constants for ThreadPool
+constexpr size_t DEFAULT_MIN_THREADS = 4;
+constexpr size_t MAX_DYNAMIC_ADD_THREADS = 4;
+constexpr int DEFAULT_WORKER_WAIT_MS = 10;
+constexpr int MAX_BACKOFF_MS = 10000;
+constexpr int INITIAL_BACKOFF_MS = 1000;
 
 std::unique_ptr<ThreadPool> GlobalThreadPool::pool_ = nullptr;
 std::once_flag GlobalThreadPool::init_flag_;
@@ -155,7 +162,7 @@ void ThreadPool::adjustThreads() {
     // 如果所有线程都忙碌且有大量待处理任务，增加线程
     if (active >= current && pending > current / 2 &&
         current < config_.max_threads) {
-        size_t add = std::min({pending / 2, config_.max_threads - current, size_t(4)});
+        size_t add = std::min({pending / 2, config_.max_threads - current, MAX_DYNAMIC_ADD_THREADS});
         for (size_t i = 0; i < add; ++i) {
             workers_.emplace_back(&ThreadPool::worker, this);
         }
@@ -216,7 +223,7 @@ void ThreadPool::waitForAll() {
                 return;
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_WORKER_WAIT_MS));
     }
 }
 
@@ -229,9 +236,9 @@ GlobalThreadPool::GlobalThreadPool() {
 ThreadPool& GlobalThreadPool::instance() {
     std::call_once(init_flag_, []() {
         ThreadPoolConfig config;
-        config.min_threads = 4;
+        config.min_threads = DEFAULT_MIN_THREADS;
         config.max_threads = std::thread::hardware_concurrency();
-        pool_ = std::unique_ptr<ThreadPool>(new ThreadPool(config));
+        pool_ = std::make_unique<ThreadPool>(config);
     });
     return *pool_;
 }
