@@ -158,9 +158,15 @@ public:
 
     /**
      * @brief Add a frame processor to the pipeline
-     * @param processor Processor function
+     * @param processor Shared pointer to FrameProcessor
      */
-    void addProcessor(PipelineProcessor processor);
+    void addProcessor(std::shared_ptr<FrameProcessor> processor);
+
+    /**
+     * @brief Remove a processor from the pipeline
+     * @param processor Shared pointer to FrameProcessor to remove
+     */
+    void removeProcessor(std::shared_ptr<FrameProcessor> processor);
 
     /**
      * @brief Get number of processors
@@ -205,13 +211,13 @@ public:
      * @brief Set pipeline mode
      * @param mode Pipeline mode
      */
-    void setMode(PipelineMode mode);
+    void setPipelineMode(PipelineMode mode);
 
     /**
      * @brief Get current pipeline mode
      * @return Current mode
      */
-    PipelineMode getMode() const;
+    PipelineMode getPipelineMode() const;
 
 private:
     /**
@@ -231,7 +237,7 @@ private:
     std::vector<std::shared_ptr<roboclaw::plugins::IVisionDevice>> sources_;
 
     // Frame processors
-    std::vector<PipelineProcessor> processors_;
+    std::vector<std::shared_ptr<FrameProcessor>> processors_;
 
     // Output targets
     std::vector<std::shared_ptr<OutputTarget>> outputs_;
