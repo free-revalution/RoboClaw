@@ -129,39 +129,28 @@ bool VisionPipeline::isRunning() const {
     return running_.load();
 }
 
-FrameData VisionPipeline::captureFrame() {
+roboclaw::plugins::FrameData VisionPipeline::captureFrame() {
     std::lock_guard<std::mutex> lock(sources_mutex_);
 
     if (sources_.empty()) {
         // Return empty frame
-        return FrameData{};
+        return roboclaw::plugins::FrameData{};
     }
 
     // Get frame from first available source
     for (auto& source : sources_) {
         if (source && source->isOpen()) {
-            // Convert IVisionDevice::FrameData to our FrameData
+            // Capture frame from device
             auto deviceFrame = source->captureFrame();
 
-            FrameData frame;
-            frame.data = deviceFrame.data;
-            frame.width = deviceFrame.width;
-            frame.height = deviceFrame.height;
-            frame.channels = deviceFrame.channels;
-            frame.stride = deviceFrame.stride;
-            frame.timestamp = deviceFrame.timestamp;
-            frame.format = deviceFrame.format;
-
             // Process through processors
-            FrameData processedFrame = processFrame(frame);
-
-            // Don't delete deviceFrame.data here - it's owned by deviceFrame's destructor
+            roboclaw::plugins::FrameData processedFrame = processFrame(deviceFrame);
 
             return processedFrame;
         }
     }
 
-    return FrameData{};
+    return roboclaw::plugins::FrameData{};
 }
 
 void VisionPipeline::setPipelineMode(PipelineMode mode) {
@@ -172,21 +161,21 @@ PipelineMode VisionPipeline::getPipelineMode() const {
     return mode_;
 }
 
-FrameData VisionPipeline::processFrame(const FrameData& frame) {
-    FrameData result = frame;
+roboclaw::plugins::FrameData VisionPipeline::processFrame(const roboclaw::plugins::FrameData& frame) {
+    roboclaw::plugins::FrameData result = frame;
 
     std::lock_guard<std::mutex> lock(processors_mutex_);
 
     for (auto& processor : processors_) {
         if (processor) {
-            result = processor(result);
+            result = processor->process(result);
         }
     }
 
     return result;
 }
 
-void VisionPipeline::outputFrame(const FrameData& frame) {
+void VisionPipeline::outputFrame(const roboclaw::plugins::FrameData& frame) {
     std::lock_guard<std::mutex> lock(outputs_mutex_);
 
     for (auto& output : outputs_) {
