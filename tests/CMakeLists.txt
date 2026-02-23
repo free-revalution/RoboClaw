@@ -51,6 +51,7 @@ set(TEST_SOURCES
     unit/test_task_coordinator.cpp
     unit/test_agent_bridge.cpp
     unit/test_claude_code_bridge.cpp
+    plugins/test_plugin_interface.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
     integration/test_social_manager.cpp
