@@ -48,3 +48,4 @@ compile_commands.json
 coverage/
 *.gcda
 *.gcno
+docs/
