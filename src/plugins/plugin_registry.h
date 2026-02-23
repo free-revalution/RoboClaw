@@ -42,7 +42,7 @@ public:
      * @param plugin Shared pointer to the plugin instance
      * @return true if registration succeeded, false if id is empty or plugin is null
      */
-    bool registerPlugin(const std::string& id, std::shared_ptr<T> plugin) {
+    [[nodiscard]] bool registerPlugin(const std::string& id, std::shared_ptr<T> plugin) {
         if (id.empty()) {
             return false;
         }
@@ -62,7 +62,7 @@ public:
      * @param id The plugin identifier
      * @return Shared pointer to the plugin, or nullptr if not found
      */
-    std::shared_ptr<T> getPlugin(const std::string& id) const {
+    [[nodiscard]] std::shared_ptr<T> getPlugin(const std::string& id) const {
         std::lock_guard<std::mutex> lock(mutex_);
         auto it = plugins_.find(id);
         return (it != plugins_.end()) ? it->second : nullptr;
@@ -98,13 +98,14 @@ public:
     /**
      * @brief Load plugins from a directory
      *
-     * This is a stub method that logs "not implemented".
-     * This will be implemented in Task 1.3 (Plugin Manager).
+     * NOTE: This is a stub method. Dynamic plugin loading will be
+     *       implemented in Task 1.3 (Plugin Manager). Currently, this
+     *       method does nothing and ignores the provided path.
      *
-     * @param path Path to the directory containing plugins
+     * @param path Path to the directory containing plugins (currently ignored)
      */
     void loadPluginsFromDirectory(const std::string& path) {
-        // TODO: Implement dynamic plugin loading in Task 1.3
+        // Stub: Not yet implemented - will be done in Task 1.3 (Plugin Manager)
         (void)path; // Suppress unused parameter warning
     }
 
