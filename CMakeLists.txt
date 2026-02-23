@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(RoboClaw VERSION 0.2.0 LANGUAGES CXX)
+project(RoboClaw VERSION 0.4.1 LANGUAGES CXX)
 
 # C++标准
 set(CMAKE_CXX_STANDARD 20)
