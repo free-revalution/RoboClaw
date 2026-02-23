@@ -3,7 +3,7 @@
 #include "../utils/code_quality_constants.h"
 #include <stdexcept>
 #include <regex>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 namespace roboclaw::social {
 

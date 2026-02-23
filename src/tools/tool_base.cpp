@@ -3,7 +3,7 @@
 #include "tool_base.h"
 #include <stdexcept>
 #include <shared_mutex>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 #include <typeinfo>
 
 namespace roboclaw {
