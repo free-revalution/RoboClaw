@@ -99,6 +99,9 @@ set(SOURCES
     # Agent Bridge模块
     src/agent/claude_code_bridge.cpp
 
+    # Plugin模块
+    src/plugins/plugin_registry.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )

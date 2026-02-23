@@ -89,6 +89,7 @@ set(MAIN_SOURCES
     ../src/social/telegram_adapter.cpp
     ../src/social/social_manager.cpp
     ../src/agent/claude_code_bridge.cpp
+    ../src/plugins/plugin_registry.cpp
 )
 
 # 链接CPR（如果需要）
