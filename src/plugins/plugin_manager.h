@@ -173,6 +173,20 @@ private:
     [[nodiscard]] bool fileExists(const std::string& path) const;
 
     /**
+     * @brief Internal unload helper that assumes mutex is already held
+     *
+     * This is a private helper that performs the actual unload operation
+     * without acquiring the mutex. It is used by loadPlugin() to avoid
+     * recursive deadlock when replacing an already-loaded plugin.
+     *
+     * IMPORTANT: The mutex_ must be locked before calling this method.
+     *
+     * @param id The plugin identifier to unload
+     * @return true if the plugin was unloaded, false if not found
+     */
+    [[nodiscard]] bool unloadPlugin_unlocked(const std::string& id);
+
+    /**
      * @brief Platform-specific plugin loading implementation
      *
      * @param path Path to the shared library

@@ -7,9 +7,10 @@
 #include <filesystem>
 #include <ctime>
 #include "plugins/plugin_manager.h"
-#include "plugins/plugin.h"
+#include "test_plugin_utils.h"
 
 using namespace roboclaw::plugins;
+using namespace roboclaw::plugins::test;
 
 // ============================================================================
 // Test Helpers

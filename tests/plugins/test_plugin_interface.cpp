@@ -1,8 +1,10 @@
 // tests/plugins/test_plugin_interface.cpp
 #include <catch2/catch.hpp>
 #include "plugins/plugin.h"
+#include "test_plugin_utils.h"
 
 using namespace roboclaw::plugins;
+using namespace roboclaw::plugins::test;
 
 TEST_CASE("Plugin interface provides name and version", "[plugin]") {
     MockPlugin plugin;

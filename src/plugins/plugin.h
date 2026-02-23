@@ -43,32 +43,4 @@ public:
     virtual void shutdown() = 0;
 };
 
-/**
- * @brief Mock plugin for testing
- *
- * This plugin is used for unit testing the plugin interface.
- * It validates configuration by checking for a required "key" field.
- */
-class MockPlugin : public IPlugin {
-public:
-    std::string getName() const override {
-        return "mock";
-    }
-
-    std::string getVersion() const override {
-        return "1.0.0";
-    }
-
-    bool initialize(const nlohmann::json& config) override {
-        if (!config.contains("key")) {
-            throw std::runtime_error("Invalid config: missing required 'key' field");
-        }
-        return true;
-    }
-
-    void shutdown() override {
-        // No resources to release in mock
-    }
-};
-
 } // namespace roboclaw::plugins

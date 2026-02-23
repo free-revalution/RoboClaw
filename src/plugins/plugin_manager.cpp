@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <functional>
 #include <filesystem>
+#include <iostream>
+#include <sstream>
 
 // Platform-specific headers for dynamic loading
 #if defined(_WIN32) || defined(_WIN64)
@@ -43,17 +45,20 @@ PluginManager::~PluginManager() {
 bool PluginManager::loadPlugin(const std::string& path) {
     // Validate inputs
     if (!validatePath(path)) {
+        std::cerr << "PluginManager: Invalid plugin path '" << path << "'" << std::endl;
         return false;
     }
 
     // Check if file exists
     if (!fileExists(path)) {
+        std::cerr << "PluginManager: Plugin file not found: '" << path << "'" << std::endl;
         return false;
     }
 
     // Extract plugin ID from path
     std::string id = extractPluginId(path);
     if (!validateId(id)) {
+        std::cerr << "PluginManager: Invalid plugin ID extracted from path: '" << path << "'" << std::endl;
         return false;
     }
 
@@ -62,12 +67,15 @@ bool PluginManager::loadPlugin(const std::string& path) {
     // Check if plugin with this ID is already loaded
     if (handles_.find(id) != handles_.end()) {
         // Plugin already loaded - replace it
-        (void)unloadPlugin(id);
+        // Use unlocked version to avoid recursive deadlock since we already hold the lock
+        std::cerr << "PluginManager: Plugin '" << id << "' already loaded, replacing..." << std::endl;
+        (void)unloadPlugin_unlocked(id);
     }
 
     // Load the shared library
     void* handle = loadLibrary(path);
     if (!handle) {
+        std::cerr << "PluginManager: Failed to load library '" << path << "': " << getDLError() << std::endl;
         return false;
     }
 
@@ -76,6 +84,7 @@ bool PluginManager::loadPlugin(const std::string& path) {
     auto* create_func = reinterpret_cast<CreatePluginFunc>(getSymbol(handle, "create_plugin"));
 
     if (!create_func) {
+        std::cerr << "PluginManager: Plugin '" << id << "' missing 'create_plugin' symbol" << std::endl;
         unloadLibrary(handle);
         return false;
     }
@@ -83,11 +92,14 @@ bool PluginManager::loadPlugin(const std::string& path) {
     // Create the plugin instance
     IPlugin* plugin_raw = create_func();
     if (!plugin_raw) {
+        std::cerr << "PluginManager: Plugin '" << id << "' factory returned null" << std::endl;
         unloadLibrary(handle);
         return false;
     }
 
     // Wrap in shared_ptr with custom deleter
+    // NOTE: The deleter may run asynchronously from any thread when the last
+    // shared_ptr reference is released. Plugin implementations must handle this.
     std::shared_ptr<IPlugin> plugin(plugin_raw, [id](IPlugin* p) {
         if (p) {
             p->shutdown();
@@ -99,17 +111,20 @@ bool PluginManager::loadPlugin(const std::string& path) {
     nlohmann::json config;
     try {
         if (!plugin->initialize(config)) {
+            std::cerr << "PluginManager: Plugin '" << id << "' initialization failed" << std::endl;
             unloadLibrary(handle);
             return false;
         }
     } catch (const std::exception& e) {
         // Initialization failed
+        std::cerr << "PluginManager: Plugin '" << id << "' initialization threw exception: " << e.what() << std::endl;
         unloadLibrary(handle);
         return false;
     }
 
     // Register the plugin and store the handle
     if (!registry_.registerPlugin(id, plugin)) {
+        std::cerr << "PluginManager: Failed to register plugin '" << id << "'" << std::endl;
         plugin->shutdown();
         unloadLibrary(handle);
         return false;
@@ -125,6 +140,11 @@ bool PluginManager::unloadPlugin(const std::string& id) {
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
+    return unloadPlugin_unlocked(id);
+}
+
+bool PluginManager::unloadPlugin_unlocked(const std::string& id) {
+    // IMPORTANT: mutex_ must already be locked before calling this method
 
     auto handle_it = handles_.find(id);
     if (handle_it == handles_.end()) {
@@ -290,6 +310,7 @@ std::string PluginManager::getDLError() const {
         if (error == 0) {
             return "No error";
         }
+
         LPSTR messageBuffer = nullptr;
         size_t size = FormatMessageA(
             FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -300,8 +321,19 @@ std::string PluginManager::getDLError() const {
             0,
             nullptr
         );
-        std::string message(messageBuffer, size);
-        LocalFree(messageBuffer);
+
+        std::string message;
+        if (size > 0 && messageBuffer) {
+            message = std::string(messageBuffer, size);
+        } else {
+            message = "Unknown error (FormatMessageA failed)";
+        }
+
+        // Clean up the buffer allocated by FormatMessageA
+        if (messageBuffer) {
+            LocalFree(messageBuffer);
+        }
+
         return message;
     #else
         const char* error = dlerror();

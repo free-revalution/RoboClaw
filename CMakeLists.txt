@@ -103,6 +103,9 @@ set(SOURCES
     src/plugins/plugin_registry.cpp
     src/plugins/plugin_manager.cpp
 
+    # Vision模块
+    src/vision/vision_pipeline.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )

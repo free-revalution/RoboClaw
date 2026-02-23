@@ -62,6 +62,7 @@ set(TEST_SOURCES
     plugins/test_plugin_interface.cpp
     plugins/test_plugin_registry.cpp
     plugins/test_plugin_manager.cpp
+    vision/test_vision_pipeline.cpp
     integration/test_hardware_cli.cpp
     integration/test_link_command.cpp
     integration/test_social_manager.cpp
@@ -92,6 +93,7 @@ set(MAIN_SOURCES
     ../src/agent/claude_code_bridge.cpp
     ../src/plugins/plugin_registry.cpp
     ../src/plugins/plugin_manager.cpp
+    ../src/vision/vision_pipeline.cpp
 )
 
 # 链接CPR（如果需要）
