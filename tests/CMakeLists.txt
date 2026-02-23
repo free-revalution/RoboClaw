@@ -19,7 +19,7 @@ endif()
 # 查找依赖
 find_package(nlohmann_json 3.11.3 REQUIRED)
 
-# Google Test
+# Google Test (for existing tests)
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -29,6 +29,14 @@ FetchContent_Declare(
 # 对于 Windows：防止覆盖父项目的编译器/链接器设置
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+# Catch2 (for plugin tests)
+FetchContent_Declare(
+    catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.0
+)
+FetchContent_MakeAvailable(catch2)
 
 # 包含主项目头文件
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
@@ -91,11 +99,19 @@ foreach(test_source ${TEST_SOURCES})
     get_filename_component(test_name ${test_source} NAME_WE)
     add_executable(${test_name} ${test_source} ${MAIN_SOURCES})
 
-    target_link_libraries(${test_name}
-        gtest
-        gtest_main
-        nlohmann_json::nlohmann_json
-    )
+    # Plugin tests use Catch2, others use GoogleTest
+    if(${test_source} MATCHES "plugins/")
+        target_link_libraries(${test_name}
+            Catch2::Catch2WithMain
+            nlohmann_json::nlohmann_json
+        )
+    else()
+        target_link_libraries(${test_name}
+            gtest
+            gtest_main
+            nlohmann_json::nlohmann_json
+        )
+    endif()
 
     # Windows 需要的库
     if(WIN32)
