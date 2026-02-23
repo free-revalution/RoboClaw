@@ -3,16 +3,23 @@
 
 #include <stdexcept>
 #include <functional>
+#include <filesystem>
 
 // Platform-specific headers for dynamic loading
 #if defined(_WIN32) || defined(_WIN64)
-    #define PLATFORM_WINDOWS
+    #ifndef PLATFORM_WINDOWS
+        #define PLATFORM_WINDOWS
+    #endif
     #include <windows.h>
 #else
     #if defined(__APPLE__)
-        #define PLATFORM_MACOS
+        #ifndef PLATFORM_MACOS
+            #define PLATFORM_MACOS
+        #endif
     #else
-        #define PLATFORM_LINUX
+        #ifndef PLATFORM_LINUX
+            #define PLATFORM_LINUX
+        #endif
     #endif
     #include <dlfcn.h>
 #endif
@@ -33,23 +40,21 @@ PluginManager::~PluginManager() {
 // Public Methods
 // ============================================================================
 
-std::string PluginManager::loadPlugin(
-    const std::string& path,
-    const std::string& id,
-    const nlohmann::json& config
-) {
+bool PluginManager::loadPlugin(const std::string& path) {
     // Validate inputs
     if (!validatePath(path)) {
-        return "";
-    }
-
-    if (!validateId(id)) {
-        return "";
+        return false;
     }
 
     // Check if file exists
     if (!fileExists(path)) {
-        return "";
+        return false;
+    }
+
+    // Extract plugin ID from path
+    std::string id = extractPluginId(path);
+    if (!validateId(id)) {
+        return false;
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
@@ -57,13 +62,13 @@ std::string PluginManager::loadPlugin(
     // Check if plugin with this ID is already loaded
     if (handles_.find(id) != handles_.end()) {
         // Plugin already loaded - replace it
-        unloadPlugin(id);
+        (void)unloadPlugin(id);
     }
 
     // Load the shared library
     void* handle = loadLibrary(path);
     if (!handle) {
-        return "";
+        return false;
     }
 
     // Look for the plugin factory function
@@ -72,45 +77,46 @@ std::string PluginManager::loadPlugin(
 
     if (!create_func) {
         unloadLibrary(handle);
-        return "";
+        return false;
     }
 
     // Create the plugin instance
     IPlugin* plugin_raw = create_func();
     if (!plugin_raw) {
         unloadLibrary(handle);
-        return "";
+        return false;
     }
 
     // Wrap in shared_ptr with custom deleter
-    std::shared_ptr<IPlugin> plugin(plugin_raw, [this, id](IPlugin* p) {
+    std::shared_ptr<IPlugin> plugin(plugin_raw, [id](IPlugin* p) {
         if (p) {
             p->shutdown();
             delete p;
         }
     });
 
-    // Initialize the plugin
+    // Initialize the plugin with empty config by default
+    nlohmann::json config;
     try {
         if (!plugin->initialize(config)) {
             unloadLibrary(handle);
-            return "";
+            return false;
         }
     } catch (const std::exception& e) {
         // Initialization failed
         unloadLibrary(handle);
-        return "";
+        return false;
     }
 
     // Register the plugin and store the handle
     if (!registry_.registerPlugin(id, plugin)) {
         plugin->shutdown();
         unloadLibrary(handle);
-        return "";
+        return false;
     }
 
     handles_[id] = handle;
-    return id;
+    return true;
 }
 
 bool PluginManager::unloadPlugin(const std::string& id) {
@@ -181,6 +187,48 @@ bool PluginManager::empty() const {
     return handles_.empty();
 }
 
+size_t PluginManager::loadPluginsFromDirectory(const std::string& directory) {
+    namespace fs = std::filesystem;
+
+    size_t loaded_count = 0;
+
+    try {
+        fs::path dir_path(directory);
+
+        // Check if directory exists
+        if (!fs::exists(dir_path) || !fs::is_directory(dir_path)) {
+            return 0;
+        }
+
+        // Iterate through directory entries
+        for (const auto& entry : fs::directory_iterator(dir_path)) {
+            if (!entry.is_regular_file()) {
+                continue;
+            }
+
+            std::string path = entry.path().string();
+
+            // Check if file has valid library extension
+            if (!validatePath(path)) {
+                continue;
+            }
+
+            // Try to load the plugin
+            if (loadPlugin(path)) {
+                ++loaded_count;
+            }
+        }
+    } catch (const fs::filesystem_error&) {
+        // Directory access error - return count so far
+        return loaded_count;
+    } catch (const std::exception&) {
+        // Other errors - return count so far
+        return loaded_count;
+    }
+
+    return loaded_count;
+}
+
 // ============================================================================
 // Private Helper Methods
 // ============================================================================
@@ -208,6 +256,22 @@ bool PluginManager::validatePath(const std::string& path) const {
 
 bool PluginManager::validateId(const std::string& id) const {
     return !id.empty();
+}
+
+std::string PluginManager::extractPluginId(const std::string& path) const {
+    namespace fs = std::filesystem;
+
+    try {
+        fs::path p(path);
+        // Get filename without extension
+        std::string filename = p.stem().string();
+        return filename;
+    } catch (const fs::filesystem_error&) {
+        // If path parsing fails, return empty string
+        return "";
+    } catch (const std::exception&) {
+        return "";
+    }
 }
 
 bool PluginManager::fileExists(const std::string& path) const {

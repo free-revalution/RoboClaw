@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <stdexcept>
+#include <filesystem>
 
 #include "plugin_registry.h"
 #include "plugin.h"
@@ -43,20 +44,26 @@ public:
     /**
      * @brief Load a plugin from a shared library
      *
-     * Loads a plugin from the specified path and initializes it with the
-     * provided configuration. The plugin must export a factory function
-     * called "create_plugin" that returns an IPlugin*.
+     * Loads a plugin from the specified path. The plugin ID is extracted from
+     * the library filename (without extension). The plugin must export a factory
+     * function called "create_plugin" that returns an IPlugin*.
      *
      * @param path Path to the shared library (.so/.dylib/.dll)
-     * @param id Unique identifier for the loaded plugin
-     * @param config JSON configuration for plugin initialization
-     * @return Plugin ID if successful, empty string if failed
+     * @return true if the plugin was loaded successfully, false otherwise
      */
-    [[nodiscard]] std::string loadPlugin(
-        const std::string& path,
-        const std::string& id,
-        const nlohmann::json& config
-    );
+    [[nodiscard]] bool loadPlugin(const std::string& path);
+
+    /**
+     * @brief Load all plugins from a directory
+     *
+     * Scans the specified directory for shared libraries (.so/.dylib/.dll)
+     * and attempts to load each one. The plugin ID is extracted from the
+     * library filename (without extension).
+     *
+     * @param directory Path to the directory containing plugin libraries
+     * @return Number of plugins successfully loaded
+     */
+    [[nodiscard]] size_t loadPluginsFromDirectory(const std::string& directory);
 
     /**
      * @brief Unload a plugin by ID
@@ -134,6 +141,19 @@ private:
      * @return true if the ID is valid
      */
     [[nodiscard]] bool validateId(const std::string& id) const;
+
+    /**
+     * @brief Extract plugin ID from library path
+     *
+     * Extracts the plugin ID from the library filename by removing
+     * the path and extension. For example:
+     * - "/path/to/libmyplugin.so" -> "libmyplugin"
+     * - "/path/to/myplugin.dylib" -> "myplugin"
+     *
+     * @param path Path to the shared library
+     * @return Extracted plugin ID
+     */
+    [[nodiscard]] std::string extractPluginId(const std::string& path) const;
 
     /**
      * @brief Get the last dynamic loading error
