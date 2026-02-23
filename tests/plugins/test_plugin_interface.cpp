@@ -21,3 +21,10 @@ TEST_CASE("Plugin initialize with invalid config throws", "[plugin]") {
     nlohmann::json config;
     REQUIRE_THROWS_AS(plugin.initialize(config), std::runtime_error);
 }
+
+TEST_CASE("Plugin shutdown completes without throwing", "[plugin]") {
+    MockPlugin plugin;
+    nlohmann::json config = {{"key", "value"}};
+    plugin.initialize(config);
+    REQUIRE_NOTHROW(plugin.shutdown());
+}
