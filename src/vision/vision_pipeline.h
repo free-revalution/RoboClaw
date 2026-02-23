@@ -22,98 +22,12 @@ enum class PipelineMode {
 };
 
 /**
- * @brief Frame data structure (compatible with IVisionDevice::FrameData)
- */
-struct FrameData {
-    void* data = nullptr;           // Pointer to frame data
-    size_t width = 0;               // Frame width in pixels
-    size_t height = 0;              // Frame height in pixels
-    size_t channels = 0;            // Number of color channels
-    size_t stride = 0;              // Bytes per row
-    int64_t timestamp = 0;          // Frame timestamp in microseconds
-    std::string format;             // Pixel format (e.g., "RGB8", "YUYV")
-
-    // Helper for cleanup
-    ~FrameData() {
-        if (data) {
-            delete[] static_cast<uint8_t*>(data);
-            data = nullptr;
-        }
-    }
-
-    // Copy constructor
-    FrameData(const FrameData& other) : width(other.width), height(other.height),
-                                         channels(other.channels), stride(other.stride),
-                                         timestamp(other.timestamp), format(other.format) {
-        if (other.data && other.width * other.height * channels > 0) {
-            data = new uint8_t[width * height * channels];
-            memcpy(data, other.data, width * height * channels);
-        }
-    }
-
-    // Move constructor
-    FrameData(FrameData&& other) noexcept
-        : data(other.data), width(other.width), height(other.height),
-          channels(other.channels), stride(other.stride),
-          timestamp(other.timestamp), format(std::move(other.format)) {
-        other.data = nullptr;
-    }
-
-    // Assignment operator
-    FrameData& operator=(const FrameData& other) {
-        if (this != &other) {
-            if (data) delete[] static_cast<uint8_t*>(data);
-
-            width = other.width;
-            height = other.height;
-            channels = other.channels;
-            stride = other.stride;
-            timestamp = other.timestamp;
-            format = other.format;
-
-            if (other.data && other.width * other.height * channels > 0) {
-                data = new uint8_t[width * height * channels];
-                memcpy(data, other.data, width * height * channels);
-            } else {
-                data = nullptr;
-            }
-        }
-        return *this;
-    }
-
-    // Move assignment
-    FrameData& operator=(FrameData&& other) noexcept {
-        if (this != &other) {
-            if (data) delete[] static_cast<uint8_t*>(data);
-
-            data = other.data;
-            width = other.width;
-            height = other.height;
-            channels = other.channels;
-            stride = other.stride;
-            timestamp = other.timestamp;
-            format = std::move(other.format);
-
-            other.data = nullptr;
-        }
-        return *this;
-    }
-};
-
-/**
- * @brief Frame processor function type
- *
- * Takes a FrameData and returns processed FrameData
- */
-using PipelineProcessor = std::function<FrameData(const FrameData&)>;
-
-/**
  * @brief Frame output target
  */
 class OutputTarget {
 public:
     virtual ~OutputTarget() = default;
-    virtual void output(const FrameData& frame) = 0;
+    virtual void output(const roboclaw::plugins::FrameData& frame) = 0;
 };
 
 /**
@@ -205,7 +119,7 @@ public:
      * @brief Capture a single frame from the first available source
      * @return Captured frame data
      */
-    FrameData captureFrame();
+    roboclaw::plugins::FrameData captureFrame();
 
     /**
      * @brief Set pipeline mode
@@ -225,13 +139,13 @@ private:
      * @param frame Input frame
      * @return Processed frame
      */
-    FrameData processFrame(const FrameData& frame);
+    roboclaw::plugins::FrameData processFrame(const roboclaw::plugins::FrameData& frame);
 
     /**
      * @brief Send frame to all output targets
      * @param frame Frame to output
      */
-    void outputFrame(const FrameData& frame);
+    void outputFrame(const roboclaw::plugins::FrameData& frame);
 
     // Source devices
     std::vector<std::shared_ptr<roboclaw::plugins::IVisionDevice>> sources_;

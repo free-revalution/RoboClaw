@@ -66,9 +66,22 @@ size_t VisionPipeline::getSourceCount() const {
     return sources_.size();
 }
 
-void VisionPipeline::addProcessor(PipelineProcessor processor) {
+void VisionPipeline::addProcessor(std::shared_ptr<FrameProcessor> processor) {
+    if (!processor) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(processors_mutex_);
-    processors_.push_back(std::move(processor));
+    processors_.push_back(processor);
+}
+
+void VisionPipeline::removeProcessor(std::shared_ptr<FrameProcessor> processor) {
+    std::lock_guard<std::mutex> lock(processors_mutex_);
+
+    auto it = std::find(processors_.begin(), processors_.end(), processor);
+    if (it != processors_.end()) {
+        processors_.erase(it);
+    }
 }
 
 size_t VisionPipeline::getProcessorCount() const {
@@ -151,11 +164,11 @@ FrameData VisionPipeline::captureFrame() {
     return FrameData{};
 }
 
-void VisionPipeline::setMode(PipelineMode mode) {
+void VisionPipeline::setPipelineMode(PipelineMode mode) {
     mode_ = mode;
 }
 
-PipelineMode VisionPipeline::getMode() const {
+PipelineMode VisionPipeline::getPipelineMode() const {
     return mode_;
 }
 
