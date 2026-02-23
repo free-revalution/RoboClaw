@@ -106,6 +106,11 @@ set(SOURCES
     # Vision模块
     src/vision/vision_pipeline.cpp
 
+    # Embedded模块
+    src/embedded/workflow_controller.cpp
+    src/embedded/programmer_detector.cpp
+    src/embedded/optimizers/parameter_optimizer.cpp
+
     # 平台相关
     ${PLATFORM_SOURCES}
 )
