@@ -358,14 +358,16 @@ void UI::drawSeparator(const std::string& style) {
 }
 
 void UI::drawLogo() {
-    int termWidth = Terminal::getSafeWidth(70);
-
     bool useColor = Terminal::supportsColor();
     const char* logoColor = useColor ? Color::TECH_BLUE : "";
     const char* reset = useColor ? Color::RESET : "";
 
-    // ASCII Art Logo for RoboClaw - pure text without colors for length calculation
-    std::vector<std::string> logoArtPlain = {
+    // Fixed width box: 78 characters total (including borders)
+    // Logo content is 72 chars, plus 2 spaces padding, plus borders
+    const int boxWidth = 78;
+
+    // ASCII Art Logo for RoboClaw
+    std::vector<std::string> logoArt = {
         "   ██████╗  ██████╗ ██████╗ ██████╗  ██████╗██╗      █████╗██╗    ██╗",
         "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██║    ██║",
         "   ██████╔╝██████╔╝██████╔╝██████╔╝██║     ██║     ███████║██║ █╗ ██║",
@@ -374,39 +376,16 @@ void UI::drawLogo() {
         "   ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝"
     };
 
-    // Calculate max line length (pure text, no ANSI codes)
-    int maxLineLen = 0;
-    for (const auto& line : logoArtPlain) {
-        if (static_cast<int>(line.length()) > maxLineLen) {
-            maxLineLen = line.length();
-        }
-    }
-
-    // Box width: border + content + border + 2 spaces padding on each side
-    int contentWidth = maxLineLen + 4;  // 2 spaces on each side
-    int boxWidth = contentWidth + 2;  // +2 for the two border chars
-    if (boxWidth > termWidth - 2) {
-        boxWidth = termWidth - 2;
-        contentWidth = boxWidth - 2;
-    }
-
-    // Draw top border with title
+    // Draw top border with title (╭ + 18 chars title + boxWidth-20 dashes + ╮)
     std::cout << logoColor << "╭─── RoboClaw v1.0.0 ";
-    int titleLen = 18;
-    int remainingWidth = boxWidth - titleLen - 2;
-    for (int i = 0; i < remainingWidth; i++) std::cout << "─";
+    for (int i = 0; i < boxWidth - 20; i++) std::cout << "─";
     std::cout << "╮" << reset << '\n';
 
     // Draw logo lines with borders
-    for (size_t i = 0; i < logoArtPlain.size(); i++) {
-        std::cout << logoColor << "│ " << reset << logoColor << logoArtPlain[i] << reset;
-
-        // Calculate padding needed
-        int lineLen = logoArtPlain[i].length();
-        int padding = contentWidth - lineLen - 2;  // -2 for the initial "│ "
-        for (int j = 0; j < padding; j++) std::cout << ' ';
-
-        std::cout << logoColor << " │" << reset << '\n';
+    // Format: │ + space + logo (72 chars) + 3 spaces + │
+    for (const auto& line : logoArt) {
+        std::cout << logoColor << "│ " << reset << logoColor << line << reset;
+        std::cout << logoColor << "   │" << reset << '\n';
     }
 
     // Draw bottom border
@@ -417,55 +396,41 @@ void UI::drawLogo() {
 }
 
 void UI::drawModelInfo(const std::string& model, const std::string& provider) {
-    int termWidth = Terminal::getSafeWidth(70);
-    int boxWidth = termWidth - 4;
-    if (boxWidth > 60) boxWidth = 60;
-
     bool useColor = Terminal::supportsColor();
     const char* boxColor = useColor ? Color::TECH_BLUE : "";
     const char* textColor = useColor ? Color::BOLD_CYAN : "";
     const char* reset = useColor ? Color::RESET : "";
 
-    // Content lines - plain text for length calculation
-    std::vector<std::string> contentPlain = {
-        " Current Model ",
-        "",
-        " Model:    " + model,
-        " Provider: " + provider
-    };
+    // Fixed width box: 75 characters total
+    const int boxWidth = 75;
 
     // Draw top border
     std::cout << boxColor << "╭";
     for (int i = 0; i < boxWidth - 2; i++) std::cout << "─";
     std::cout << "╮" << reset << '\n';
 
-    // Draw content
-    int innerWidth = boxWidth - 4;  // Width inside borders
-    for (size_t i = 0; i < contentPlain.size(); i++) {
-        std::cout << boxColor << "│ " << reset;
+    // Draw content lines with proper padding
+    // Line 1: " Current Model " (15 chars) + padding to 71
+    std::cout << boxColor << "│ " << textColor << " Current Model " << reset;
+    for (int i = 0; i < boxWidth - 19; i++) std::cout << ' ';
+    std::cout << boxColor << "│" << reset << '\n';
 
-        // First line gets special color treatment
-        if (i == 0) {
-            std::cout << textColor << contentPlain[i] << reset;
-        } else if (i == 1) {
-            // Empty line
-        } else if (i == 2) {
-            // Model line - color the label
-            size_t colonPos = contentPlain[i].find(':');
-            std::cout << textColor << contentPlain[i].substr(0, colonPos + 1) << reset
-                      << contentPlain[i].substr(colonPos + 1);
-        } else if (i == 3) {
-            // Provider line - color the label
-            size_t colonPos = contentPlain[i].find(':');
-            std::cout << textColor << contentPlain[i].substr(0, colonPos + 1) << reset
-                      << contentPlain[i].substr(colonPos + 1);
-        }
+    // Line 2: Empty
+    std::cout << boxColor << "│";
+    for (int i = 0; i < boxWidth - 2; i++) std::cout << ' ';
+    std::cout << "│" << reset << '\n';
 
-        int lineLen = contentPlain[i].length();
-        int padding = innerWidth - lineLen - 1;  // -1 for the leading space after border
-        for (int j = 0; j < padding; j++) std::cout << ' ';
-        std::cout << boxColor << " │" << reset << '\n';
-    }
+    // Line 3: " Model:    " + model
+    std::cout << boxColor << "│ " << textColor << " Model:" << reset << "    " << model;
+    int padding3 = boxWidth - 13 - static_cast<int>(model.length());
+    for (int i = 0; i < padding3 - 2; i++) std::cout << ' ';
+    std::cout << boxColor << " │" << reset << '\n';
+
+    // Line 4: " Provider: " + provider
+    std::cout << boxColor << "│ " << textColor << " Provider:" << reset << " " << provider;
+    int padding4 = boxWidth - 13 - static_cast<int>(provider.length());
+    for (int i = 0; i < padding4 - 2; i++) std::cout << ' ';
+    std::cout << boxColor << " │" << reset << '\n';
 
     // Draw bottom border
     std::cout << boxColor << "╰";
