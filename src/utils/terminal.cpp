@@ -753,13 +753,26 @@ std::string repeat(const std::string& str, int count) {
 std::string stripAnsi(const std::string& str) {
     std::string result;
     bool inEscape = false;
+    bool seenBracket = false;  // Track if we've seen the '[' after ESC
 
     for (char c : str) {
         if (c == '\033') {
             inEscape = true;
-        } else if (inEscape && c == 'm') {
-            inEscape = false;
-        } else if (!inEscape) {
+            seenBracket = false;
+        } else if (inEscape) {
+            // After ESC, we expect the CSI format: ESC [ ... m
+            // We need to skip everything until we see the final character
+            // Common final chars: m (SGR), K (erase line), H (cursor position), etc.
+            if (c == '[') {
+                seenBracket = true;
+            } else if (seenBracket && (c == 'm' || c == 'K' || c == 'H' || c == 'J' ||
+                                   c == 'h' || c == 'l' || c == 'A' || c == 'B' ||
+                                   c == 'C' || c == 'D' || c == 'G' || isalpha(c))) {
+                inEscape = false;
+                seenBracket = false;
+            }
+            // Skip all characters while in escape sequence
+        } else {
             result += c;
         }
     }
