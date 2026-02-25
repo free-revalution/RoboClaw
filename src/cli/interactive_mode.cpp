@@ -408,7 +408,7 @@ bool InteractiveMode::cmdSkills(const std::string& args) {
     if (args.empty() || args == "list") {
         // List all available skills
         std::cout << CYAN << "Available Skills / 可用技能:" << RESET << "\n\n";
-        std::cout << GRAY << "Skills directory: ~/.roboclaw/skills/" << RESET << "\n\n";
+        std::cout << GRAY << "Skills directory: .roboclaw/skills/" << RESET << "\n\n";
 
         std::cout << YELLOW << "Built-in skills / 内置技能:" << RESET << "\n";
         std::cout << "  • " << GREEN << "motion" << RESET << "   - Robot motion control / 机器人运动控制\n";

@@ -16,12 +16,8 @@ SkillCommands::SkillCommands(std::shared_ptr<SkillRegistry> registry,
 }
 
 std::string SkillCommands::getSkillsDir() const {
-    // Use ~/.roboclaw/skills like Claude Code
-    const char* home = std::getenv("HOME");
-    if (home) {
-        return std::string(home) + "/.roboclaw/skills";
-    }
-    return ".roboclaw/skills";  // Fallback to local directory
+    // Use .roboclaw/skills in project directory
+    return ".roboclaw/skills";
 }
 
 std::string SkillCommands::getBuiltinSkillsDir() const {
