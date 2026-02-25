@@ -25,7 +25,7 @@
 using namespace std;
 using namespace roboclaw;
 
-// 获取内置技能目录路径
+// 获取内置skills目录路径
 string getBuiltinSkillsDir() {
     // 首先尝试相对于可执行文件的路径
     // 对于开发环境，可执行文件在 build/roboclaw
@@ -63,7 +63,7 @@ string getBuiltinSkillsDir() {
 }
 
 // 版本信息
-const string ROBOCLAW_VERSION = "0.4.1";
+const string ROBOCLAW_VERSION = "1.0.0";
 const string ROBOCLAW_NAME = "RoboClaw";
 const string ROBOCLAW_DESCRIPTION = "C++ AI Agent Framework with Browser Automation - AI Agent框架与浏览器自动化";
 

@@ -169,6 +169,7 @@ bool InteractiveMode::handleSlashCommand(const std::string& command) {
     if (cmd == "agent") return cmdAgent(args);
     if (cmd == "browser") return cmdBrowser(args);
     if (cmd == "link") return cmdLink(args);
+    if (cmd == "skills") return cmdSkills(args);
 
     std::cout << Color::RED << "Unknown command: " << cmd << Color::RESET << std::endl;
     std::cout << "Type /help for available commands" << std::endl;
@@ -401,6 +402,51 @@ bool InteractiveMode::cmdModel(const std::string& args) {
     return true;
 }
 
+bool InteractiveMode::cmdSkills(const std::string& args) {
+    using namespace Color;
+
+    if (args.empty() || args == "list") {
+        // List all available skills
+        std::cout << CYAN << "Available Skills / 可用技能:" << RESET << "\n\n";
+        std::cout << GRAY << "Skills directory: ~/.roboclaw/skills/" << RESET << "\n\n";
+
+        std::cout << YELLOW << "Built-in skills / 内置技能:" << RESET << "\n";
+        std::cout << "  • " << GREEN << "motion" << RESET << "   - Robot motion control / 机器人运动控制\n";
+        std::cout << "  • " << GREEN << "sensor" << RESET << "   - Sensor data reading / 传感器数据读取\n";
+        std::cout << "  • " << GREEN << "gripper" << RESET << "  - Gripper control / 夹爪控制\n";
+
+        std::cout << "\n" << YELLOW << "Usage / 用法:" << RESET << "\n";
+        std::cout << "  " << GREEN << "/skills list" << RESET << "             List all skills / 列出所有技能\n";
+        std::cout << "  " << GREEN << "/skills info <name>" << RESET << "       Show skill details / 显示技能详情\n";
+        std::cout << "  " << GREEN << "/<skillname>" << RESET << "              Invoke skill directly / 直接调用技能\n";
+        std::cout << "  " << GREEN << "natural trigger" << RESET << "           Use natural language / 使用自然语言\n";
+
+        return true;
+    }
+
+    std::istringstream iss(args);
+    std::string action;
+    iss >> action;
+
+    if (action == "info" || action == "show") {
+        std::string skillName;
+        iss >> skillName;
+
+        if (skillName.empty()) {
+            std::cout << RED << "Please specify skill name / 请指定技能名称" << RESET << "\n";
+            return true;
+        }
+
+        std::cout << YELLOW << "Skill info / 技能信息: " << skillName << RESET << "\n";
+        std::cout << GRAY << "Feature coming soon! / 功能即将推出！" << RESET << "\n";
+        return true;
+    }
+
+    std::cout << RED << "Unknown action / 未知操作: " << action << RESET << "\n";
+    std::cout << "Available: list, info / 可用: list, info\n";
+    return true;
+}
+
 bool InteractiveMode::handleCommand(const std::string& input) {
     std::istringstream iss(input);
     std::string command;
@@ -505,9 +551,9 @@ void InteractiveMode::showBanner() {
     std::string provider = ConfigManager::providerToString(config.default_config.provider);
     std::string model = config.default_config.model;
 
-    std::string sessionTitle = session->getTitle().empty()
+    std::string sessionTitle = session->getConversationId().empty()
         ? "Untitled Session"
-        : session->getTitle();
+        : session->getConversationId();
 
     std::string branchName;
     auto currentNode = session->getCurrentNode();
@@ -530,7 +576,7 @@ void InteractiveMode::showBanner() {
 
 void InteractiveMode::showPrompt() {
     using namespace Color;
-    std::cout << CYAN << ">>> " << RESET;
+    std::cout << CYAN << "> " << RESET;
     std::cout.flush();
 }
 
@@ -550,9 +596,9 @@ Slash Commands / 斜杠命令:
   /help       Show this help / 显示帮助
   /config     Edit configuration / 编辑配置
   /model      Switch or add models / 切换或添加模型
+  /skills     List and manage skills / 技能列表和管理
   /clear      Clear conversation / 清空对话
-  /agent      Manage AI Agents / 管理 AI Agents
-  /browser    Browser automation / 浏览器自动化
+  /link       Connect social platforms / 连接社交平台
   Ctrl+D      Exit / 退出
 )";
 

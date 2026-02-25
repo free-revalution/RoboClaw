@@ -358,58 +358,94 @@ void UI::drawSeparator(const std::string& style) {
 }
 
 void UI::drawLogo() {
-    int termWidth = Terminal::getSafeWidth(60);
-    int boxWidth = (termWidth < 47) ? termWidth : 47;
-    if (boxWidth > 47) boxWidth = 47;
+    int termWidth = Terminal::getSafeWidth(70);
 
     bool useColor = Terminal::supportsColor();
     const char* logoColor = useColor ? Color::TECH_BLUE : "";
     const char* reset = useColor ? Color::RESET : "";
-    const char* accentColor = useColor ? Color::TECH_CYAN : "";
 
-    // ASCII Art Logo for RoboClaw
+    // ASCII Art Logo for RoboClaw - with proper art style
     std::vector<std::string> logoArt = {
-        "",
-        std::string(logoColor) + "     _      _            __    __      " + reset,
-        std::string(logoColor) + "    / \\    | |          / _|  / _|     " + reset,
-        std::string(logoColor) + "   / _ \\   | |  _____  | |_  | |_      " + reset,
-        std::string(logoColor) + "  / ___ \\  | | |_____| |  _| |  _|     " + reset,
-        std::string(logoColor) + " /_/   \\_\\ |_|          |_|   |_|      " + reset,
-        "",
-        std::string(accentColor) + "     R  O  B  O     C  L     A  W" + reset,
-        "",
-        std::string(Color::GRAY) + "             v 0 . 2 . 0" + reset,
-        ""
+        std::string(logoColor) + "   ██████╗  ██████╗ ██████╗ ██████╗  ██████╗██╗      █████╗██╗    ██╗" + reset,
+        std::string(logoColor) + "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██║    ██║" + reset,
+        std::string(logoColor) + "   ██████╔╝██████╔╝██████╔╝██████╔╝██║     ██║     ███████║██║ █╗ ██║" + reset,
+        std::string(logoColor) + "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║     ██╔══██║██║███╗██║" + reset,
+        std::string(logoColor) + "   ██║  ██║██████╔╝██████╔╝██████╔╝╚██████╗███████╗██║  ██║╚███╔███╔╝" + reset,
+        std::string(logoColor) + "   ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝" + reset,
     };
 
-    // Adjust each line to fit in box
-    std::vector<std::string> boxContent;
+    // Calculate box width based on terminal width
+    int maxLineLen = 0;
     for (const auto& line : logoArt) {
-        int lineLen = TerminalUtils::visibleLength(line);
-        if (lineLen <= boxWidth - 4) {
-            int padding = (boxWidth - 4 - lineLen) / 2;
-            boxContent.push_back(std::string(padding, ' ') + line);
-        } else {
-            boxContent.push_back(line);
-        }
+        int len = TerminalUtils::visibleLength(line);
+        if (len > maxLineLen) maxLineLen = len;
     }
 
-    drawBox("", boxContent, boxWidth, BoxStyle::ROUNDED, Alignment::LEFT);
+    int boxWidth = maxLineLen + 8; // padding
+    if (boxWidth > termWidth - 4) boxWidth = termWidth - 4;
+
+    // Draw top border with title
+    std::cout << logoColor << "╭─── RoboClaw v1.0.0 ";
+    int titleLen = 18;
+    int remainingWidth = boxWidth - 4 - titleLen;
+    for (int i = 0; i < remainingWidth; i++) std::cout << "─";
+    std::cout << "╮" << reset << '\n';
+
+    // Draw logo lines with borders
+    for (const auto& line : logoArt) {
+        std::cout << logoColor << "│ " << reset << line;
+
+        int lineLen = TerminalUtils::visibleLength(line);
+        int padding = boxWidth - 4 - lineLen;
+        for (int i = 0; i < padding; i++) std::cout << ' ';
+        std::cout << logoColor << " │" << reset << '\n';
+    }
+
+    // Draw bottom border
+    std::cout << logoColor << "╰";
+    for (int i = 0; i < boxWidth - 2; i++) std::cout << "─";
+    std::cout << "╯" << reset << '\n';
     std::cout << '\n';
 }
 
 void UI::drawModelInfo(const std::string& model, const std::string& provider) {
-    int width = Terminal::getSafeWidth(50);
-    if (width > 50) width = 50;
+    int termWidth = Terminal::getSafeWidth(70);
+    int boxWidth = termWidth - 4;
+    if (boxWidth > 60) boxWidth = 60;
+
+    bool useColor = Terminal::supportsColor();
+    const char* boxColor = useColor ? Color::TECH_BLUE : "";
+    const char* textColor = useColor ? Color::BOLD_CYAN : "";
+    const char* reset = useColor ? Color::RESET : "";
 
     std::vector<std::string> content = {
-        "Current Model / 当前模型",
+        std::string(textColor) + " Current Model " + reset,
         "",
-        std::string(Color::BOLD_CYAN) + "Model:    " + Color::RESET + model,
-        std::string(Color::BOLD_CYAN) + "Provider: " + Color::RESET + provider
+        std::string(textColor) + " Model:    " + reset + model,
+        std::string(textColor) + " Provider: " + reset + provider
     };
 
-    drawBox("", content, width, BoxStyle::SINGLE, Alignment::LEFT);
+    // Draw top border
+    std::cout << boxColor << "╭";
+    for (int i = 0; i < boxWidth - 2; i++) std::cout << "─";
+    std::cout << "╮" << reset << '\n';
+
+    // Draw content
+    int innerWidth = boxWidth - 4;
+    for (const auto& line : content) {
+        std::cout << boxColor << "│ " << reset;
+        std::cout << line;
+
+        int lineLen = TerminalUtils::visibleLength(line);
+        int padding = innerWidth - lineLen - 1;
+        for (int i = 0; i < padding; i++) std::cout << ' ';
+        std::cout << boxColor << " │" << reset << '\n';
+    }
+
+    // Draw bottom border
+    std::cout << boxColor << "╰";
+    for (int i = 0; i < boxWidth - 2; i++) std::cout << "─";
+    std::cout << "╯" << reset << '\n';
     std::cout << '\n';
 }
 

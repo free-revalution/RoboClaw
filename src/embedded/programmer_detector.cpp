@@ -4,6 +4,8 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <thread>
+#include <chrono>
 
 namespace roboclaw::embedded {
 

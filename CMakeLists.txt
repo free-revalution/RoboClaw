@@ -17,15 +17,9 @@ else()
     add_definitions(-DPLATFORM_LINUX)
 endif()
 
-# 依赖管理（使用FetchContent）
-include(FetchContent)
-
-# 1. CPR - HTTP库
-FetchContent_Declare(cpr
-    GIT_REPOSITORY https://github.com/libcpr/cpr.git
-    GIT_TAG 1.10.5
-)
-FetchContent_MakeAvailable(cpr)
+# 依赖管理
+# 1. CPR - HTTP库 (使用本地副本)
+add_subdirectory(external/cpr-1.10.5 EXCLUDE_FROM_ALL)
 
 # 2. nlohmann/json - JSON库 (使用系统包管理器安装)
 find_package(nlohmann_json 3.11.3 REQUIRED)

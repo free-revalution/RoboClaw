@@ -4,6 +4,7 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+#include <thread>
 
 namespace roboclaw::simulation {
 

@@ -74,7 +74,7 @@ double IParameterOptimizer::calculateCost(const PlantModel& plant,
 }
 
 double IParameterOptimizer::estimateOvershoot(double kp, double ki, double kd,
-                                               const PlantModel& plant) const {
+                                               const PlantModel& plant) {
     // Simplified overshoot estimation
     double wn = std::sqrt(kp / plant.time_constant);  // Natural frequency
     double zeta = (kd + 1.0 / (2.0 * wn * plant.time_constant)) / 2.0;  // Damping ratio
@@ -88,7 +88,7 @@ double IParameterOptimizer::estimateOvershoot(double kp, double ki, double kd,
 }
 
 double IParameterOptimizer::estimateSettlingTime(double kp, double ki, double kd,
-                                                  const PlantModel& plant) const {
+                                                  const PlantModel& plant) {
     // Simplified settling time estimation (4% criterion)
     double wn = std::sqrt(kp / plant.time_constant);
     double zeta = std::min(1.0, (kd + 1.0 / (2.0 * wn * plant.time_constant)) / 2.0);
@@ -214,16 +214,21 @@ OptimizationResult GeneticAlgorithmOptimizer::optimize(
         }
 
         // Crossover and mutation
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        std::uniform_int_distribution<int> dist_idx(0, selected.size() - 1);
+        std::uniform_real_distribution<double> dist_mut(0, 1);
+
         while (new_population.size() < static_cast<size_t>(config_.population_size)) {
             // Select parents
-            int idx1 = std::uniform_int_distribution<int>(0, selected.size() - 1)(std::mt19937(std::random_device()()));
-            int idx2 = std::uniform_int_distribution<int>(0, selected.size() - 1)(std::mt19937(std::random_device()()));
+            int idx1 = dist_idx(rng);
+            int idx2 = dist_idx(rng);
 
             // Crossover
             auto offspring = crossover(selected[idx1], selected[idx2]);
 
             // Mutate
-            if (std::uniform_real_distribution<double>(0, 1)(std::mt19937(std::random_device()())) < config_.mutation_rate) {
+            if (dist_mut(rng) < config_.mutation_rate) {
                 mutate(offspring, bounds);
             }
 

@@ -16,22 +16,16 @@ SkillCommands::SkillCommands(std::shared_ptr<SkillRegistry> registry,
 }
 
 std::string SkillCommands::getSkillsDir() const {
-    // 从配置读取，如果没有则使用默认值
-    std::string skillsDir = config_.get("skills.local_skills_dir", "~/.roboclaw/skills");
-
-    // 展开波浪号
-    if (skillsDir[0] == '~') {
-        const char* home = std::getenv("HOME");
-        if (home) {
-            skillsDir = std::string(home) + skillsDir.substr(1);
-        }
+    // Use ~/.roboclaw/skills like Claude Code
+    const char* home = std::getenv("HOME");
+    if (home) {
+        return std::string(home) + "/.roboclaw/skills";
     }
-
-    return skillsDir;
+    return ".roboclaw/skills";  // Fallback to local directory
 }
 
 std::string SkillCommands::getBuiltinSkillsDir() const {
-    return "skills/builtin";
+    return getSkillsDir() + "/builtin";
 }
 
 std::string SkillCommands::getUserSkillsDir() const {

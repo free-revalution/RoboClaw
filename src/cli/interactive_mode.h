@@ -96,6 +96,7 @@ private:
     bool cmdAgent(const std::string& args);
     bool cmdBrowser(const std::string& args);
     bool cmdLink(const std::string& args);
+    bool cmdSkills(const std::string& args);
 
     // 保存当前会话
     void saveCurrentSession();

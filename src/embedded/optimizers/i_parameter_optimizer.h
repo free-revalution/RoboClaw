@@ -79,6 +79,11 @@ public:
     virtual double calculateCost(const PlantModel& plant,
                                 const nlohmann::json& params,
                                 const OptimizationConstraints& constraints) const;
+
+protected:
+    // Helper functions for cost calculation
+    static double estimateOvershoot(double kp, double ki, double kd, const PlantModel& plant);
+    static double estimateSettlingTime(double kp, double ki, double kd, const PlantModel& plant);
 };
 
 /**
