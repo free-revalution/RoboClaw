@@ -364,40 +364,48 @@ void UI::drawLogo() {
     const char* logoColor = useColor ? Color::TECH_BLUE : "";
     const char* reset = useColor ? Color::RESET : "";
 
-    // ASCII Art Logo for RoboClaw - with proper art style
-    std::vector<std::string> logoArt = {
-        std::string(logoColor) + "   ██████╗  ██████╗ ██████╗ ██████╗  ██████╗██╗      █████╗██╗    ██╗" + reset,
-        std::string(logoColor) + "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██║    ██║" + reset,
-        std::string(logoColor) + "   ██████╔╝██████╔╝██████╔╝██████╔╝██║     ██║     ███████║██║ █╗ ██║" + reset,
-        std::string(logoColor) + "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║     ██╔══██║██║███╗██║" + reset,
-        std::string(logoColor) + "   ██║  ██║██████╔╝██████╔╝██████╔╝╚██████╗███████╗██║  ██║╚███╔███╔╝" + reset,
-        std::string(logoColor) + "   ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝" + reset,
+    // ASCII Art Logo for RoboClaw - pure text without colors for length calculation
+    std::vector<std::string> logoArtPlain = {
+        "   ██████╗  ██████╗ ██████╗ ██████╗  ██████╗██╗      █████╗██╗    ██╗",
+        "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗██║    ██║",
+        "   ██████╔╝██████╔╝██████╔╝██████╔╝██║     ██║     ███████║██║ █╗ ██║",
+        "   ██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║     ██║     ██╔══██║██║███╗██║",
+        "   ██║  ██║██████╔╝██████╔╝██████╔╝╚██████╗███████╗██║  ██║╚███╔███╔╝",
+        "   ╚═╝  ╚═╝╚═════╝ ╚═════╝ ╚═════╝  ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝"
     };
 
-    // Calculate box width based on terminal width
+    // Calculate max line length (pure text, no ANSI codes)
     int maxLineLen = 0;
-    for (const auto& line : logoArt) {
-        int len = TerminalUtils::visibleLength(line);
-        if (len > maxLineLen) maxLineLen = len;
+    for (const auto& line : logoArtPlain) {
+        if (static_cast<int>(line.length()) > maxLineLen) {
+            maxLineLen = line.length();
+        }
     }
 
-    int boxWidth = maxLineLen + 8; // padding
-    if (boxWidth > termWidth - 4) boxWidth = termWidth - 4;
+    // Box width: border + content + border + 2 spaces padding on each side
+    int contentWidth = maxLineLen + 4;  // 2 spaces on each side
+    int boxWidth = contentWidth + 2;  // +2 for the two border chars
+    if (boxWidth > termWidth - 2) {
+        boxWidth = termWidth - 2;
+        contentWidth = boxWidth - 2;
+    }
 
     // Draw top border with title
     std::cout << logoColor << "╭─── RoboClaw v1.0.0 ";
     int titleLen = 18;
-    int remainingWidth = boxWidth - 4 - titleLen;
+    int remainingWidth = boxWidth - titleLen - 2;
     for (int i = 0; i < remainingWidth; i++) std::cout << "─";
     std::cout << "╮" << reset << '\n';
 
     // Draw logo lines with borders
-    for (const auto& line : logoArt) {
-        std::cout << logoColor << "│ " << reset << line;
+    for (size_t i = 0; i < logoArtPlain.size(); i++) {
+        std::cout << logoColor << "│ " << reset << logoColor << logoArtPlain[i] << reset;
 
-        int lineLen = TerminalUtils::visibleLength(line);
-        int padding = boxWidth - 4 - lineLen;
-        for (int i = 0; i < padding; i++) std::cout << ' ';
+        // Calculate padding needed
+        int lineLen = logoArtPlain[i].length();
+        int padding = contentWidth - lineLen - 2;  // -2 for the initial "│ "
+        for (int j = 0; j < padding; j++) std::cout << ' ';
+
         std::cout << logoColor << " │" << reset << '\n';
     }
 
@@ -418,11 +426,12 @@ void UI::drawModelInfo(const std::string& model, const std::string& provider) {
     const char* textColor = useColor ? Color::BOLD_CYAN : "";
     const char* reset = useColor ? Color::RESET : "";
 
-    std::vector<std::string> content = {
-        std::string(textColor) + " Current Model " + reset,
+    // Content lines - plain text for length calculation
+    std::vector<std::string> contentPlain = {
+        " Current Model ",
         "",
-        std::string(textColor) + " Model:    " + reset + model,
-        std::string(textColor) + " Provider: " + reset + provider
+        " Model:    " + model,
+        " Provider: " + provider
     };
 
     // Draw top border
@@ -431,14 +440,30 @@ void UI::drawModelInfo(const std::string& model, const std::string& provider) {
     std::cout << "╮" << reset << '\n';
 
     // Draw content
-    int innerWidth = boxWidth - 4;
-    for (const auto& line : content) {
+    int innerWidth = boxWidth - 4;  // Width inside borders
+    for (size_t i = 0; i < contentPlain.size(); i++) {
         std::cout << boxColor << "│ " << reset;
-        std::cout << line;
 
-        int lineLen = TerminalUtils::visibleLength(line);
-        int padding = innerWidth - lineLen - 1;
-        for (int i = 0; i < padding; i++) std::cout << ' ';
+        // First line gets special color treatment
+        if (i == 0) {
+            std::cout << textColor << contentPlain[i] << reset;
+        } else if (i == 1) {
+            // Empty line
+        } else if (i == 2) {
+            // Model line - color the label
+            size_t colonPos = contentPlain[i].find(':');
+            std::cout << textColor << contentPlain[i].substr(0, colonPos + 1) << reset
+                      << contentPlain[i].substr(colonPos + 1);
+        } else if (i == 3) {
+            // Provider line - color the label
+            size_t colonPos = contentPlain[i].find(':');
+            std::cout << textColor << contentPlain[i].substr(0, colonPos + 1) << reset
+                      << contentPlain[i].substr(colonPos + 1);
+        }
+
+        int lineLen = contentPlain[i].length();
+        int padding = innerWidth - lineLen - 1;  // -1 for the leading space after border
+        for (int j = 0; j < padding; j++) std::cout << ' ';
         std::cout << boxColor << " │" << reset << '\n';
     }
 
